@@ -3,8 +3,11 @@
   ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /u "PABCRtl"'
   ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /i "$INSTDIR\Lib\PABCRtl.dll"'
   
-  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /u "PABCRtl32"'
-  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /i "$INSTDIR\Lib\PABCRtl32.dll"'
+  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /u "HelixToolkit.Wpf"'
+  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /i "$INSTDIR\Lib\HelixToolkit.Wpf.dll"'
+
+  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /u "HelixToolkit"'
+  ExecWait '"$INSTDIR\ExecHide.exe" "$INSTDIR\gacutil.exe" /i "$INSTDIR\Lib\HelixToolkit.dll"'
   ;\MikhailoMMX
   Delete "$INSTDIR\gacutil.exe"
   Delete "$INSTDIR\gacutil.exe.config"
@@ -84,6 +87,8 @@ SectionEnd
   LangString DESC_Core ${LANG_ENGLISH} "Core"
   LangString DESC_PT4 ${LANG_RUSSIAN} "Задачник PT4"
   LangString DESC_PT4 ${LANG_ENGLISH} "PT4 Taskbook"
+  LangString DESC_Files ${LANG_RUSSIAN} "Дополнительные файлы"
+  LangString DESC_Files ${LANG_ENGLISH} "Additional files"
   LangString DESC_PROGRAMMING_LANGUAGES ${LANG_RUSSIAN} "Входные языки"
   LangString DESC_PROGRAMMING_LANGUAGES ${LANG_ENGLISH} "Programming languages"
   LangString DESC_INTERNAL_ERROR_REPORT ${LANG_RUSSIAN} "Контроль внутренних ошибок"
@@ -101,11 +106,12 @@ SectionEnd
   LangString DESC_INTERNAL_ERROR_REPORT_Desc ${LANG_RUSSIAN} "Позволяет отправить разработчикам отчет о ошибках в работе компилятора"
   LangString DESC_INTERNAL_ERROR_REPORT_Desc ${LANG_ENGLISH} " "
   LangString DESC_PT4_Desc ${LANG_RUSSIAN} "Электронный задачник Programming Taskbook Copyright (c)М.Э.Абрамян, 1998-2017"
-  LangString DESC_PT4_Desc ${LANG_ENGLISH} "Programming Taskbook Copyright (c) M.E. Abramyan, 1998-2017"
+  LangString DESC_PT4_Desc ${LANG_ENGLISH} "Programming Taskbook Copyright (c) M.E. Abramyan, 1998-2019"
   LangString DESC_Samples_Desc ${LANG_RUSSIAN} "Файлы примеров"
   LangString DESC_Samples_Desc ${LANG_ENGLISH} "Samples"
   LangString DESC_RusLoc_Desc ${LANG_RUSSIAN} "Поддержка русcкого языка"
   LangString DESC_RusLoc_Desc ${LANG_ENGLISH} " "
+  LangString DESC_RusLoc_Desc ${LANG_UKR} "Поддержка украинского языка"
   LangString DESC_EngLoc_Desc ${LANG_RUSSIAN} "Поддержка английского языка"
   LangString DESC_EngLoc_Desc ${LANG_ENGLISH} " "
   LangString DESC_Framework_Desc ${LANG_RUSSIAN} "Платформа необходима для работы компилятора и программ, работающих на этой платформе"

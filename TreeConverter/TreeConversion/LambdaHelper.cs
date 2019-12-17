@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -122,7 +122,11 @@ namespace PascalABCCompiler.TreeConverter
 
         public static type_definition ConvertSemanticTypeToSyntaxType(type_node semType)
         {
-            return OpenMP.ConvertToSyntaxType(semType);
+            // SSM 29/12/18 пробую скомбинировать
+            //if (semType is compiled_type_node && !(semType as compiled_type_node).is_generic_type_definition && !(semType as compiled_type_node).is_generic_type_instance)
+              //return new semantic_type_node(semType); // SSM 29/12/18 поменял на современное. Не получилось!
+            //else 
+            return OpenMP.ConvertToSyntaxType(semType); // Это же надо! Пользоваться для этого хреновиной из OpenMP!!!
         }
 
         public static int processingLambdaParametersForTypeInference = 0; // Счетчик для подсчета лямбд
@@ -140,6 +144,17 @@ namespace PascalABCCompiler.TreeConverter
             if (id == null)
                 return false;
             return id.Contains(lambdaPrefix);
+        }
+
+        public static bool IsCapturedSelf(expression_node ex)
+        {
+            if (ex is class_field_reference)
+            {
+                class_field fld = (ex as class_field_reference).field;
+                if (fld.name.Contains("<>local_variables_class"))
+                    return true;
+            }
+            return false;
         }
 
         public static bool IsAuxiliaryLambdaName(ident id)
@@ -233,6 +248,8 @@ namespace PascalABCCompiler.TreeConverter
                     else
                         return false;
                 }
+                else
+                    return false; // Т.е. это - лямбда с коротким телом, но в результате сахарных преобразований Result := переменстился не на первое место - тогда преобразовать нельзя
             }
 
             lambdaDef.return_type = null;
@@ -252,7 +269,13 @@ namespace PascalABCCompiler.TreeConverter
                 delegate_internal_interface dii_left =
                     (delegate_internal_interface)leftType.get_internal_interface(internal_interface_kind.delegate_interface);
                 if (dii_left == null)
-                    visitor.AddError(visitor.get_location(lambdaDef), "ILLEGAL_LAMBDA_VARIABLE_TYPE");
+                {
+                    if (leftType != SystemLibrary.SystemLibrary.system_delegate_type)
+                        visitor.AddError(visitor.get_location(lambdaDef), "ILLEGAL_LAMBDA_VARIABLE_TYPE");
+                    else
+                        return;
+                }
+                    
                 int leftTypeParamsNumber = dii_left.parameters.Count;
                 int lambdaDefParamsCount = 0;
                 if (lambdaDef.formal_parameters != null && lambdaDef.formal_parameters.params_list.Count != 0)
@@ -270,6 +293,7 @@ namespace PascalABCCompiler.TreeConverter
                             param.idents = new ident_list();
                             param.idents.Add(lambdaDef.formal_parameters.params_list[i].idents.idents[j]);
                             param.vars_type = lambdaDef.formal_parameters.params_list[i].vars_type;
+                            param.source_context = lambdaDef.formal_parameters.source_context;
                             lambdaDefParamsTypes.Add(param);
                         }
                     for (int i = 0; i < leftTypeParamsNumber && flag; i++)
@@ -298,9 +322,10 @@ namespace PascalABCCompiler.TreeConverter
                         (lambdaDef.return_type as lambda_inferred_type).real_type = dii_left.return_value_type;
                     else // SSM 23/07/16 - попытка бороться с var p: Shape->() := a->a.Print()
                     {
-                        var b = TryConvertFuncLambdaBodyWithMethodCallToProcLambdaBody(lambdaDef);
+                        // lambdaDef.usedkeyword == 1 // function
+                        var b = lambdaDef.usedkeyword == 0 && TryConvertFuncLambdaBodyWithMethodCallToProcLambdaBody(lambdaDef); // пытаться конвертировать только если мы явно не указали, что это функция
                         if (!b)
-                            throw new SimpleSemanticError(visitor.get_location(lambdaDef), "UNABLE_TO_CONVERT_FUNCTIONAL_TYPE_TO_PROCEDURAL_TYPE");
+                            visitor.AddError(visitor.get_location(lambdaDef), "UNABLE_TO_CONVERT_FUNCTIONAL_TYPE_TO_PROCEDURAL_TYPE");
                     }
                 }
             }
@@ -330,12 +355,15 @@ namespace PascalABCCompiler.TreeConverter
             if (def.formal_parameters != null && def.formal_parameters.params_list.Count != 0)
             {
                 for (int i = 0; i < def.formal_parameters.params_list.Count; i++)
+                { 
+                    var tt = visitor.convert_strong(def.formal_parameters.params_list[i].vars_type); // SSM 29/12/18
                     for (int j = 0; j < def.formal_parameters.params_list[i].idents.idents.Count; j++)
                     {
                         var new_param = new common_parameter(null, SemanticTree.parameter_type.value, res, concrete_parameter_type.cpt_none, visitor.get_location(def.formal_parameters.params_list[i].idents.idents[0]));
-                        new_param.type = visitor.convert_strong(def.formal_parameters.params_list[i].vars_type);
+                        new_param.type = tt;
                         res.parameters.AddElement(new_param);
                     }
+                }
             }
             var hhh = new delegated_methods();
             hhh.proper_methods.AddElement(new common_namespace_function_call(res, visitor.get_location(def)));
@@ -346,7 +374,7 @@ namespace PascalABCCompiler.TreeConverter
         {
             procedure_definition procDef = null;
             if (functionLambdaDef.return_type == null)
-                procDef = SyntaxTreeNodesConstructor.CreateProcedureDefinitionNode(new method_name(null,null, new ident(functionLambdaDef.lambda_name), null),
+                procDef = SyntaxTreeNodesConstructor.CreateProcedureDefinitionNode(new method_name(null,null, new ident(functionLambdaDef.lambda_name, functionLambdaDef.source_context), null),
                                                               functionLambdaDef.formal_parameters,
                                                               false,
                                                               false,
@@ -374,6 +402,10 @@ namespace PascalABCCompiler.TreeConverter
                 ProcessNode(root);
             }
 
+            public override void visit(function_lambda_definition fd)
+            {
+                // не заходить во внутренние лямбды
+            }
             public override void visit(assign value)
             {
                 var to = value.to as ident;
@@ -382,6 +414,9 @@ namespace PascalABCCompiler.TreeConverter
                     exprList.Add(value.from);
                 }
             }
+            /*public override void visit(function_lambda_definition fld)
+            {
+            }*/
         }
         #endregion
 

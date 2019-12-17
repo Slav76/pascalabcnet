@@ -1,6 +1,20 @@
 <?xml version="1.0"?>
 <NodeGeneratorData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SyntaxNodes>
+    <SyntaxNode Name="expression" BaseName="declaration">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>1</TagIndex>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
     <SyntaxNode Name="syntax_tree_node">
       <Fields>
         <ExtendedField Name="source_context" Type="SourceContext" CreateVariable="false" DeleteVariable="false" />
@@ -9,18 +23,6 @@
       <Tags>
         <CategoryIndices />
         <TagIndices />
-      </Tags>
-    </SyntaxNode>
-    <SyntaxNode Name="expression" BaseName="declaration">
-      <Fields />
-      <Methods />
-      <Tags>
-        <CategoryIndices>
-          <CategoryIndex>0</CategoryIndex>
-        </CategoryIndices>
-        <TagIndices>
-          <TagIndex>1</TagIndex>
-        </TagIndices>
       </Tags>
     </SyntaxNode>
     <SyntaxNode Name="statement" BaseName="declaration">
@@ -844,7 +846,7 @@
     </SyntaxNode>
     <SyntaxNode Name="method_name" BaseName="syntax_tree_node">
       <Fields>
-        <ExtendedField Name="ln" Type="List&lt;ident&gt;" CreateVariable="false" DeleteVariable="false" />
+        <ExtendedField Name="ln" Type="List&lt;ident&gt;" CreateVariable="true" DeleteVariable="false" />
         <SyntaxField Name="class_name" SyntaxType="ident" />
         <SyntaxField Name="meth_name" SyntaxType="ident" />
         <SyntaxField Name="explicit_interface_name" SyntaxType="ident" />
@@ -977,6 +979,8 @@
     <SyntaxNode Name="write_accessor_name" BaseName="syntax_tree_node">
       <Fields>
         <SyntaxField Name="accessor_name" SyntaxType="ident" />
+        <SyntaxField Name="pr" SyntaxType="procedure_definition" />
+        <SyntaxField Name="statment_for_formatting" SyntaxType="statement" />
       </Fields>
       <Methods />
       <Tags>
@@ -987,6 +991,8 @@
     <SyntaxNode Name="read_accessor_name" BaseName="syntax_tree_node">
       <Fields>
         <SyntaxField Name="accessor_name" SyntaxType="ident" />
+        <SyntaxField Name="pr" SyntaxType="procedure_definition" />
+        <SyntaxField Name="expression_for_formatting" SyntaxType="expression" />
       </Fields>
       <Methods />
       <Tags>
@@ -1014,6 +1020,9 @@
         <SyntaxField Name="array_default" SyntaxType="property_array_default" />
         <SyntaxField Name="parameter_list" SyntaxType="property_parameter_list" />
         <ExtendedField Name="attr" Type="definition_attribute" CreateVariable="false" DeleteVariable="false" />
+        <ExtendedField Name="virt_over_none_attr" Type="proc_attribute" CreateVariable="false" DeleteVariable="false" />
+        <ExtendedField Name="is_auto" Type="bool" CreateVariable="false" DeleteVariable="false" />
+        <SyntaxField Name="initial_value" SyntaxType="expression" />
       </Fields>
       <Methods />
       <Tags>
@@ -1057,7 +1066,7 @@
         <TagIndices />
       </Tags>
     </SyntaxNode>
-    <SyntaxNode Name="class_body" BaseName="syntax_tree_node">
+    <SyntaxNode Name="class_body_list" BaseName="syntax_tree_node">
       <Fields>
         <ExtendedField Name="class_def_blocks" Type="List&lt;class_members&gt;" CreateVariable="true" DeleteVariable="false" />
       </Fields>
@@ -1074,7 +1083,7 @@
     <SyntaxNode Name="class_definition" BaseName="type_definition">
       <Fields>
         <SyntaxField Name="class_parents" SyntaxType="named_type_reference_list" />
-        <SyntaxField Name="body" SyntaxType="class_body" />
+        <SyntaxField Name="body" SyntaxType="class_body_list" />
         <ExtendedField Name="keyword" Type="class_keyword" CreateVariable="false" DeleteVariable="false" />
         <SyntaxField Name="template_args" SyntaxType="ident_list" />
         <SyntaxField Name="where_section" SyntaxType="where_definition_list" />
@@ -1324,6 +1333,7 @@
     <SyntaxNode Name="procedure_call" BaseName="statement">
       <Fields>
         <SyntaxField Name="func_name" SyntaxType="addressed_value" />
+        <ExtendedField Name="is_ident" Type="bool" CreateVariable="false" DeleteVariable="false" />
       </Fields>
       <Methods />
       <Tags>
@@ -1855,6 +1865,7 @@
     </SyntaxNode>
     <SyntaxNode Name="loop_stmt" BaseName="statement">
       <Fields>
+        <SyntaxField Name="count" SyntaxType="expression" />
         <SyntaxField Name="stmt" SyntaxType="statement" />
       </Fields>
       <Methods />
@@ -2449,10 +2460,10 @@
         <SyntaxField Name="return_type" SyntaxType="type_definition" />
         <SyntaxField Name="formal_parameters" SyntaxType="formal_parameters" />
         <SyntaxField Name="proc_body" SyntaxType="statement" />
-        <SyntaxField Name="proc_definition" SyntaxType="procedure_definition" />
+        <ExtendedField Name="proc_definition" Type="object" CreateVariable="false" DeleteVariable="false" />
         <SyntaxField Name="parameters" SyntaxType="expression_list" />
         <ExtendedField Name="lambda_name" Type="string" CreateVariable="false" DeleteVariable="false" />
-        <ExtendedField Name="defs" Type="List&lt;declaration&gt;" CreateVariable="false" DeleteVariable="false" />
+        <ExtendedField Name="defs" Type="List&lt;declaration&gt;" CreateVariable="true" DeleteVariable="false" />
         <ExtendedField Name="lambda_visit_mode" Type="LambdaVisitMode" CreateVariable="false" DeleteVariable="false" />
         <SyntaxField Name="substituting_node" SyntaxType="syntax_tree_node" />
         <ExtendedField Name="usedkeyword" Type="int" CreateVariable="false" DeleteVariable="false" />
@@ -2547,7 +2558,7 @@
         </TagIndices>
       </Tags>
     </SyntaxNode>
-    <SyntaxNode Name="unnamed_type_object" BaseName="expression">
+    <SyntaxNode Name="unnamed_type_object" BaseName="addressed_value">
       <Fields>
         <SyntaxField Name="ne_list" SyntaxType="name_assign_expr_list" />
         <ExtendedField Name="is_class" Type="bool" CreateVariable="false" DeleteVariable="false" />
@@ -2790,8 +2801,11 @@
         <TagIndices />
       </Tags>
     </SyntaxNode>
-    <SyntaxNode Name="assign_var_tuple" BaseName="assign_tuple">
-      <Fields />
+    <SyntaxNode Name="assign_var_tuple" BaseName="statement">
+      <Fields>
+        <SyntaxField Name="idents" SyntaxType="ident_list" />
+        <SyntaxField Name="expr" SyntaxType="expression" />
+      </Fields>
       <Methods />
       <Tags>
         <CategoryIndices />
@@ -2839,6 +2853,378 @@
         <TagIndices />
       </Tags>
     </SyntaxNode>
+    <SyntaxNode Name="double_question_node" BaseName="addressed_value_funcname">
+      <Fields>
+        <SyntaxField Name="left" SyntaxType="expression" />
+        <SyntaxField Name="right" SyntaxType="expression" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices />
+        <TagIndices />
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="pattern_node" BaseName="syntax_tree_node">
+      <Fields>
+        <ExtendedField Name="parameters" Type="List&lt;pattern_parameter&gt;" CreateVariable="true" DeleteVariable="false" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="type_pattern" BaseName="pattern_node">
+      <Fields>
+        <SyntaxField Name="identifier" SyntaxType="ident" />
+        <SyntaxField Name="type" SyntaxType="type_definition" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="is_pattern_expr" BaseName="expression">
+      <Fields>
+        <SyntaxField Name="left" SyntaxType="expression" />
+        <SyntaxField Name="right" SyntaxType="pattern_node" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="match_with" BaseName="statement">
+      <Fields>
+        <SyntaxField Name="expr" SyntaxType="expression" />
+        <SyntaxField Name="case_list" SyntaxType="pattern_cases" />
+        <SyntaxField Name="defaultAction" SyntaxType="statement" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="pattern_case" BaseName="statement">
+      <Fields>
+        <SyntaxField Name="pattern" SyntaxType="pattern_node" />
+        <SyntaxField Name="case_action" SyntaxType="statement" />
+        <SyntaxField Name="condition" SyntaxType="expression" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="pattern_cases" BaseName="statement">
+      <Fields>
+        <ExtendedField Name="elements" Type="List&lt;pattern_case&gt;" CreateVariable="true" DeleteVariable="false" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="deconstructor_pattern" BaseName="pattern_node">
+      <Fields>
+        <SyntaxField Name="type" SyntaxType="type_definition" />
+        <SyntaxField Name="const_params_check" SyntaxType="expression" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="pattern_parameter" BaseName="syntax_tree_node">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="desugared_deconstruction" BaseName="statement">
+      <Fields>
+        <SyntaxField Name="variables" SyntaxType="deconstruction_variables_definition" />
+        <SyntaxField Name="deconstruction_target" SyntaxType="expression" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="var_deconstructor_parameter" BaseName="pattern_parameter">
+      <Fields>
+        <SyntaxField Name="identifier" SyntaxType="ident" />
+        <SyntaxField Name="type" SyntaxType="type_definition" />
+        <ExtendedField Name="var_keyword_used" Type="bool" CreateVariable="false" DeleteVariable="false" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="recursive_deconstructor_parameter" BaseName="recursive_pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="deconstruction_variables_definition" BaseName="declaration">
+      <Fields>
+        <ExtendedField Name="definitions" Type="List&lt;var_def_statement&gt;" CreateVariable="true" DeleteVariable="false" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="var_tuple_def_statement" BaseName="var_def_statement">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices />
+        <TagIndices />
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="semantic_check_sugared_var_def_statement_node" BaseName="var_def_statement">
+      <Fields>
+        <ExtendedField Name="typ" Type="object" CreateVariable="false" DeleteVariable="false" />
+        <ExtendedField Name="lst" Type="List&lt;syntax_tree_node&gt;" CreateVariable="true" DeleteVariable="false" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices />
+        <TagIndices />
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="const_pattern" BaseName="pattern_node">
+      <Fields>
+        <SyntaxField Name="pattern_expressions" SyntaxType="expression_list" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="tuple_pattern_wild_card" BaseName="pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="const_pattern_parameter" BaseName="pattern_parameter">
+      <Fields>
+        <SyntaxField Name="const_param" SyntaxType="expression" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="wild_card_deconstructor_parameter" BaseName="pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="collection_pattern" BaseName="pattern_node">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="collection_pattern_gap_parameter" BaseName="pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="collection_pattern_wild_card" BaseName="pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="collection_pattern_var_parameter" BaseName="pattern_parameter">
+      <Fields>
+        <SyntaxField Name="identifier" SyntaxType="ident" />
+        <SyntaxField Name="type" SyntaxType="type_definition" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="recursive_collection_parameter" BaseName="recursive_pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="recursive_pattern_parameter" BaseName="pattern_parameter">
+      <Fields>
+        <SyntaxField Name="pattern" SyntaxType="pattern_node" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="tuple_pattern" BaseName="pattern_node">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="tuple_pattern_var_parameter" BaseName="pattern_parameter">
+      <Fields>
+        <SyntaxField Name="identifier" SyntaxType="ident" />
+        <SyntaxField Name="type" SyntaxType="type_definition" />
+      </Fields>
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
+    <SyntaxNode Name="recursive_tuple_parameter" BaseName="recursive_pattern_parameter">
+      <Fields />
+      <Methods />
+      <Tags>
+        <CategoryIndices>
+          <CategoryIndex>0</CategoryIndex>
+        </CategoryIndices>
+        <TagIndices>
+          <TagIndex>9</TagIndex>
+        </TagIndices>
+      </Tags>
+    </SyntaxNode>
   </SyntaxNodes>
   <Settings>
     <FileName>Tree.cs</FileName>
@@ -2859,11 +3245,13 @@
         <Tag Name="Выражения" ReferenceCount="36" />
         <Tag Name="Константы" ReferenceCount="15" />
         <Tag Name="Списки" ReferenceCount="23" />
-        <Tag Name="Типы" ReferenceCount="12" />
-        <Tag Name="Описания" ReferenceCount="23" />
+        <Tag Name="Типы" ReferenceCount="15" />
+        <Tag Name="Описания" ReferenceCount="25" />
         <Tag Name="Важнейшие" ReferenceCount="207" />
         <Tag Name="Method_Procedure_Call" ReferenceCount="2" />
         <Tag Name="Yield" ReferenceCount="8" />
+        <Tag Name="Patterns" ReferenceCount="25" />
+        <Tag Name="Typeclasses" ReferenceCount="13" />
       </Tags>
     </FilterCategory>
   </TagCategories>
@@ -2879,12 +3267,16 @@
       <HelpData Key=".UnknownID" Value="" />
       <HelpData Key=".Vds" Value="" />
       <HelpData Key="._realType" Value="" />
+      <HelpData Key=".additional_restrictions" Value="" />
       <HelpData Key=".aloneparam" Value="" />
       <HelpData Key=".attr" Value="" />
       <HelpData Key=".attributes" Value="" />
+      <HelpData Key=".body" Value="" />
       <HelpData Key=".cconst" Value="Значение константы." />
       <HelpData Key=".char_num" Value="Номер символа." />
+      <HelpData Key=".count" Value="" />
       <HelpData Key=".def" Value="" />
+      <HelpData Key=".definitions" Value="" />
       <HelpData Key=".defs" Value="" />
       <HelpData Key=".directives" Value="" />
       <HelpData Key=".el" Value="" />
@@ -2895,6 +3287,8 @@
       <HelpData Key=".from" Value="" />
       <HelpData Key=".guardstats" Value="" />
       <HelpData Key=".handlers" Value="" />
+      <HelpData Key=".i" Value="" />
+      <HelpData Key=".item_expression" Value="" />
       <HelpData Key=".left" Value="" />
       <HelpData Key=".lists" Value="" />
       <HelpData Key=".listunitsections" Value="" />
@@ -2908,12 +3302,17 @@
       <HelpData Key=".override string ToString()" Value="" />
       <HelpData Key=".parameters" Value="" />
       <HelpData Key=".params" Value="" />
+      <HelpData Key=".pattern" Value="" />
+      <HelpData Key=".pattern_expression" Value="" />
       <HelpData Key=".procdef" Value="" />
       <HelpData Key=".res" Value="" />
+      <HelpData Key=".restriction" Value="" />
+      <HelpData Key=".restriction_args" Value="" />
       <HelpData Key=".right" Value="" />
       <HelpData Key=".sharp_consts" Value="Список символьных констант в строке вида #123#124#125" />
       <HelpData Key=".specificator" Value="" />
       <HelpData Key=".stat" Value="" />
+      <HelpData Key=".statements" Value="" />
       <HelpData Key=".step" Value="" />
       <HelpData Key=".string" Value="" />
       <HelpData Key=".subprogram_definitions" Value="" />
@@ -2924,6 +3323,7 @@
       <HelpData Key=".tags" Value="" />
       <HelpData Key=".tn" Value="" />
       <HelpData Key=".to" Value="" />
+      <HelpData Key=".typ" Value="" />
       <HelpData Key=".type" Value="" />
       <HelpData Key=".types" Value="" />
       <HelpData Key=".unknown_foreach" Value="" />
@@ -2990,6 +3390,8 @@
       <HelpData Key="assign_tuple.expr" Value="" />
       <HelpData Key="assign_tuple.vars" Value="" />
       <HelpData Key="assign_var_tuple" Value="" />
+      <HelpData Key="assign_var_tuple.expr" Value="" />
+      <HelpData Key="assign_var_tuple.idents" Value="" />
       <HelpData Key="attribute" Value="" />
       <HelpData Key="attribute." Value="" />
       <HelpData Key="attribute.arguments" Value="" />
@@ -3068,6 +3470,8 @@
       <HelpData Key="class_body.class_body Add(class_members _class_members, SourceContext sc)" Value="" />
       <HelpData Key="class_body.class_body(class_members _class_members, SourceContext sc)" Value="" />
       <HelpData Key="class_body.class_def_blocks" Value="" />
+      <HelpData Key="class_body_list" Value="" />
+      <HelpData Key="class_body_list.class_def_blocks" Value="" />
       <HelpData Key="class_definition" Value="" />
       <HelpData Key="class_definition." Value="" />
       <HelpData Key="class_definition.IsInterface" Value="" />
@@ -3096,6 +3500,17 @@
       <HelpData Key="class_predefinition.class_name" Value="" />
       <HelpData Key="closure_substituting_node" Value="" />
       <HelpData Key="closure_substituting_node.substitution" Value="" />
+      <HelpData Key="collection_pattern" Value="" />
+      <HelpData Key="collection_pattern.collection_items" Value="" />
+      <HelpData Key="collection_pattern_expr_item" Value="" />
+      <HelpData Key="collection_pattern_expr_item.item_expression" Value="" />
+      <HelpData Key="collection_pattern_gap_item" Value="" />
+      <HelpData Key="collection_pattern_gap_parameter" Value="" />
+      <HelpData Key="collection_pattern_item" Value="" />
+      <HelpData Key="collection_pattern_var_parameter" Value="Возможно без типа" />
+      <HelpData Key="collection_pattern_var_parameter.identifier" Value="" />
+      <HelpData Key="collection_pattern_var_parameter.type" Value="" />
+      <HelpData Key="collection_pattern_wild_card" Value="" />
       <HelpData Key="compilation_unit" Value="" />
       <HelpData Key="compilation_unit." Value="" />
       <HelpData Key="compilation_unit.Language" Value="" />
@@ -3114,6 +3529,10 @@
       <HelpData Key="compiler_directive_list.compiler_directive_list Add(compiler_directive _compiler_directive, SourceContext sc)" Value="" />
       <HelpData Key="compiler_directive_list.compiler_directive_list(compiler_directive _compiler_directive, SourceContext sc)" Value="" />
       <HelpData Key="compiler_directive_list.directives" Value="" />
+      <HelpData Key="const_deconstructor_parameter" Value="" />
+      <HelpData Key="const_deconstructor_parameter.const_param" Value="" />
+      <HelpData Key="const_deconstructor_parameter.i" Value="" />
+      <HelpData Key="const_deconstructor_parameter.value" Value="" />
       <HelpData Key="const_definition" Value="" />
       <HelpData Key="const_definition.const_name" Value="" />
       <HelpData Key="const_definition.const_value" Value="" />
@@ -3124,6 +3543,11 @@
       <HelpData Key="const_method_call.parametres" Value="" />
       <HelpData Key="const_method_call.unit_name" Value="" />
       <HelpData Key="const_node" Value="Константа" />
+      <HelpData Key="const_pattern" Value="паттерн для константного матчинга" />
+      <HelpData Key="const_pattern.pattern_expression" Value="" />
+      <HelpData Key="const_pattern.pattern_expressions" Value="" />
+      <HelpData Key="const_pattern_parameter" Value="" />
+      <HelpData Key="const_pattern_parameter.const_param" Value="" />
       <HelpData Key="constructor" Value="" />
       <HelpData Key="constructor.constructor(formal_parameters fp): this(fp, null)" Value="" />
       <HelpData Key="constructor.constructor(formal_parameters fp,SourceContext sc): this(null, fp, new procedure_attributes_list(proc_attribute.attr_overload), null, false, false, null, null)" Value="" />
@@ -3158,6 +3582,12 @@
       <HelpData Key="declarations.void Add(declaration d, SourceContext sc)" Value="" />
       <HelpData Key="declarations_as_statement" Value="" />
       <HelpData Key="declarations_as_statement.defs" Value="" />
+      <HelpData Key="deconstruction_variables_definition" Value="Список объявлений для deconstructor pattern" />
+      <HelpData Key="deconstruction_variables_definition.definitions" Value="" />
+      <HelpData Key="deconstructor_pattern" Value="" />
+      <HelpData Key="deconstructor_pattern.const_params_check" Value="Проверка соответствия для константных параметрах деконструирования" />
+      <HelpData Key="deconstructor_pattern.parameters" Value="Результат деконструирования" />
+      <HelpData Key="deconstructor_pattern.type" Value="Деконструируемый тип" />
       <HelpData Key="default_indexer_property_node" Value="" />
       <HelpData Key="default_operator" Value="" />
       <HelpData Key="default_operator." Value="" />
@@ -3170,6 +3600,13 @@
       <HelpData Key="dereference.dereferencing_value" Value="" />
       <HelpData Key="dereference.override string ToString()" Value="" />
       <HelpData Key="destructor" Value="" />
+      <HelpData Key="desugared_deconstruction" Value="Представляет объединение объявлений пременных, порожденных деконструкцией. Деконструируемое выражение необходимо хранить для выведения типа на этапе семантики." />
+      <HelpData Key="desugared_deconstruction.deconstruct_call" Value="Вызов метода Deconstruct" />
+      <HelpData Key="desugared_deconstruction.deconstruction_target" Value="Деконструируемое выражение" />
+      <HelpData Key="desugared_deconstruction.definitions" Value="Объявления порожденных переменных" />
+      <HelpData Key="desugared_deconstruction.destruct_call" Value="" />
+      <HelpData Key="desugared_deconstruction.expressionVariableName" Value="Деконструируемое выражение" />
+      <HelpData Key="desugared_deconstruction.variables" Value="Объявления порожденных переменных" />
       <HelpData Key="diap_expr" Value="" />
       <HelpData Key="diap_expr." Value="" />
       <HelpData Key="diap_expr.left" Value="" />
@@ -3220,6 +3657,9 @@
       <HelpData Key="double_const." Value="" />
       <HelpData Key="double_const.override string ToString()" Value="" />
       <HelpData Key="double_const.val" Value="Значение вещественной константы" />
+      <HelpData Key="double_question_node" Value="" />
+      <HelpData Key="double_question_node.left" Value="" />
+      <HelpData Key="double_question_node.right" Value="" />
       <HelpData Key="eee" Value="" />
       <HelpData Key="empty_statement" Value="" />
       <HelpData Key="enum_type_definition" Value="" />
@@ -3265,6 +3705,8 @@
       <HelpData Key="exception_identifier.type_name" Value="" />
       <HelpData Key="exception_identifier.variable" Value="" />
       <HelpData Key="exit_directive" Value="" />
+      <HelpData Key="expr_collection_pattern_item" Value="" />
+      <HelpData Key="expr_collection_pattern_item.item_expression" Value="" />
       <HelpData Key="expression" Value="Выражение" />
       <HelpData Key="expression." Value="" />
       <HelpData Key="expression_as_statement" Value="" />
@@ -3438,6 +3880,8 @@
       <HelpData Key="initfinal_part.initfinal_part(statement_list init,statement_list fin,SourceContext sc)" Value="" />
       <HelpData Key="initfinal_part.initfinal_part(syntax_tree_node stn1, statement_list init, syntax_tree_node stn2, statement_list fin, syntax_tree_node stn3, SourceContext sc)" Value="" />
       <HelpData Key="initfinal_part.initialization_sect" Value="" />
+      <HelpData Key="instance_definition" Value="Определение того как конкретный тип удовлетворяет классу типов." />
+      <HelpData Key="instance_definition.body" Value="" />
       <HelpData Key="int32_const" Value="Целая константа" />
       <HelpData Key="int32_const." Value="" />
       <HelpData Key="int32_const.override string ToString()" Value="" />
@@ -3456,6 +3900,10 @@
       <HelpData Key="interface_node.interface_defsinitions" Value="" />
       <HelpData Key="interface_node.uses_modules" Value="" />
       <HelpData Key="interface_node.using_namespaces" Value="" />
+      <HelpData Key="is_pattern_expr" Value="" />
+      <HelpData Key="is_pattern_expr.constDeconstructorParamCheck" Value="" />
+      <HelpData Key="is_pattern_expr.left" Value="" />
+      <HelpData Key="is_pattern_expr.right" Value="" />
       <HelpData Key="jump_stmt" Value="" />
       <HelpData Key="jump_stmt.JumpType" Value="" />
       <HelpData Key="jump_stmt.expr" Value="" />
@@ -3501,9 +3949,17 @@
       <HelpData Key="look_stmt." Value="" />
       <HelpData Key="look_stmt.name" Value="" />
       <HelpData Key="look_stmt.stmt" Value="" />
+      <HelpData Key="loop_node" Value="" />
+      <HelpData Key="loop_node.count" Value="" />
+      <HelpData Key="loop_node.stmt" Value="" />
       <HelpData Key="loop_stmt" Value="" />
       <HelpData Key="loop_stmt." Value="" />
+      <HelpData Key="loop_stmt.count" Value="" />
       <HelpData Key="loop_stmt.stmt" Value="" />
+      <HelpData Key="match_with" Value="" />
+      <HelpData Key="match_with.case_list" Value="" />
+      <HelpData Key="match_with.defaultAction" Value="" />
+      <HelpData Key="match_with.expr" Value="" />
       <HelpData Key="matching_expression" Value="" />
       <HelpData Key="matching_expression.left" Value="" />
       <HelpData Key="matching_expression.right" Value="" />
@@ -3661,6 +4117,23 @@
       <HelpData Key="pascal_set_constant." Value="" />
       <HelpData Key="pascal_set_constant.values" Value="" />
       <HelpData Key="pascal_set_constant.void Add(expression value)" Value="Добавляет во множество элемент" />
+      <HelpData Key="pattern_case" Value="" />
+      <HelpData Key="pattern_case.case_action" Value="" />
+      <HelpData Key="pattern_case.condition" Value="" />
+      <HelpData Key="pattern_case.isDefault" Value="" />
+      <HelpData Key="pattern_case.pattern" Value="" />
+      <HelpData Key="pattern_cases" Value="" />
+      <HelpData Key="pattern_cases.elements" Value="" />
+      <HelpData Key="pattern_deconstructor_call_params" Value="" />
+      <HelpData Key="pattern_deconstructor_call_params.parameters" Value="" />
+      <HelpData Key="pattern_deconstructor_parameter" Value="Базовый класс параметра deconstruct" />
+      <HelpData Key="pattern_deconstructor_parameter.identifier" Value="" />
+      <HelpData Key="pattern_deconstructor_parameter.isDeconstruct" Value="Флаг, показывающий, что этот параметр - рекурсивный паттерн" />
+      <HelpData Key="pattern_deconstructor_parameter.name" Value="" />
+      <HelpData Key="pattern_deconstructor_parameter.type" Value="" />
+      <HelpData Key="pattern_node" Value="" />
+      <HelpData Key="pattern_node.parameters" Value="" />
+      <HelpData Key="pattern_parameter" Value="Базовый класс параметра для pattern_node" />
       <HelpData Key="proc_block" Value="" />
       <HelpData Key="procedure_attribute" Value="" />
       <HelpData Key="procedure_attribute.attribute_type" Value="" />
@@ -3673,9 +4146,10 @@
       <HelpData Key="procedure_attributes_list.procedure_attributes_list(proc_attribute attr, SourceContext sc): this(new procedure_attribute(attr),sc)" Value="" />
       <HelpData Key="procedure_attributes_list.procedure_attributes_list(procedure_attribute _procedure_attribute)" Value="" />
       <HelpData Key="procedure_attributes_list.procedure_attributes_list(procedure_attribute _procedure_attribute, SourceContext sc)" Value="" />
-      <HelpData Key="procedure_call" Value="" />
+      <HelpData Key="procedure_call" Value="bool is_ident; // является ли вызов процедуры идентификатором. Нужно исключительно для секции write свойств" />
       <HelpData Key="procedure_call." Value="" />
       <HelpData Key="procedure_call.func_name" Value="" />
+      <HelpData Key="procedure_call.is_ident" Value="" />
       <HelpData Key="procedure_call.override string ToString()" Value="" />
       <HelpData Key="procedure_call.parametres" Value="" />
       <HelpData Key="procedure_definition" Value="" />
@@ -3770,8 +4244,11 @@
       <HelpData Key="raise_stmt.address" Value="" />
       <HelpData Key="raise_stmt.expr" Value="" />
       <HelpData Key="raise_stmt.object" Value="" />
-      <HelpData Key="read_accessor_name" Value="" />
+      <HelpData Key="read_accessor_name" Value="procedure_definition pr != null если метод сгенерирован по выражению. //pr сделано object чтобы не обходилось лишний раз" />
       <HelpData Key="read_accessor_name.accessor_name" Value="" />
+      <HelpData Key="read_accessor_name.expr_for_formatting" Value="" />
+      <HelpData Key="read_accessor_name.expression_for_formatting" Value="" />
+      <HelpData Key="read_accessor_name.pr" Value="" />
       <HelpData Key="record_const" Value="" />
       <HelpData Key="record_const." Value="" />
       <HelpData Key="record_const.rec_consts" Value="" />
@@ -3799,6 +4276,15 @@
       <HelpData Key="record_type_parts" Value="" />
       <HelpData Key="record_type_parts.fixed_part" Value="" />
       <HelpData Key="record_type_parts.variant_part" Value="" />
+      <HelpData Key="recursive_collection_parameter" Value="Рекурсивный паттерн-параметр. " />
+      <HelpData Key="recursive_collection_parameter.pattern" Value="" />
+      <HelpData Key="recursive_collection_pattern" Value="Рекурсивный паттерн-параметр. " />
+      <HelpData Key="recursive_collection_pattern.pattern" Value="" />
+      <HelpData Key="recursive_deconstructor_parameter" Value="Параметр-паттерн. Часть рекурсивного паттерна." />
+      <HelpData Key="recursive_deconstructor_parameter.pattern" Value="" />
+      <HelpData Key="recursive_pattern_parameter" Value="Рекурсивный паттерн-параметр." />
+      <HelpData Key="recursive_pattern_parameter.pattern" Value="" />
+      <HelpData Key="recursive_tuple_parameter" Value="Рекурсивный паттерн-параметр." />
       <HelpData Key="ref_type" Value="" />
       <HelpData Key="ref_type.pointed_to" Value="" />
       <HelpData Key="repeat_node" Value="Цикл с постусловием (repeat)" />
@@ -3826,10 +4312,13 @@
       <HelpData Key="semantic_check_statement.stat" Value="" />
       <HelpData Key="semantic_check_sugared_statement" Value="узел, не генерирующий кода, но осуществляющий семантические проверки сахарных узлов. stat - это на самом деле statement. stat сделано типа object - чтобы оно автоматически не обходилось" />
       <HelpData Key="semantic_check_sugared_statement.stat" Value="" />
-      <HelpData Key="semantic_check_sugared_statement_node" Value="Узел, не генерирующий кода, но осуществляющий семантические проверки сахарных узлов. stat - это на самом деле statement. stat сделано типа object - чтобы оно автоматически не обходилось" />
+      <HelpData Key="semantic_check_sugared_statement_node" Value="" />
       <HelpData Key="semantic_check_sugared_statement_node.lst" Value="" />
       <HelpData Key="semantic_check_sugared_statement_node.stat" Value="" />
       <HelpData Key="semantic_check_sugared_statement_node.typ" Value="" />
+      <HelpData Key="semantic_check_sugared_var_def_statement_node" Value="" />
+      <HelpData Key="semantic_check_sugared_var_def_statement_node.lst" Value="" />
+      <HelpData Key="semantic_check_sugared_var_def_statement_node.typ" Value="" />
       <HelpData Key="semantic_expr_node" Value="" />
       <HelpData Key="semantic_expr_node.expr" Value="" />
       <HelpData Key="semantic_type_node" Value="" />
@@ -3864,17 +4353,20 @@
       <HelpData Key="simple_const_definition" Value="" />
       <HelpData Key="simple_const_definition." Value="" />
       <HelpData Key="simple_const_definition.simple_const_definition(ident name, expression value, SourceContext sc)" Value="" />
-      <HelpData Key="simple_property" Value="property property_name[parameter_list]:property_type index index_expression accessors;array_default;" />
+      <HelpData Key="simple_property" Value="property property_name[parameter_list]:property_type index index_expression accessors; [virtual;] array_default;" />
       <HelpData Key="simple_property." Value="" />
       <HelpData Key="simple_property.accessors" Value="" />
       <HelpData Key="simple_property.array_default" Value="" />
       <HelpData Key="simple_property.attr" Value="" />
       <HelpData Key="simple_property.index_expression" Value="" />
+      <HelpData Key="simple_property.initial_value" Value="" />
+      <HelpData Key="simple_property.is_auto" Value="" />
       <HelpData Key="simple_property.parameter_list" Value="" />
       <HelpData Key="simple_property.property_name" Value="" />
       <HelpData Key="simple_property.property_type" Value="" />
       <HelpData Key="simple_property.simple_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr)" Value="" />
       <HelpData Key="simple_property.simple_property(ident name, type_definition type, property_accessors accessors): this(name, type, null, accessors, null, null, definition_attribute.None)" Value="" />
+      <HelpData Key="simple_property.virt_over_none_attr" Value="" />
       <HelpData Key="sizeof_operator" Value="" />
       <HelpData Key="sizeof_operator." Value="" />
       <HelpData Key="sizeof_operator.expr" Value="" />
@@ -3993,6 +4485,12 @@
       <HelpData Key="tuple_node.el" Value="" />
       <HelpData Key="tuple_node_for_formatter" Value="" />
       <HelpData Key="tuple_node_for_formatter.el" Value="" />
+      <HelpData Key="tuple_pattern" Value="" />
+      <HelpData Key="tuple_pattern_var_parameter" Value="" />
+      <HelpData Key="tuple_pattern_var_parameter.identifier" Value="" />
+      <HelpData Key="tuple_pattern_var_parameter.type" Value="" />
+      <HelpData Key="tuple_pattern_wild_card" Value="" />
+      <HelpData Key="tuple_wild_card" Value="" />
       <HelpData Key="type_declaration" Value="" />
       <HelpData Key="type_declaration.type_declaration(string name, type_definition type): this(new ident(name),type)" Value="" />
       <HelpData Key="type_declaration.type_declaration(string name, type_definition type, SourceContext sc): this(new ident(name),type,sc)" Value="" />
@@ -4024,6 +4522,9 @@
       <HelpData Key="type_definition_list.type_definition_list Add(type_definition _type_definition)" Value="" />
       <HelpData Key="type_definition_list.type_definition_list Add(type_definition _type_definition, SourceContext sc)" Value="" />
       <HelpData Key="type_definition_list.type_definition_list(type_definition _type_definition, SourceContext sc)" Value="" />
+      <HelpData Key="type_pattern" Value="" />
+      <HelpData Key="type_pattern.identifier" Value="" />
+      <HelpData Key="type_pattern.type" Value="" />
       <HelpData Key="typecast_expr" Value="" />
       <HelpData Key="typecast_expr." Value="" />
       <HelpData Key="typecast_expr.type_def" Value="" />
@@ -4034,6 +4535,17 @@
       <HelpData Key="typecast_node.left" Value="" />
       <HelpData Key="typecast_node.right" Value="" />
       <HelpData Key="typecast_node.type_def" Value="" />
+      <HelpData Key="typeclass_definition" Value="Определение класса типов" />
+      <HelpData Key="typeclass_definition.additional_restrictions" Value="" />
+      <HelpData Key="typeclass_definition.body" Value="" />
+      <HelpData Key="typeclass_param_list" Value="Список параметров тайпкласса" />
+      <HelpData Key="typeclass_param_list.public typeclass_param_list(template_param_list _template_param_list): this(_template_param_list._dereferencing_value, _template_param_list._params_list, _template_param_list.source_context)" Value="" />
+      <HelpData Key="typeclass_param_list.public typeclass_param_list(template_param_list _template_param_list): this(_template_param_list.dereferencing_value, _template_param_list.params_list, _template_param_list.source_context)" Value="" />
+      <HelpData Key="typeclass_param_list.public typeclass_param_list(template_param_list _template_param_list): this(_template_param_list.dereferencing_value, _template_param_list.params_list, _template_param_list.source_context)&#xA;{&#xA;}" Value="" />
+      <HelpData Key="typeclass_reference" Value="" />
+      <HelpData Key="typeclass_reference.restriction_args" Value="" />
+      <HelpData Key="typeclass_restriction" Value="Представляет конструкцию вида Typeclass[T], где Typleclass это ограничение, которое накладывается на тип T" />
+      <HelpData Key="typeclass_restriction.restriction_args" Value="" />
       <HelpData Key="typed_const_definition" Value="" />
       <HelpData Key="typed_const_definition.const_type" Value="" />
       <HelpData Key="typed_parameters" Value="" />
@@ -4095,7 +4607,9 @@
       <HelpData Key="unknown_ident" Value="" />
       <HelpData Key="unknown_ident.ClassName" Value="" />
       <HelpData Key="unknown_ident.UnknownID" Value="" />
-      <HelpData Key="unnamed_type_object" Value="Это - сахарная конструкция.&#xD;&#xA;/// Объект безымянного класса. Например: new class(Name := 'Иванов'; Age := 25);&#xD;&#xA;/// ne - это узел для генерации кода, основной узел предназначен для форматирования" />
+      <HelpData Key="unknown_type" Value="" />
+      <HelpData Key="unknown_type.context" Value="" />
+      <HelpData Key="unnamed_type_object" Value="Это - сахарная конструкция.&#xD;&#xA;/// Объект безымянного класса. Например: new class(Name := 'Иванов'; Age := 25);&#xD;&#xA;/// new_ex - это узел для генерации кода, основной узел предназначен для форматирования&#xD;&#xA;&#xD;&#xA;/// Сделал потомком addressed_value из-за #1843" />
       <HelpData Key="unnamed_type_object.is_class" Value="" />
       <HelpData Key="unnamed_type_object.ne" Value="" />
       <HelpData Key="unnamed_type_object.ne_list" Value="" />
@@ -4138,6 +4652,10 @@
       <HelpData Key="using_namespaces.usings" Value="" />
       <HelpData Key="var_attribute_node" Value="" />
       <HelpData Key="var_attribute_node.var_attr" Value="" />
+      <HelpData Key="var_deconstructor_parameter" Value="Параметр-объявление переменной (возможно без типа)" />
+      <HelpData Key="var_deconstructor_parameter.identifier" Value="" />
+      <HelpData Key="var_deconstructor_parameter.type" Value="" />
+      <HelpData Key="var_deconstructor_parameter.var_keyword_used" Value="" />
       <HelpData Key="var_def_list" Value="" />
       <HelpData Key="var_def_list.var_def_list Add(var_def_statement _var_def_statement)" Value="" />
       <HelpData Key="var_def_list.var_def_list Add(var_def_statement _var_def_statement, SourceContext sc)" Value="" />
@@ -4145,7 +4663,7 @@
       <HelpData Key="var_def_list.vars" Value="" />
       <HelpData Key="var_def_list_for_record" Value="" />
       <HelpData Key="var_def_list_for_record.vars" Value="" />
-      <HelpData Key="var_def_statement" Value="Описание переменных одной строкой. Не содержит var, т.к. встречается исключительно внутри другой конструкции.Может встречаться как до beginа (внутри variable_definitions), так и как внутриблочное описание (внутри var_statement).&#xD;&#xA;" />
+      <HelpData Key="var_def_statement" Value="Описание переменных одной строкой. Не содержит var, т.к. встречается исключительно внутри другой конструкции. Может встречаться как до beginа (внутри variable_definitions), так и как внутриблочное описание (внутри var_statement).&#xD;&#xA;" />
       <HelpData Key="var_def_statement." Value="" />
       <HelpData Key="var_def_statement.field_attr" Value="" />
       <HelpData Key="var_def_statement.inital_value" Value="Начальное значение переменных" />
@@ -4167,6 +4685,7 @@
       <HelpData Key="var_statement." Value="" />
       <HelpData Key="var_statement.override string ToString()" Value="" />
       <HelpData Key="var_statement.var_def" Value="" />
+      <HelpData Key="var_tuple_def_statement" Value="" />
       <HelpData Key="variable_definitions" Value="Секция описания переменных (до beginа). Состоит из var_def_statement. Не путать с var_statement - однострочным описанием переменной внутри begin-end" />
       <HelpData Key="variable_definitions." Value="" />
       <HelpData Key="variable_definitions.override string ToString()" Value="" />
@@ -4220,6 +4739,8 @@
       <HelpData Key="where_definition_list.where_definition_list(where_definition _where_definition, SourceContext sc)" Value="" />
       <HelpData Key="where_type_specificator_list" Value="" />
       <HelpData Key="where_type_specificator_list.defs" Value="" />
+      <HelpData Key="where_typeclass_constraint" Value="" />
+      <HelpData Key="where_typeclass_constraint.restriction" Value="" />
       <HelpData Key="while_node" Value="Цикл ПОКА" />
       <HelpData Key="while_node." Value="" />
       <HelpData Key="while_node.CycleType" Value="Тип цикла ПОКА" />
@@ -4228,12 +4749,17 @@
       <HelpData Key="while_node.statements" Value="Тело цикла" />
       <HelpData Key="while_type_specificator_list" Value="" />
       <HelpData Key="while_type_specificator_list.defs" Value="" />
+      <HelpData Key="wild_card_deconstructor_parameter" Value="" />
+      <HelpData Key="wild_card_deconstructor_parameter.exp" Value="" />
+      <HelpData Key="wildcard_deconstructor_parameter" Value="" />
       <HelpData Key="with_statement" Value="Представление оператора with в синтаксическом дереве." />
       <HelpData Key="with_statement." Value="" />
       <HelpData Key="with_statement.do_with" Value="Список объектов, с которыми производить действия." />
       <HelpData Key="with_statement.what_do" Value="Что делать." />
-      <HelpData Key="write_accessor_name" Value="" />
+      <HelpData Key="write_accessor_name" Value="procedure_definition pr != null если метод сгенерирован по выражению. //pr сделано object чтобы не обходилось лишний раз" />
       <HelpData Key="write_accessor_name.accessor_name" Value="" />
+      <HelpData Key="write_accessor_name.pr" Value="" />
+      <HelpData Key="write_accessor_name.statment_for_formatting" Value="" />
       <HelpData Key="yield_node" Value="" />
       <HelpData Key="yield_node.ex" Value="" />
       <HelpData Key="yield_node.override string ToString()" Value="" />

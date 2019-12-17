@@ -37,6 +37,7 @@ M_DELETE=Delete
                 
 MR_SERVICE=Tools
 M_OPTIONS=Options...
+M_AUTOINSERT_CODE=Ñode autocomplete mode
 
 MR_VIEW=View
 M_BOTTOMPANEL=Bottom Panel
@@ -131,6 +132,7 @@ M_COLLAPSE_REGIONS=Collapse regions
 TP_WARNINGLIST=Warnings
 TP_VARLIST=Local Variables
 TP_WATCHLIST=Watch List
+TP_DISASSEMBLY=Disassembly window
 TP_FIND_SYMBOL_RESULTS=Search Results
 CLMN_VAR=Var
 CLMN_TYPE=Type
@@ -162,7 +164,7 @@ M_COMPILEROPTIONS=Compiler Options
 M_VIEWOPTIONS=View
 
 MR_HELP=Help
-M_HELP=Contens
+M_HELP=Contents
 M_DOTNET_HELP=.NET Framework Help (MSDN)
 M_EXAMPLES=Examples
 M_MAINFEATURES=Main Features
@@ -331,7 +333,13 @@ PRJ_COMPANY=Company
 PRJ_TRADEMARK=Trademark
 PRJ_COPYRIGHT=Copyright
 PRJ_GENERATE_XML_DOC=Generate XML doc
-VERSION_IS_UP_DO_DATE=PascalABC.NET is up to date
+PRJ_NUGET=NuGet
+PRJ_NAMESPACE=Namespace
+PRJ_FILENAME_EXAMPLE=Unit1.pas, dir/Unit1.pas
+NUGET_PACKAGE=Package Id
+NUGET_INSTALL=Install package
+NUGET_LOG=Log
+VERSION_IS_UP_TO_DATE=PascalABC.NET is up to date
 UPDATE_AVAILABLE=New version of PascalABC.NET is available. Do you want to visit the download page?
 UPDATE_AVAILABLE_CURRENT_VESION{0}=Installed version: {0}
 UPDATE_AVAILABLE_NEW_VESION{0}=Available version: {0}
@@ -339,6 +347,9 @@ UPDATE_CHECK_ERROR=An error occurred while checking for updates
 UPDATE_CHECK=Checking for updates
 PABC_DOWNLOAD_PAGE=http://pascalabc.net/en/download
 M_CHECKUPDATES=Check for updates
+FRAMEWORK_DOWNLOAD_PAGE=https://www.microsoft.com/en-US/download/details.aspx?id=56116
+DOTNET_UPDATE_CHECK=Checking for updates of .NET Framework
+DOTNET_AVAILABLE=New version of .NET Framework is available(.NET Framework 4.7.1). Do you want to visit the download page?
 //Options
 %PREFIX%=VP_OC_VIEWOPTIONS_
 NAME=General
@@ -353,6 +364,7 @@ EDITOR_OPTIONS=Editor
 SHOW_DEBUG_PLAY_PAUSE_BUTTONS=Show additional debug buttons
 PASUSE_IN_RUNMODE_IF_CONSOLE=Make pause after a console program ends execution 
 SAVE_FILES_IF_COMPILATOIN_OK=Save files if compilation was successful
+AUTO_INSERT_CODE_IS_ENABLED_ON_STARTUP=Code completion mode is enabled on startup
 
 %PREFIX%=VP_OC_EDITOROPTIONS_
 NAME=Text Editor

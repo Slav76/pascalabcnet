@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -69,9 +69,10 @@ namespace VisualPascalABC
         internal CompilerConsoleWindowForm CompilerConsoleWindow;
         internal DebugVariablesListWindowForm DebugVariablesListWindow;
         internal DebugWatchListWindowForm DebugWatchListWindow;
+        internal DisassemblyWindow DisassemblyWindow;
         internal ProjectExplorerForm ProjectExplorerWindow = null;
-        WeifenLuo.WinFormsUI.Docking.DockPane BottomPane;
-        WeifenLuo.WinFormsUI.Docking.DockPane ProjectPane;
+        public WeifenLuo.WinFormsUI.Docking.DockPane BottomPane;
+        public WeifenLuo.WinFormsUI.Docking.DockPane ProjectPane;
         FSWatcherService WatcherService = new FSWatcherService();
 
         private bool LoadComplete = false;
@@ -92,6 +93,14 @@ namespace VisualPascalABC
             get
             {
                 return OutputWindow;
+            }
+        }
+
+        VisualPascalABCPlugins.IDisassemblyWindow VisualPascalABCPlugins.IWorkbench.DisassemblyWindow
+        {
+            get
+            {
+                return DisassemblyWindow;
             }
         }
 
@@ -211,7 +220,9 @@ namespace VisualPascalABC
                 DesignerUseable = false;
                 //DebuggerVisible = false;
             }
-        	PascalABCCompiler.StringResourcesLanguage.LoadDefaultConfig();
+
+            PascalABCCompiler.StringResourcesLanguage.LoadDefaultConfig();
+            
             //if (PascalABCCompiler.StringResourcesLanguage.AccessibleLanguages.Count > 0)
             //    PascalABCCompiler.StringResourcesLanguage.CurrentLanguageName = PascalABCCompiler.StringResourcesLanguage.AccessibleLanguages[0];
            
@@ -224,14 +235,16 @@ namespace VisualPascalABC
             this.mADDFILEToolStripMenuItem.Image = miNew.Image;
             this.mADDEXISTFILEToolStripMenuItem.Image = miOpen.Image;
             this.mADDFORMToolStripMenuItem.Image = new System.Drawing.Bitmap(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("VisualPascalABC.Resources.Icons.16x16.Form.png"));
-            toolStripPanel.Size = new Size(toolStripPanel.Size.Width, toolStrip1.Height);
+
+            //toolStripPanel.Size = new Size(toolStripPanel.Size.Width, toolStrip1.Height);
+            toolStripPanel.AutoSize = true;
             var gr = Graphics.FromHwnd(Handle);
             if (gr.DpiX >= 96*2)
             {
                 toolStrip1.ImageScalingSize = new Size(32, 32);
                 menuStrip1.ImageScalingSize = new Size(32, 32);
-                toolStripPanel.Size = new Size(toolStripPanel.Size.Width, 38);
-            }
+                //toolStripPanel.Size = new Size(toolStripPanel.Size.Width, 38);
+            } 
             serviceContainer = new WorkbenchServiceContainer();
 
             if (DebuggerVisible)
@@ -324,8 +337,9 @@ namespace VisualPascalABC
             NavigationManager = new NavigationManager(ExecuteSourceLocationAction);
             NavigationManager.StateChanged += new NavigationManager.NavigationManagerStateChanged(NavigationManager_StateChanged);
 
-            AddNewProgramToTab(MainDockPanel, InstNameNewProgramm(MainDockPanel));
-
+            string newFileName = InstNameNewProgramm(MainDockPanel);
+            AddNewProgramToTab(MainDockPanel, newFileName);
+            
             AddOptionsContent();
             Application.AddMessageFilter(this);
 
@@ -351,11 +365,17 @@ namespace VisualPascalABC
             this.mNEWASPToolStripMenuItem.Visible = DebugModus;
             if (!Tools.IsUnix())
                 AddDesignerSidebars();
-
+            WorkbenchServiceFactory.CodeCompletionParserController.RegisterFileForParsing(newFileName);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Автовставка кода по умолчанию включена. Отключил это - теперь сохраняется в настройках!
+            //tsAutoInsertCode.Checked = true;
+            //mAUTOINSERTToolStripMenuItem.Checked = true;
+
+            //CurrentCodeFileDocument.TextEditor.ActiveTextAreaControl.TextArea.KeyEventHandler += TextArea_KeyEventHandler;
+
             init = true;
             foreach (string FileName in VisualPascalABCProgram.CommandLineArgs)
             {
@@ -588,6 +608,23 @@ namespace VisualPascalABC
                     if (s != null) 
                         return s;
                     return WorkbenchStorage.StandartDirectories[(string)obj] as string;
+                case VisualEnvironmentCompilerAction.PT4PositionCursorAfterTask: // SSM 09.11.19
+                    {
+                        var ta = CurrentCodeFileDocument.TextEditor.ActiveTextAreaControl.TextArea;
+                        var d = ta.Document;
+                        for (var i = 0; i<d.TotalNumberOfLines; i++)
+                        {
+                            var line = ICSharpCode.TextEditor.Document.TextUtilities.GetLineAsString(d, i);
+                            if (line.Equals("  "))
+                            {
+                                var p = 1;
+                                ta.Caret.Line = i;
+                                ta.Caret.Column = 2;
+                                return true;
+                            }
+                        }
+                        return true;
+                    }
                 case VisualEnvironmentCompilerAction.GetCurrentSourceFileName:
                     return CurrentSourceFileName;
                 case VisualEnvironmentCompilerAction.SetCurrentSourceFileTextFormatting:
@@ -612,7 +649,11 @@ namespace VisualPascalABC
                     string FileName = Tools.FileNameToLower((string)obj);
                     if (!OpenDocuments.ContainsKey(FileName))
                         return false;
-                    SaveFileAs(OpenDocuments[FileName], (string)obj);
+                    var doc = OpenDocuments[FileName];
+                    if (doc.DocumentSavedToDisk)
+                        SaveFileAs(doc, (string)obj);
+                    //else
+                    //    ExecuteSaveAs(doc);
                     return true;
             }
             return false;
@@ -1459,14 +1500,38 @@ namespace VisualPascalABC
             __showhelpinqueue();
         }
 
+        /*private void __checkforupdate(object state)
+        {
+            WorkbenchServiceFactory.UpdateService.CheckForUpdates();
+        }*/
+
         private void miCheckUpdates_Click(object sender, EventArgs e)
         {
             WorkbenchServiceFactory.UpdateService.CheckForUpdates();
+            //if (!ThreadPool.QueueUserWorkItem(__checkforupdate))
+            //    __checkforupdate(null);
         }
 
         private void cmCollapseRegions_Click(object sender, EventArgs e)
         {
             WorkbenchServiceFactory.EditorService.CollapseRegions();
+        }
+
+        private void tsDisassembly_Click(object sender, EventArgs e)
+        {
+            DisassemblyWindowVisible = true;
+        }
+
+        private void tsAutoInsertCode_Click(object sender, EventArgs e)
+        {
+            tsAutoInsertCode.Checked = !tsAutoInsertCode.Checked;
+            mAUTOINSERTToolStripMenuItem.Checked = !mAUTOINSERTToolStripMenuItem.Checked;
+        }
+
+        private void mAUTOINSERTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            tsAutoInsertCode.Checked = !tsAutoInsertCode.Checked;
+            mAUTOINSERTToolStripMenuItem.Checked = !mAUTOINSERTToolStripMenuItem.Checked;
         }
 
         private void tsHelp_Click(object sender, EventArgs e)

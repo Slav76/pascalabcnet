@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -59,10 +59,10 @@ namespace SyntaxVisitors
             else
             {
                 // Нескольких переменных тут всё равно не будет - это ошибка
-                ReplaceStatement(vs, SeqStatements(vs.var_def.vars.idents.Select(id => new assign(id, vs.var_def.inital_value)).ToArray()));
+                ReplaceStatement(vs, SeqStatements(vs.var_def.vars.idents.Select(id => new assign(id, vs.var_def.inital_value, vs.source_context)).ToArray()));
             }
 
-            LocalDeletedDefsNames.UnionWith(vs.var_def.vars.idents.Select(id => id.name));
+            LocalDeletedDefsNames.UnionWith(vs.var_def.vars.idents.Select(id => id.name.ToLower()));
             CollectedLocals.UnionWith(vs.var_def.vars.idents);
         }
 
@@ -71,7 +71,7 @@ namespace SyntaxVisitors
             foreach (var v in vd.list)
             {
                 LocalDeletedVD.Insert(0, v); //.Add(v);
-                LocalDeletedDefsNames.UnionWith(v.vars.idents.Select(id => id.name));
+                LocalDeletedDefsNames.UnionWith(v.vars.idents.Select(id => id.name.ToLower()));
             }
             var d = UpperNodeAs<declarations>();
             d.defs.Remove(vd); // может ли остаться список declarations пустым?

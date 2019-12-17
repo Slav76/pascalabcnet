@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 // This is a modified file from SharpDevelop project (Copyright (c) AlphaSierraPapa)
 using System;
@@ -204,7 +204,7 @@ namespace VisualPascalABC
             startColumn = makerStartColumn;
             endLine = makerEndLine;
             endColumn = makerEndColumn;
-
+            
             LineSegment line = document.GetLineSegment(startLine - 1);
             instance = new CurrentBreakpointBookmark(fileName, document, startLine - 1);
             document.BookmarkManager.AddMark(instance);
@@ -680,7 +680,7 @@ namespace VisualPascalABC
                     		breakpoints_conditions.Remove(breakpoints[breakpoint]);
                         	WorkbenchServiceFactory.DebuggerManager.RemoveBreakpoint(breakpoints[breakpoint]);
                         }
-                        catch (System.Exception e)
+                        catch (System.Exception)
                         {
                         }
                         breakpoints.Remove(breakpoint);

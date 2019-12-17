@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.IO;
@@ -208,20 +208,20 @@ namespace VisualPascalABC
                 }
                 else*/
                 {
-                    Help.ShowHelp(this, HelpFileName, HelpNavigator.TableOfContents);
-                    Help.ShowHelp(this, HelpFileName, HelpNavigator.KeywordIndex, tw.Word);
+                    Help.ShowHelp(null, HelpFileName, HelpNavigator.TableOfContents);
+                    Help.ShowHelp(null, HelpFileName, HelpNavigator.KeywordIndex, tw.Word);
                 }
             }
             else
             {
-                Help.ShowHelp(this, HelpFileName, HelpNavigator.KeywordIndex, "PascalABC"); // ôèêòèâíûé âûçîâ. Íóæåí ÷òîáû îêíî ñïðàâêè íå ïîêàçûâàëîñü Always on Top
-                Help.ShowHelp(this, HelpFileName);
+                Help.ShowHelp(null, HelpFileName, HelpNavigator.KeywordIndex, "PascalABC"); // ôèêòèâíûé âûçîâ. Íóæåí ÷òîáû îêíî ñïðàâêè íå ïîêàçûâàëîñü Always on Top
+                Help.ShowHelp(null, HelpFileName);
             }
         }
 
         void __showgettingstarted(object state)
         {
-            Help.ShowHelp(this, HelpFileName, HelpNavigator.Topic, @"Common\features.html"); //this íå ïåðåïðàâëÿòü íà null - ñîîáùèòü ìíå ïðè îøèáêå - ÑÑÌ
+            Help.ShowHelp(null, HelpFileName, HelpNavigator.Topic, @"Common\features.html"); //this íå ïåðåïðàâëÿòü íà null - ñîîáùèòü ìíå ïðè îøèáêå - ÑÑÌ
         }
 
         void __showhelp(object state)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -51,13 +51,28 @@ namespace VisualPascalABC
 				{
 					string[] assemblies = ReferenceForm.Instance.GetSelectedFileAssemblies();
 					List<string> assm_lst = new List<string>();
-                    foreach (string s in assemblies)
+                    foreach (string dll in assemblies)
                     {
-                        if (string.Compare(s, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(s)), true) != 0)
-                            File.Copy(s, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(s)), true);
+                        if (string.Compare(dll, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(dll)), true) != 0)
+                            File.Copy(dll, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(dll)), true);
+                        string xml = Path.ChangeExtension(dll, ".xml");
+                        if (File.Exists(xml))
+                        {
+                            if (string.Compare(xml, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(xml)), true) != 0)
+                                File.Copy(xml, Path.Combine(ProjectFactory.Instance.ProjectDirectory, Path.GetFileName(xml)), true);
+                        }
                         //assm_lst.Add(Path.GetFileNameWithoutExtension(s));
                         //ProjectExplorerWindow.AddReferenceNode(Path.GetFileNameWithoutExtension(s));
-                        PascalABCCompiler.IReferenceInfo ri = ProjectFactory.Instance.AddReference(Path.GetFileNameWithoutExtension(s));
+                        try
+                        {
+                            PascalABCCompiler.NetHelper.NetHelper.LoadAssembly(dll);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                        
+                        PascalABCCompiler.IReferenceInfo ri = ProjectFactory.Instance.AddReference(Path.GetFileNameWithoutExtension(dll));
                         ProjectExplorerWindow.AddReferenceNode(ri);
                         try
                         {
@@ -84,14 +99,25 @@ namespace VisualPascalABC
 				PascalABCCompiler.IFileInfo fi = ProjectFactory.Instance.AddSourceFile(frm.FileName);
 				ProjectExplorerWindow.AddSourceFile(fi,false);
 				string full_file_name = Path.Combine(Path.GetDirectoryName(ProjectFactory.Instance.CurrentProject.Path),frm.FileName);
-				StreamWriter sw = File.CreateText(full_file_name);
-				sw.WriteLine("unit "+Path.GetFileNameWithoutExtension(frm.FileName)+";");
-				sw.WriteLine();
-				sw.WriteLine("interface");
-				sw.WriteLine();
-				sw.WriteLine("implementation");
-				sw.WriteLine();
-				sw.WriteLine("end.");
+                StreamWriter sw = File.CreateText(full_file_name);
+                if (frm.GetFileFilter() == FileType.Unit)
+                {
+                    sw.WriteLine("unit " + Path.GetFileNameWithoutExtension(frm.FileName) + ";");
+                    sw.WriteLine();
+                    sw.WriteLine("interface");
+                    sw.WriteLine();
+                    sw.WriteLine("implementation");
+                    sw.WriteLine();
+                    sw.Write("end.");
+                }
+                else
+                {
+                    sw.WriteLine("namespace "+ProjectFactory.Instance.CurrentProject.Name+";");
+                    sw.WriteLine();
+                    sw.Write("end.");
+                    ProjectFactory.Instance.AddNamespaceFileReference(full_file_name);
+                }
+				
 				sw.Close();
                 WorkbenchServiceFactory.FileService.OpenFile(full_file_name, null);
 			}
@@ -184,6 +210,7 @@ namespace VisualPascalABC
 		public static void ExcludeFile(PascalABCCompiler.IFileInfo fi)
 		{
 			ProjectFactory.Instance.ExcludeFile(fi);
+			ProjectFactory.Instance.RemoveNamespaceFileReference(fi.Path);
 		}
 		
 		private static TypeLibConverter type_conv = new TypeLibConverter();

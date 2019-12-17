@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System.Collections.Generic;
 using PascalABCCompiler.SyntaxTree;
@@ -43,8 +43,8 @@ namespace PascalABCSavParser
         public List<Error> errors;
         public List<CompilerWarning> warnings;
         public System.Collections.Stack NodesStack; // SSM: для каких-то вспомогательных целей в двух правилах
-        public bool build_tree_for_formatter = false; 
-
+        public bool build_tree_for_formatter = false;
+        public bool build_tree_for_format_strings = false;
         public string CurrentFileName;
 
         int lambda_num = 0;
@@ -95,6 +95,7 @@ namespace PascalABCSavParser
             tokenNum["tkArrow"]="'->'";
             tokenNum["tkAddressOf"]="'@'";
             tokenNum["tkDeref"]="'^'";
+            tokenNum["tkStarStar"]="'**'";
         }
 
         public PT()
@@ -179,8 +180,15 @@ namespace PascalABCSavParser
             string prefix = "";
             if (yytext != "")
                 prefix = StringResources.Get("FOUND{0}");
-            else prefix = StringResources.Get("FOUNDEOF");
+            else
+                prefix = StringResources.Get("FOUNDEOF");
 
+            if (this.build_tree_for_format_strings && prefix == StringResources.Get("FOUNDEOF"))
+            {
+                yytext = "}";
+                prefix = StringResources.Get("FOUND{0}");
+            }
+                
             // Преобразовали в список строк - хорошо
             List<string> tokens = new List<string>(args.Skip(1).Cast<string>());
 
@@ -220,7 +228,8 @@ namespace PascalABCSavParser
 
             if (MaxTok.Equals("tkStatement") || MaxTok.Equals("tkIdentifier"))
                 ExpectedString = StringResources.Get("EXPECTEDR{1}");
-
+            if ((MaxTok == "EOF" || MaxTok == "EOF1" || MaxTok == "FOUNDEOF") && this.build_tree_for_format_strings)
+                MaxTok = "}";
             var MaxTokHuman = ConvertToHumanName(MaxTok);
 
             // string w = string.Join(" или ", tokens.Select(s => ConvertToHumanName((string)s)));
@@ -410,7 +419,16 @@ namespace PascalABCSavParser
             lt.source_context = sc;
             return lt;
         }
-        
+
+        public literal create_format_string_const(string text, SourceContext sc)
+        {
+            literal lt;
+            text = ReplaceSpecialSymbols(text.Substring(2, text.Length - 3));
+            lt = new string_const(text);
+            lt.source_context = sc;
+            return lt;
+        }
+
         public procedure_definition lambda(function_lambda_definition _function_lambda_definition)
         {
             procedure_definition _func_def = new procedure_definition();
@@ -794,9 +812,9 @@ namespace PascalABCSavParser
                 return ntr.names[0];
             else
             {
-                var dn = new dot_node(ntr.names[0], ntr.names[1]);
+                var dn = new dot_node(ntr.names[0], ntr.names[1], ntr.names[0].source_context.Merge(ntr.names[1].source_context));
                 for (var i = 2; i < ntr.names.Count; i++)
-                    dn = new dot_node(dn, ntr.names[i]);
+                    dn = new dot_node(dn, ntr.names[i],dn.source_context.Merge(ntr.names[i].source_context));
                 dn.source_context = ntr.source_context;
                 return dn;
             }
@@ -808,6 +826,7 @@ namespace PascalABCSavParser
             if (en is dot_node)
             {
                 var dn = en as dot_node;
+                var sc = dn.source_context;
                 var ids = new List<ident>();
                 ids.Add(dn.right as ident);
                 while (dn.left is dot_node)
@@ -817,7 +836,7 @@ namespace PascalABCSavParser
                 }
                 ids.Add(dn.left as ident);
                 ids.Reverse();
-                return new named_type_reference(ids, dn.source_context);
+                return new named_type_reference(ids, sc);
             }
             this.AddErrorFromResource("TYPE_NAME_EXPECTED",  en.source_context);
             return null;

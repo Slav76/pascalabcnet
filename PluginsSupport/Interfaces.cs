@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -88,7 +88,8 @@ namespace VisualPascalABCPlugins
         SaveFile,
         BuildUnit,
         AddMessageToErrorListWindow,
-        SetCurrentSourceFileTextFormatting
+        SetCurrentSourceFileTextFormatting,
+        PT4PositionCursorAfterTask
     }
 
     public delegate IAsyncResult InvokeDegegate(Delegate method, params object[] args);
@@ -240,6 +241,7 @@ namespace VisualPascalABCPlugins
         bool HighlightOperatorBrackets { get; set; }
         bool UseDllForSystemUnits { get; set; }
         bool PABCDllChecked { get; set; }
+        bool AutoInsertCodeIsEnabledOnStartup { get; set; }
     }
 
     public interface IListItem
@@ -259,7 +261,7 @@ namespace VisualPascalABCPlugins
 
     public interface IWorkbenchFileService
     {
-        bool OpenFile(string FileName, string PreferedFileName, bool not_open_designer = false);
+        bool OpenFile(string FileName, string PreferedFileName, bool notOpenDesigner = false);
         void RenameFile(string OldFileName, string NewFileName);
         void CloseFile(string FileName);
         void ReloadFile(string FileName);
@@ -338,6 +340,7 @@ namespace VisualPascalABCPlugins
         void SetDebugStopDisabled();
         void SetDebugStopEnabled();
         void SetAddExprMenuVisible(bool val);
+        void SetDisassemblyMenuVisible(bool val);
         void SetDebugTabsVisible(bool val);
         void SetDebugPausedDisabled();
         void SetPlayButtonsVisible(bool val);
@@ -384,6 +387,7 @@ namespace VisualPascalABCPlugins
         void ClearWatch();
         void ClearLocalVarTree();
         void ClearDebugTabs();
+        void DisplayDisassembledCode(string code);
     }
 
     public interface IWorkbenchOperationsService
@@ -394,6 +398,7 @@ namespace VisualPascalABCPlugins
         void WriteToOutputBox(string message, bool is_exc);
         void ClearOutputTextBoxForTabPage(ICodeFileDocument tabPage);
         void AddTabWithUrl(string title, string url);
+        void AddTextToCompilerMessagesSync(string text);
     }
 
     public interface IWorkbenchOptionService
@@ -452,6 +457,7 @@ namespace VisualPascalABCPlugins
         ICompilerConsoleWindow CompilerConsoleWindow { get; }
         IOutputWindow OutputWindow { get; }
         IErrorListWindow ErrorsListWindow { get; }
+        IDisassemblyWindow DisassemblyWindow { get; }
         void BeginInvoke(Delegate del, params object[] args);
     }
 
@@ -464,6 +470,12 @@ namespace VisualPascalABCPlugins
     {
         void ShowErrorsSync(List<PascalABCCompiler.Errors.Error> errors, bool ChangeViewTab);
         void ClearErrorList();
+    }
+
+    public interface IDisassemblyWindow
+    {
+        bool IsVisible { get; }
+        void ClearWindow();
     }
 
     public interface IOutputWindow

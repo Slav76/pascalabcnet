@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -160,6 +160,8 @@ namespace VisualPascalABC
                         is_comp = true;
                         CodeCompletion.CodeCompletionController controller = new CodeCompletion.CodeCompletionController();
                         string text = visualEnvironmentCompiler.SourceFilesProvider(FileName, PascalABCCompiler.SourceFileOperation.GetText) as string;
+                        if (string.IsNullOrEmpty(text))
+                            text = "begin end.";
                         CodeCompletion.DomConverter tmp = CodeCompletion.CodeCompletionController.comp_modules[FileName] as CodeCompletion.DomConverter;
                         long cur_mem = Environment.WorkingSet;
                         CodeCompletion.DomConverter dc = controller.Compile(FileName, text);
@@ -242,7 +244,7 @@ namespace VisualPascalABC
                         }
                     }
                 }
-                if (is_comp && Environment.WorkingSet > 60000000 /*&& mem_delta > 10000000*/)
+                if (is_comp && mem_delta > 20000000 /*&& mem_delta > 10000000*/)
                 //postavil delta dlja pamjati, posle kototoj delaetsja sborka musora
                 {
                     mem_delta = 0;

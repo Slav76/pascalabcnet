@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -48,7 +48,7 @@ namespace PascalABCCompiler.TreeRealization
 		
         public virtual constant_node get_constant_copy(location loc)
         {
-        	return null;
+        	return this;
         }
         
         public override type_node type
@@ -1094,6 +1094,11 @@ namespace PascalABCCompiler.TreeRealization
         {
             _method_call = method_call;
         }
+        
+        public override constant_node get_constant_copy(location loc)
+		{
+			return new basic_function_call_as_constant(this.method_call,loc);
+		}
 
         SemanticTree.IBasicFunctionCallNode SemanticTree.IBasicFunctionCallNodeAsConstant.MethodCall
         {
@@ -1124,7 +1129,60 @@ namespace PascalABCCompiler.TreeRealization
             }
         }
     }
-    
+
+    public class default_operator_node_as_constant : constant_node, SemanticTree.IDefaultOperatorNodeAsConstant
+    {
+        private default_operator_node _default_operator;
+
+        public default_operator_node default_operator
+        {
+            get
+            {
+                return _default_operator;
+            }
+            set
+            {
+                _default_operator = value;
+            }
+        }
+
+        public default_operator_node_as_constant(default_operator_node default_operator, location loc)
+            :
+            base(default_operator.type, loc)
+        {
+            _default_operator = default_operator;
+        }
+
+        SemanticTree.IDefaultOperatorNode SemanticTree.IDefaultOperatorNodeAsConstant.DefaultOperator
+        {
+            get
+            {
+                return _default_operator;
+            }
+        }
+
+
+        /// <summary>
+        /// Метод для обхода дерева посетителем.
+        /// </summary>
+        /// <param name="visitor">Класс - посетитель дерева.</param>
+        public override void visit(SemanticTree.ISemanticVisitor visitor)
+        {
+            visitor.visit(this);
+        }
+
+        /// <summary>
+        /// Тип узла.
+        /// </summary>
+        public override semantic_node_type semantic_node_type
+        {
+            get
+            {
+                return semantic_node_type.default_operator_node_as_constant;
+            }
+        }
+    }
+
     public class compiled_constructor_call_as_constant : constant_node, SemanticTree.ICompiledConstructorCallAsConstant
     {
         private compiled_constructor_call _method_call;

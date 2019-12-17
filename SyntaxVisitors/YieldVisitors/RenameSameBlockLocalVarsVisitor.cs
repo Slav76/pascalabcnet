@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -60,7 +60,7 @@ namespace SyntaxVisitors
         {
             if (first_time_visit_function_header)
             {
-                DefaultVisit(fh);
+                //DefaultVisit(fh);
                 first_time_visit_function_header = false;
             }
             // DO NOTHING
@@ -78,7 +78,7 @@ namespace SyntaxVisitors
                 var fpids = fp.params_list.SelectMany(tp => tp.idents.idents);
                 foreach (var v in fpids)
                 {
-                    var low = v.name/*.ToLower()*/;
+                    var low = v.name.ToLower();
                     //BlockNamesStack[CurrentLevel].Add(low, "$fp_"+ low);
                     BlockNamesStack[CurrentLevel][low] = "$fp_" + low;
                 }
@@ -105,7 +105,34 @@ namespace SyntaxVisitors
             --CurrentLevel;
         }
 
-        public override void visit(var_statement vs)
+        public override void visit(var_def_statement var_def)
+        {
+            if (var_def.vars.idents.Any(id => id.name.StartsWith("$")))
+            {
+                base.visit(var_def); // SSM 17/07/16 исправление ошибки - не обходилось выражение-инициализатор
+                return;
+            }
+
+            var newLocalNames = var_def.vars.idents.Select(id => 
+                {
+                    var low = id.name.ToLower();
+
+                    var newName = this.CreateNewVariableName(low);
+                    //BlockNamesStack[CurrentLevel].Add(low, newName);
+                    BlockNamesStack[CurrentLevel][low] = newName;
+                    return new ident(newName, id.source_context);
+                });
+
+            var newVS = new var_def_statement(new ident_list(newLocalNames.ToArray()),
+                var_def.vars_type,
+                var_def.inital_value);
+
+            Replace(var_def, newVS);
+            listNodes[listNodes.Count - 1] = newVS; //SSM 8.11.18
+            base.visit(newVS);
+        }
+
+        /*public override void visit(var_statement vs)
         {
             if (vs.var_def.vars.idents.Any(id => id.name.StartsWith("$")))
             {
@@ -113,15 +140,17 @@ namespace SyntaxVisitors
                 return;
             }
 
-            var newLocalNames = vs.var_def.vars.idents.Select(id => 
-                {
-                    var low = id.name/*.ToLower()*/;
+            var newLocalNames = vs.var_def.vars.idents.Select(id =>
+            {
+                var low = id.name
+                //.ToLower()
+                ;
 
-                    var newName = this.CreateNewVariableName(low);
-                    //BlockNamesStack[CurrentLevel].Add(low, newName);
-                    BlockNamesStack[CurrentLevel][low] = newName;
-                    return new ident(newName, id.source_context);
-                });
+                var newName = this.CreateNewVariableName(low);
+                //BlockNamesStack[CurrentLevel].Add(low, newName);
+                BlockNamesStack[CurrentLevel][low] = newName;
+                return new ident(newName, id.source_context);
+            });
 
             var newVS = new var_statement(new var_def_statement(new ident_list(newLocalNames.ToArray()),
                 vs.var_def.vars_type,
@@ -130,7 +159,7 @@ namespace SyntaxVisitors
             Replace(vs, newVS);
 
             base.visit(newVS);
-        }
+        }/* */
 
         public override void visit(variable_definitions vd)
         {
@@ -150,7 +179,7 @@ namespace SyntaxVisitors
                 {
                     var newLocalNames = vds.vars.idents.Select(id =>
                     {
-                        var low = id.name/*.ToLower()*/;
+                        var low = id.name.ToLower();
 
                         var newName = this.CreateNewVariableName(low);
                         //BlockNamesStack[CurrentLevel].Add(low, newName);
@@ -168,7 +197,7 @@ namespace SyntaxVisitors
 
         public override void visit(ident id)
         {
-            var newName = this.GetNewVariableName(id.name/*.ToLower()*/);
+            var newName = this.GetNewVariableName(id.name.ToLower());
             if (newName != null)
             {
                 Replace(id, new ident(newName, id.source_context));
@@ -184,6 +213,7 @@ namespace SyntaxVisitors
 
         private string CreateNewVariableName(string name)
         {
+            name = name.ToLower();
             if (BlockNamesCounter.ContainsKey(name))
             {
                 ++BlockNamesCounter[name];
@@ -197,6 +227,7 @@ namespace SyntaxVisitors
 
         private string GetNewVariableName(string name)
         {
+            name = name.ToLower();
             for (int i = CurrentLevel; i >= 0; --i)
             {
                 if (BlockNamesStack[i].ContainsKey(name))

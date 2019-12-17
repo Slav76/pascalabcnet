@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -49,26 +49,26 @@ namespace VisualPascalABC
 				return Path.GetDirectoryName(currentProject.Path);
 			}
 		}
-		
-		public PascalABCCompiler.IProjectInfo CreateProject(string projectName, string projectFileName, PascalABCCompiler.ProjectType projectType)
-		{
-			currentProject = new PascalABCCompiler.ProjectInfo();
-			currentProject.name = projectName;
-			currentProject.path = projectFileName;
-			string dir = Path.GetDirectoryName(projectFileName);
-			if (!Directory.Exists(dir))
-			{
-				Directory.CreateDirectory(dir);
-			}
-			currentProject.include_debug_info = true;
-           
-			currentProject.project_type = projectType;
-			currentProject.source_files.Add(new PascalABCCompiler.SourceCodeFileInfo(projectName+".pas",Path.Combine(dir,projectName+".pas")));
-			currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System","System.dll"));
-			if (projectType == PascalABCCompiler.ProjectType.WindowsApp)
-			{
-				currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Windows.Forms","System.Windows.Forms.dll"));
-				currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Drawing","System.Drawing.dll"));
+
+        public PascalABCCompiler.IProjectInfo CreateProject(string projectName, string projectFileName, PascalABCCompiler.ProjectType projectType)
+        {
+            currentProject = new PascalABCCompiler.ProjectInfo();
+            currentProject.name = projectName;
+            currentProject.path = projectFileName;
+            string dir = Path.GetDirectoryName(projectFileName);
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            currentProject.include_debug_info = true;
+
+            currentProject.project_type = projectType;
+            currentProject.source_files.Add(new PascalABCCompiler.SourceCodeFileInfo(projectName + ".pas", Path.Combine(dir, projectName + ".pas")));
+            currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System", "System.dll"));
+            if (projectType == PascalABCCompiler.ProjectType.WindowsApp)
+            {
+                currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Windows.Forms", "System.Windows.Forms.dll"));
+                currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Drawing", "System.Drawing.dll"));
                 //roman//
                 currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Core", "System.Core.dll"));
                 currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Data", "System.Data.dll"));
@@ -76,42 +76,42 @@ namespace VisualPascalABC
                 currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Xml", "System.Xml.dll"));
                 currentProject.references.Add(new PascalABCCompiler.ReferenceInfo("System.Xml.Linq", "System.Xml.Linq.dll"));
                 //roman//
-			}
-			currentProject.main_file = Path.Combine(dir,projectName+".pas");
-			currentProject.generate_xml_doc = false;
+            }
+            currentProject.main_file = Path.Combine(dir, projectName + ".pas");
+            currentProject.generate_xml_doc = false;
             currentProject.delete_exe = true;
             currentProject.delete_pdb = true;
             currentProject.major_version = 0;
             currentProject.minor_version = 0;
             currentProject.build_version = 0;
             currentProject.revision_version = 0;
-			currentProject.output_directory = dir;
-			StreamWriter sw = File.CreateText(Path.Combine(dir,projectName+".pas"));
-			currentProject.output_file_name = projectName + ".exe";
-			if (projectType == PascalABCCompiler.ProjectType.ConsoleApp)
-			{
-				//sw.WriteLine("program "+projectName+";");
-				//sw.WriteLine();
-				//sw.WriteLine("uses System;");
-				//sw.WriteLine();
-				sw.WriteLine("begin");
-				sw.WriteLine();
-				sw.WriteLine("end.");
-			}
-			else if (projectType == PascalABCCompiler.ProjectType.Library)
-			{
-				sw.WriteLine("library "+projectName+";");
-				sw.WriteLine();
-				//sw.WriteLine("uses System;");
-				//sw.WriteLine();
-				sw.WriteLine("end.");
-				currentProject.output_file_name = projectName + ".dll";
-			}
-			sw.Close();
-			currentProject.Save();
-			//VisualPABCSingleton.MainForm.OpenFile(Path.Combine(dir,projectName+".pas"));
-			return currentProject;
-		}
+            currentProject.output_directory = dir;
+            StreamWriter sw = File.CreateText(Path.Combine(dir, projectName + ".pas"));
+            currentProject.output_file_name = projectName + ".exe";
+            if (projectType == PascalABCCompiler.ProjectType.ConsoleApp)
+            {
+                //sw.WriteLine("program "+projectName+";");
+                //sw.WriteLine();
+                //sw.WriteLine("uses System;");
+                //sw.WriteLine();
+                sw.WriteLine("begin");
+                sw.WriteLine();
+                sw.Write("end.");
+            }
+            else if (projectType == PascalABCCompiler.ProjectType.Library)
+            {
+                sw.WriteLine("library " + projectName + ";");
+                sw.WriteLine();
+                //sw.WriteLine("uses System;");
+                //sw.WriteLine();
+                sw.Write("end.");
+                currentProject.output_file_name = projectName + ".dll";
+            }
+            sw.Close();
+            currentProject.Save();
+            //VisualPABCSingleton.MainForm.OpenFile(Path.Combine(dir,projectName+".pas"));
+            return currentProject;
+        }
 
         public PascalABCCompiler.IProjectInfo OpenProject(string projectFileName)
         {
@@ -150,22 +150,58 @@ namespace VisualPascalABC
 				}
 			}
 		}
-		
-		public PascalABCCompiler.IFileInfo AddSourceFile(string file_name)
-		{
-			PascalABCCompiler.SourceCodeFileInfo fi = new PascalABCCompiler.SourceCodeFileInfo(file_name,Path.Combine(Path.GetDirectoryName(currentProject.Path),file_name));
-			currentProject.source_files.Add(fi);
-			Dirty = true;
-			return fi;
-		}
-		
-		public PascalABCCompiler.IReferenceInfo AddReference(string s)
-		{
-			PascalABCCompiler.ReferenceInfo ri = new PascalABCCompiler.ReferenceInfo(s,s+".dll");
-			currentProject.references.Add(ri);
-			Dirty = true;
-			return ri;
-		}
+
+        public PascalABCCompiler.IFileInfo AddSourceFile(string fileName)
+        {
+            PascalABCCompiler.SourceCodeFileInfo fi = new PascalABCCompiler.SourceCodeFileInfo(fileName, Path.Combine(Path.GetDirectoryName(currentProject.Path), fileName));
+            currentProject.source_files.Add(fi);
+            Dirty = true;
+            return fi;
+        }
+        
+        public void AddNamespaceFileReference(string fileName)
+        {
+            var text = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.SourceFilesProvider(currentProject.main_file, PascalABCCompiler.SourceFileOperation.GetText) as string;
+            text = "{$includenamespace " + Path.GetFileName(fileName) + "}"+Environment.NewLine + text;
+            var doc = WorkbenchServiceFactory.DocumentService.GetDocument(currentProject.main_file);
+            if (doc != null)
+            {
+            	doc.TextEditor.Text = text;
+            }
+            else
+            {
+            	File.WriteAllText(currentProject.main_file, text);
+            }
+        }
+        
+        public bool hasNamespaceFileReference(string fileName)
+        {
+            var text = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.SourceFilesProvider(currentProject.main_file, PascalABCCompiler.SourceFileOperation.GetText) as string;
+            return text.IndexOf("{$includenamespace " + Path.GetFileName(fileName) + "}") != -1;
+        }
+
+        public void RemoveNamespaceFileReference(string fileName)
+        {
+            var text = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.SourceFilesProvider(currentProject.main_file, PascalABCCompiler.SourceFileOperation.GetText) as string;
+            text = text.Replace("{$includenamespace " + Path.GetFileName(fileName) + "}" + Environment.NewLine, "");
+            var doc = WorkbenchServiceFactory.DocumentService.GetDocument(currentProject.main_file);
+            if (doc != null)
+            {
+                doc.TextEditor.Text = text;
+            }
+            else
+            {
+                File.WriteAllText(currentProject.main_file, text);
+            }
+        }
+
+        public PascalABCCompiler.IReferenceInfo AddReference(string s)
+        {
+            PascalABCCompiler.ReferenceInfo ri = new PascalABCCompiler.ReferenceInfo(s, s + ".dll");
+            currentProject.references.Add(ri);
+            Dirty = true;
+            return ri;
+        }
 		
 		public void RemoveReference(PascalABCCompiler.IReferenceInfo ri)
 		{
@@ -181,19 +217,24 @@ namespace VisualPascalABC
 		
 		public void RenameFile(PascalABCCompiler.IFileInfo fi, string new_name)
 		{
-			fi.Name = new_name;
+            bool hasNsReference = hasNamespaceFileReference(fi.Name);
+            if (hasNsReference)
+                RemoveNamespaceFileReference(fi.Name);
+            fi.Name = new_name;
 			Dirty = true;
+            if (hasNsReference)
+                AddNamespaceFileReference(fi.Name);
 		}
 		
 		public string GetUnitFileName()
 		{
 			return "Unit"+uid++ + ".pas";
 		}
-		
-		public string GetFullUnitFileName()
-		{
-			return Path.Combine(Path.GetDirectoryName(currentProject.path),GetUnitFileName());
-		}
+
+        public string GetFullUnitFileName()
+        {
+            return Path.Combine(Path.GetDirectoryName(currentProject.path), GetUnitFileName());
+        }
 		
 		public void SaveProject()
 		{
@@ -209,6 +250,7 @@ namespace VisualPascalABC
 			currentProject = null;
 			uid = 1;
 			Dirty = false;
+            GC.Collect();
 		}
 	}
 }

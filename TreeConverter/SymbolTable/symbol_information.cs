@@ -1,8 +1,25 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
 using PascalABCCompiler.TreeRealization;
+using System.Collections.Generic;
+using System.Collections;
+
+namespace System.Collections.Generic
+{
+    using PascalABCCompiler.TreeConverter;
+    public static class SymbolInfoList
+    {
+        public static bool HasOnlyExtensionMethods(this List<SymbolInfo> list)
+        {
+            for (int i = 0; i < list.Count; ++i)
+                if (!(list[i].sym_info is function_node && (list[i].sym_info as function_node).is_extension_method))
+                    return false;
+            return true;
+        }
+    }
+}
 
 namespace PascalABCCompiler.TreeConverter
 {
@@ -13,7 +30,7 @@ namespace PascalABCCompiler.TreeConverter
 
 	public abstract class base_scope
 	{
-		public abstract SymbolInfo find(string name);
+		public abstract List<SymbolInfo> find(string name);
 
 		public abstract base_scope top_scope
 		{
@@ -86,49 +103,45 @@ namespace PascalABCCompiler.TreeConverter
             }
         }
     }
+  
+    public class SymbolInfo
+    {
+        public override string ToString() => sym_info.ToString();
 
-	public class SymbolInfo
-	{
-		//private readonly name_information_type _name_information_type;
-		private definition_node _sym_info;
+        //private readonly name_information_type _name_information_type;
+        private definition_node _sym_info;
 
-        
+        private access_level _access_level;
 
-		private access_level _access_level;
+        private symbol_kind _symbol_kind;
 
-		private symbol_kind _symbol_kind;
+        public SymbolTable.Scope scope;
 
-		public SymbolInfo Next;
-
-		public SymbolTable.Scope scope;
-
-        
-		public access_level access_level
-		{
-			get
-			{
-				return _access_level;
-			}
+        public access_level access_level
+        {
+            get
+            {
+                return _access_level;
+            }
             set
             {
                 _access_level = value;
             }
+        }
 
-		}
+        public symbol_kind symbol_kind
+        {
+            get
+            {
+                return _symbol_kind;
+            }
+            set
+            {
+                _symbol_kind = value;
+            }
+        }
 
-		public symbol_kind symbol_kind
-		{
-			get
-			{
-				return _symbol_kind;
-			}
-			set
-			{
-				_symbol_kind=value;
-			}
-		}
-
-		/*public name_information_type name_information_type
+        /*public name_information_type name_information_type
 		{
 			get
 			{
@@ -136,21 +149,21 @@ namespace PascalABCCompiler.TreeConverter
 			}
 		}*/
 
-		public definition_node sym_info
-		{
-			get
-			{
-				return _sym_info;
-			}
-			set
-			{
-				_sym_info=value;
-			}
-		}
+        public definition_node sym_info
+        {
+            get
+            {
+                return _sym_info;
+            }
+            set
+            {
+                _sym_info = value;
+            }
+        }
 
-		public SymbolInfo()
-		{
-		}
+        public SymbolInfo()
+        {
+        }
 
         public SymbolInfo copy()
         {
@@ -159,10 +172,10 @@ namespace PascalABCCompiler.TreeConverter
             si._sym_info = this._sym_info;
             si._symbol_kind = this._symbol_kind;
             si.scope = this.scope;
-            si.Next = this.Next;
             return si;
         }
-        private symbol_kind get_function_kind(function_node fn,bool is_overload)
+
+        private symbol_kind get_function_kind(function_node fn, bool is_overload)
         {
             symbol_kind sk;
             if (is_overload)
@@ -183,8 +196,8 @@ namespace PascalABCCompiler.TreeConverter
             return sk;
         }
 
-		private symbol_kind get_function_kind(function_node fn)
-		{
+        private symbol_kind get_function_kind(function_node fn)
+        {
             common_function_node cfn = fn as common_function_node;
             if (cfn != null)
             {
@@ -196,22 +209,22 @@ namespace PascalABCCompiler.TreeConverter
                 return get_function_kind(bfn, bfn.is_overload);
             }
             return symbol_kind.sk_none;
-		}
+        }
 
-		private access_level get_class_member_access_level(SemanticTree.IClassMemberNode icmn)
-		{
-			access_level al;
-			switch (icmn.field_access_level)
-			{
-				case SemanticTree.field_access_level.fal_public: al=access_level.al_public;break;
-				case SemanticTree.field_access_level.fal_protected: al=access_level.al_protected;break;
-				case SemanticTree.field_access_level.fal_private: al=access_level.al_private;break;
+        private access_level get_class_member_access_level(SemanticTree.IClassMemberNode icmn)
+        {
+            access_level al;
+            switch (icmn.field_access_level)
+            {
+                case SemanticTree.field_access_level.fal_public: al = access_level.al_public; break;
+                case SemanticTree.field_access_level.fal_protected: al = access_level.al_protected; break;
+                case SemanticTree.field_access_level.fal_private: al = access_level.al_private; break;
                 case SemanticTree.field_access_level.fal_internal: al = access_level.al_internal; break;
-				default:
-					al=access_level.al_private;break;
-			}
-			return al;
-		}
+                default:
+                    al = access_level.al_private; break;
+            }
+            return al;
+        }
 
         public SymbolInfo(template_class tc)
         {
@@ -234,20 +247,20 @@ namespace PascalABCCompiler.TreeConverter
             _symbol_kind = symbol_kind.sk_none;
         }
 
-		public SymbolInfo(compiled_type_node value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_type;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
-		
-		public SymbolInfo(common_event value)
-		{
-			_sym_info = value;
-			_access_level = get_class_member_access_level(value);
-			_symbol_kind = symbol_kind.sk_none;
-		}
+        public SymbolInfo(compiled_type_node value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_type;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
+
+        public SymbolInfo(common_event value)
+        {
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
         public SymbolInfo(common_namespace_event value)
         {
@@ -263,37 +276,37 @@ namespace PascalABCCompiler.TreeConverter
             _symbol_kind = symbol_kind.sk_none;
         }
 
-		public SymbolInfo(compiled_function_node value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_function;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(compiled_function_node value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_function;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(compiled_constructor_node value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_function;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(compiled_constructor_node value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_function;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(compiled_property_node value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_property;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(compiled_property_node value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_property;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(compiled_variable_definition value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_variable;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(compiled_variable_definition value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_variable;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
         public SymbolInfo(compiled_class_constant_definition value)
         {
@@ -302,77 +315,77 @@ namespace PascalABCCompiler.TreeConverter
             _symbol_kind = symbol_kind.sk_none;
         }
 
-		public SymbolInfo(compiled_namespace_node value)
-		{
-			//_name_information_type=name_information_type.nit_compiled_namespace;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(compiled_namespace_node value)
+        {
+            //_name_information_type=name_information_type.nit_compiled_namespace;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(common_type_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_type;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(common_type_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_type;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(basic_function_node value)
-		{
-			//_name_information_type=name_information_type.nit_basic_function;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(basic_function_node value)
+        {
+            //_name_information_type=name_information_type.nit_basic_function;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(common_namespace_function_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_namespace_function;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(common_namespace_function_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_namespace_function;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(common_in_function_function_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_in_function_function;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(common_in_function_function_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_in_function_function;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(common_method_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_method;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=get_function_kind(value);
-		}
+        public SymbolInfo(common_method_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_method;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = get_function_kind(value);
+        }
 
-		public SymbolInfo(common_namespace_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_namespace;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(common_namespace_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_namespace;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(unit_node value)
-		{
-			//_name_information_type=name_information_type.nit_unit;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(unit_node value)
+        {
+            //_name_information_type=name_information_type.nit_unit;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(local_variable value)
-		{
-			//_name_information_type=name_information_type.nit_local_variable;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(local_variable value)
+        {
+            //_name_information_type=name_information_type.nit_local_variable;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
         public SymbolInfo(local_block_variable value)
         {
@@ -382,61 +395,60 @@ namespace PascalABCCompiler.TreeConverter
             _symbol_kind = symbol_kind.sk_none;
         }
 
-        
         public SymbolInfo(namespace_variable value)
-		{
-			//_name_information_type=name_information_type.nit_namespace_variable;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        {
+            //_name_information_type=name_information_type.nit_namespace_variable;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(class_field value)
-		{
-			//_name_information_type=name_information_type.nit_class_field;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(class_field value)
+        {
+            //_name_information_type=name_information_type.nit_class_field;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(common_parameter value)
-		{
-			//_name_information_type=name_information_type.nit_common_parameter;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(common_parameter value)
+        {
+            //_name_information_type=name_information_type.nit_common_parameter;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(basic_parameter value)
-		{
-			//_name_information_type=name_information_type.nit_basic_parameter;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(basic_parameter value)
+        {
+            //_name_information_type=name_information_type.nit_basic_parameter;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(constant_definition_node value)
-		{
-			//_name_information_type=name_information_type.nit_constant_defnition;
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(constant_definition_node value)
+        {
+            //_name_information_type=name_information_type.nit_constant_defnition;
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(common_property_node value)
-		{
-			//_name_information_type=name_information_type.nit_common_property;
-			_sym_info=value;
-			_access_level=get_class_member_access_level(value);
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(common_property_node value)
+        {
+            //_name_information_type=name_information_type.nit_common_property;
+            _sym_info = value;
+            _access_level = get_class_member_access_level(value);
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
-		public SymbolInfo(type_node value)
-		{
-			_sym_info=value;
-			_access_level=access_level.al_public;
-			_symbol_kind=symbol_kind.sk_none;
-		}
+        public SymbolInfo(type_node value)
+        {
+            _sym_info = value;
+            _access_level = access_level.al_public;
+            _symbol_kind = symbol_kind.sk_none;
+        }
 
         public SymbolInfo(definition_node value, access_level alevel, symbol_kind skind)
         {
@@ -444,6 +456,7 @@ namespace PascalABCCompiler.TreeConverter
             _access_level = alevel;
             _symbol_kind = skind;
         }
-	}
+
+    }
 
 }

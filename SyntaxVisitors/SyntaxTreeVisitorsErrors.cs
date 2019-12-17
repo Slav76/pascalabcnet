@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -26,6 +26,11 @@ namespace SyntaxVisitors
     public class SyntaxVisitorError: SyntaxError
     {
         public SyntaxVisitorError(string resourcestring, SourceContext sc, params object[] values): base(StringResources.Get(resourcestring),"",sc,null)
+        {
+
+        }
+        public SyntaxVisitorError(string resourcestring, PascalABCCompiler.SyntaxTree.syntax_tree_node bad_node) 
+            : base(StringResources.Get(resourcestring), "", bad_node.source_context, bad_node)
         {
 
         }

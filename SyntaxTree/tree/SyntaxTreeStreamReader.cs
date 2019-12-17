@@ -21,9 +21,9 @@ namespace PascalABCCompiler.SyntaxTree
 			switch(node_class_number)
 			{
 				case 0:
-					return new syntax_tree_node();
-				case 1:
 					return new expression();
+				case 1:
+					return new syntax_tree_node();
 				case 2:
 					return new statement();
 				case 3:
@@ -177,7 +177,7 @@ namespace PascalABCCompiler.SyntaxTree
 				case 77:
 					return new access_modifer_node();
 				case 78:
-					return new class_body();
+					return new class_body_list();
 				case 79:
 					return new class_definition();
 				case 80:
@@ -462,6 +462,62 @@ namespace PascalABCCompiler.SyntaxTree
 					return new sugared_expression();
 				case 220:
 					return new sugared_addressed_value();
+				case 221:
+					return new double_question_node();
+				case 222:
+					return new pattern_node();
+				case 223:
+					return new type_pattern();
+				case 224:
+					return new is_pattern_expr();
+				case 225:
+					return new match_with();
+				case 226:
+					return new pattern_case();
+				case 227:
+					return new pattern_cases();
+				case 228:
+					return new deconstructor_pattern();
+				case 229:
+					return new pattern_parameter();
+				case 230:
+					return new desugared_deconstruction();
+				case 231:
+					return new var_deconstructor_parameter();
+				case 232:
+					return new recursive_deconstructor_parameter();
+				case 233:
+					return new deconstruction_variables_definition();
+				case 234:
+					return new var_tuple_def_statement();
+				case 235:
+					return new semantic_check_sugared_var_def_statement_node();
+				case 236:
+					return new const_pattern();
+				case 237:
+					return new tuple_pattern_wild_card();
+				case 238:
+					return new const_pattern_parameter();
+				case 239:
+					return new wild_card_deconstructor_parameter();
+				case 240:
+					return new collection_pattern();
+				case 241:
+					return new collection_pattern_gap_parameter();
+				case 242:
+					return new collection_pattern_wild_card();
+				case 243:
+					return new collection_pattern_var_parameter();
+				case 244:
+					return new recursive_collection_parameter();
+				case 245:
+					return new recursive_pattern_parameter();
+				case 246:
+					return new tuple_pattern();
+				case 247:
+					return new tuple_pattern_var_parameter();
+				case 248:
+					return new recursive_tuple_parameter();
 			}
 			return null;
 		}
@@ -478,6 +534,17 @@ namespace PascalABCCompiler.SyntaxTree
 				return null;
 			}
 		}
+
+		public void visit(expression _expression)
+		{
+			read_expression(_expression);
+		}
+
+		public void read_expression(expression _expression)
+		{
+			read_declaration(_expression);
+		}
+
 
 		public void visit(syntax_tree_node _syntax_tree_node)
 		{
@@ -504,17 +571,6 @@ namespace PascalABCCompiler.SyntaxTree
 				}
 				_syntax_tree_node.source_context = new SourceContext(ssyy_beg, ssyy_end);
 			}
-		}
-
-
-		public void visit(expression _expression)
-		{
-			read_expression(_expression);
-		}
-
-		public void read_expression(expression _expression)
-		{
-			read_declaration(_expression);
 		}
 
 
@@ -1612,6 +1668,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			read_syntax_tree_node(_write_accessor_name);
 			_write_accessor_name.accessor_name = _read_node() as ident;
+			_write_accessor_name.pr = _read_node() as procedure_definition;
+			_write_accessor_name.statment_for_formatting = _read_node() as statement;
 		}
 
 
@@ -1624,6 +1682,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			read_syntax_tree_node(_read_accessor_name);
 			_read_accessor_name.accessor_name = _read_node() as ident;
+			_read_accessor_name.pr = _read_node() as procedure_definition;
+			_read_accessor_name.expression_for_formatting = _read_node() as expression;
 		}
 
 
@@ -1655,6 +1715,9 @@ namespace PascalABCCompiler.SyntaxTree
 			_simple_property.array_default = _read_node() as property_array_default;
 			_simple_property.parameter_list = _read_node() as property_parameter_list;
 			_simple_property.attr = (definition_attribute)br.ReadByte();
+			_simple_property.virt_over_none_attr = (proc_attribute)br.ReadByte();
+			_simple_property.is_auto = br.ReadBoolean();
+			_simple_property.initial_value = _read_node() as expression;
 		}
 
 
@@ -1708,25 +1771,25 @@ namespace PascalABCCompiler.SyntaxTree
 		}
 
 
-		public void visit(class_body _class_body)
+		public void visit(class_body_list _class_body_list)
 		{
-			read_class_body(_class_body);
+			read_class_body_list(_class_body_list);
 		}
 
-		public void read_class_body(class_body _class_body)
+		public void read_class_body_list(class_body_list _class_body_list)
 		{
-			read_syntax_tree_node(_class_body);
+			read_syntax_tree_node(_class_body_list);
 			if (br.ReadByte() == 0)
 			{
-				_class_body.class_def_blocks = null;
+				_class_body_list.class_def_blocks = null;
 			}
 			else
 			{
-				_class_body.class_def_blocks = new List<class_members>();
+				_class_body_list.class_def_blocks = new List<class_members>();
 				Int32 ssyy_count = br.ReadInt32();
 				for(Int32 ssyy_i = 0; ssyy_i < ssyy_count; ssyy_i++)
 				{
-					_class_body.class_def_blocks.Add(_read_node() as class_members);
+					_class_body_list.class_def_blocks.Add(_read_node() as class_members);
 				}
 			}
 		}
@@ -1741,7 +1804,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			read_type_definition(_class_definition);
 			_class_definition.class_parents = _read_node() as named_type_reference_list;
-			_class_definition.body = _read_node() as class_body;
+			_class_definition.body = _read_node() as class_body_list;
 			_class_definition.keyword = (class_keyword)br.ReadByte();
 			_class_definition.template_args = _read_node() as ident_list;
 			_class_definition.where_section = _read_node() as where_definition_list;
@@ -2018,6 +2081,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			read_statement(_procedure_call);
 			_procedure_call.func_name = _read_node() as addressed_value;
+			_procedure_call.is_ident = br.ReadBoolean();
 		}
 
 
@@ -2628,6 +2692,7 @@ namespace PascalABCCompiler.SyntaxTree
 		public void read_loop_stmt(loop_stmt _loop_stmt)
 		{
 			read_statement(_loop_stmt);
+			_loop_stmt.count = _read_node() as expression;
 			_loop_stmt.stmt = _read_node() as statement;
 		}
 
@@ -3387,7 +3452,7 @@ namespace PascalABCCompiler.SyntaxTree
 			_function_lambda_definition.return_type = _read_node() as type_definition;
 			_function_lambda_definition.formal_parameters = _read_node() as formal_parameters;
 			_function_lambda_definition.proc_body = _read_node() as statement;
-			_function_lambda_definition.proc_definition = _read_node() as procedure_definition;
+			_function_lambda_definition.proc_definition = (object)br.ReadByte();
 			_function_lambda_definition.parameters = _read_node() as expression_list;
 			if (br.ReadByte() == 0)
 			{
@@ -3530,7 +3595,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 		public void read_unnamed_type_object(unnamed_type_object _unnamed_type_object)
 		{
-			read_expression(_unnamed_type_object);
+			read_addressed_value(_unnamed_type_object);
 			_unnamed_type_object.ne_list = _read_node() as name_assign_expr_list;
 			_unnamed_type_object.is_class = br.ReadBoolean();
 			_unnamed_type_object.new_ex = _read_node() as new_expr;
@@ -3836,7 +3901,9 @@ namespace PascalABCCompiler.SyntaxTree
 
 		public void read_assign_var_tuple(assign_var_tuple _assign_var_tuple)
 		{
-			read_assign_tuple(_assign_var_tuple);
+			read_statement(_assign_var_tuple);
+			_assign_var_tuple.idents = _read_node() as ident_list;
+			_assign_var_tuple.expr = _read_node() as expression;
 		}
 
 
@@ -3899,6 +3966,393 @@ namespace PascalABCCompiler.SyntaxTree
 			read_addressed_value(_sugared_addressed_value);
 			_sugared_addressed_value.sugared_expr = (object)br.ReadByte();
 			_sugared_addressed_value.new_addr_value = _read_node() as addressed_value;
+		}
+
+
+		public void visit(double_question_node _double_question_node)
+		{
+			read_double_question_node(_double_question_node);
+		}
+
+		public void read_double_question_node(double_question_node _double_question_node)
+		{
+			read_addressed_value_funcname(_double_question_node);
+			_double_question_node.left = _read_node() as expression;
+			_double_question_node.right = _read_node() as expression;
+		}
+
+
+		public void visit(pattern_node _pattern_node)
+		{
+			read_pattern_node(_pattern_node);
+		}
+
+		public void read_pattern_node(pattern_node _pattern_node)
+		{
+			read_syntax_tree_node(_pattern_node);
+			if (br.ReadByte() == 0)
+			{
+				_pattern_node.parameters = null;
+			}
+			else
+			{
+				_pattern_node.parameters = new List<pattern_parameter>();
+				Int32 ssyy_count = br.ReadInt32();
+				for(Int32 ssyy_i = 0; ssyy_i < ssyy_count; ssyy_i++)
+				{
+					_pattern_node.parameters.Add(_read_node() as pattern_parameter);
+				}
+			}
+		}
+
+
+		public void visit(type_pattern _type_pattern)
+		{
+			read_type_pattern(_type_pattern);
+		}
+
+		public void read_type_pattern(type_pattern _type_pattern)
+		{
+			read_pattern_node(_type_pattern);
+			_type_pattern.identifier = _read_node() as ident;
+			_type_pattern.type = _read_node() as type_definition;
+		}
+
+
+		public void visit(is_pattern_expr _is_pattern_expr)
+		{
+			read_is_pattern_expr(_is_pattern_expr);
+		}
+
+		public void read_is_pattern_expr(is_pattern_expr _is_pattern_expr)
+		{
+			read_expression(_is_pattern_expr);
+			_is_pattern_expr.left = _read_node() as expression;
+			_is_pattern_expr.right = _read_node() as pattern_node;
+		}
+
+
+		public void visit(match_with _match_with)
+		{
+			read_match_with(_match_with);
+		}
+
+		public void read_match_with(match_with _match_with)
+		{
+			read_statement(_match_with);
+			_match_with.expr = _read_node() as expression;
+			_match_with.case_list = _read_node() as pattern_cases;
+			_match_with.defaultAction = _read_node() as statement;
+		}
+
+
+		public void visit(pattern_case _pattern_case)
+		{
+			read_pattern_case(_pattern_case);
+		}
+
+		public void read_pattern_case(pattern_case _pattern_case)
+		{
+			read_statement(_pattern_case);
+			_pattern_case.pattern = _read_node() as pattern_node;
+			_pattern_case.case_action = _read_node() as statement;
+			_pattern_case.condition = _read_node() as expression;
+		}
+
+
+		public void visit(pattern_cases _pattern_cases)
+		{
+			read_pattern_cases(_pattern_cases);
+		}
+
+		public void read_pattern_cases(pattern_cases _pattern_cases)
+		{
+			read_statement(_pattern_cases);
+			if (br.ReadByte() == 0)
+			{
+				_pattern_cases.elements = null;
+			}
+			else
+			{
+				_pattern_cases.elements = new List<pattern_case>();
+				Int32 ssyy_count = br.ReadInt32();
+				for(Int32 ssyy_i = 0; ssyy_i < ssyy_count; ssyy_i++)
+				{
+					_pattern_cases.elements.Add(_read_node() as pattern_case);
+				}
+			}
+		}
+
+
+		public void visit(deconstructor_pattern _deconstructor_pattern)
+		{
+			read_deconstructor_pattern(_deconstructor_pattern);
+		}
+
+		public void read_deconstructor_pattern(deconstructor_pattern _deconstructor_pattern)
+		{
+			read_pattern_node(_deconstructor_pattern);
+			_deconstructor_pattern.type = _read_node() as type_definition;
+			_deconstructor_pattern.const_params_check = _read_node() as expression;
+		}
+
+
+		public void visit(pattern_parameter _pattern_parameter)
+		{
+			read_pattern_parameter(_pattern_parameter);
+		}
+
+		public void read_pattern_parameter(pattern_parameter _pattern_parameter)
+		{
+			read_syntax_tree_node(_pattern_parameter);
+		}
+
+
+		public void visit(desugared_deconstruction _desugared_deconstruction)
+		{
+			read_desugared_deconstruction(_desugared_deconstruction);
+		}
+
+		public void read_desugared_deconstruction(desugared_deconstruction _desugared_deconstruction)
+		{
+			read_statement(_desugared_deconstruction);
+			_desugared_deconstruction.variables = _read_node() as deconstruction_variables_definition;
+			_desugared_deconstruction.deconstruction_target = _read_node() as expression;
+		}
+
+
+		public void visit(var_deconstructor_parameter _var_deconstructor_parameter)
+		{
+			read_var_deconstructor_parameter(_var_deconstructor_parameter);
+		}
+
+		public void read_var_deconstructor_parameter(var_deconstructor_parameter _var_deconstructor_parameter)
+		{
+			read_pattern_parameter(_var_deconstructor_parameter);
+			_var_deconstructor_parameter.identifier = _read_node() as ident;
+			_var_deconstructor_parameter.type = _read_node() as type_definition;
+			_var_deconstructor_parameter.var_keyword_used = br.ReadBoolean();
+		}
+
+
+		public void visit(recursive_deconstructor_parameter _recursive_deconstructor_parameter)
+		{
+			read_recursive_deconstructor_parameter(_recursive_deconstructor_parameter);
+		}
+
+		public void read_recursive_deconstructor_parameter(recursive_deconstructor_parameter _recursive_deconstructor_parameter)
+		{
+			read_recursive_pattern_parameter(_recursive_deconstructor_parameter);
+		}
+
+
+		public void visit(deconstruction_variables_definition _deconstruction_variables_definition)
+		{
+			read_deconstruction_variables_definition(_deconstruction_variables_definition);
+		}
+
+		public void read_deconstruction_variables_definition(deconstruction_variables_definition _deconstruction_variables_definition)
+		{
+			read_declaration(_deconstruction_variables_definition);
+			if (br.ReadByte() == 0)
+			{
+				_deconstruction_variables_definition.definitions = null;
+			}
+			else
+			{
+				_deconstruction_variables_definition.definitions = new List<var_def_statement>();
+				Int32 ssyy_count = br.ReadInt32();
+				for(Int32 ssyy_i = 0; ssyy_i < ssyy_count; ssyy_i++)
+				{
+					_deconstruction_variables_definition.definitions.Add(_read_node() as var_def_statement);
+				}
+			}
+		}
+
+
+		public void visit(var_tuple_def_statement _var_tuple_def_statement)
+		{
+			read_var_tuple_def_statement(_var_tuple_def_statement);
+		}
+
+		public void read_var_tuple_def_statement(var_tuple_def_statement _var_tuple_def_statement)
+		{
+			read_var_def_statement(_var_tuple_def_statement);
+		}
+
+
+		public void visit(semantic_check_sugared_var_def_statement_node _semantic_check_sugared_var_def_statement_node)
+		{
+			read_semantic_check_sugared_var_def_statement_node(_semantic_check_sugared_var_def_statement_node);
+		}
+
+		public void read_semantic_check_sugared_var_def_statement_node(semantic_check_sugared_var_def_statement_node _semantic_check_sugared_var_def_statement_node)
+		{
+			read_var_def_statement(_semantic_check_sugared_var_def_statement_node);
+			_semantic_check_sugared_var_def_statement_node.typ = (object)br.ReadByte();
+			if (br.ReadByte() == 0)
+			{
+				_semantic_check_sugared_var_def_statement_node.lst = null;
+			}
+			else
+			{
+				_semantic_check_sugared_var_def_statement_node.lst = new List<syntax_tree_node>();
+				Int32 ssyy_count = br.ReadInt32();
+				for(Int32 ssyy_i = 0; ssyy_i < ssyy_count; ssyy_i++)
+				{
+					_semantic_check_sugared_var_def_statement_node.lst.Add(_read_node() as syntax_tree_node);
+				}
+			}
+		}
+
+
+		public void visit(const_pattern _const_pattern)
+		{
+			read_const_pattern(_const_pattern);
+		}
+
+		public void read_const_pattern(const_pattern _const_pattern)
+		{
+			read_pattern_node(_const_pattern);
+			_const_pattern.pattern_expressions = _read_node() as expression_list;
+		}
+
+
+		public void visit(tuple_pattern_wild_card _tuple_pattern_wild_card)
+		{
+			read_tuple_pattern_wild_card(_tuple_pattern_wild_card);
+		}
+
+		public void read_tuple_pattern_wild_card(tuple_pattern_wild_card _tuple_pattern_wild_card)
+		{
+			read_pattern_parameter(_tuple_pattern_wild_card);
+		}
+
+
+		public void visit(const_pattern_parameter _const_pattern_parameter)
+		{
+			read_const_pattern_parameter(_const_pattern_parameter);
+		}
+
+		public void read_const_pattern_parameter(const_pattern_parameter _const_pattern_parameter)
+		{
+			read_pattern_parameter(_const_pattern_parameter);
+			_const_pattern_parameter.const_param = _read_node() as expression;
+		}
+
+
+		public void visit(wild_card_deconstructor_parameter _wild_card_deconstructor_parameter)
+		{
+			read_wild_card_deconstructor_parameter(_wild_card_deconstructor_parameter);
+		}
+
+		public void read_wild_card_deconstructor_parameter(wild_card_deconstructor_parameter _wild_card_deconstructor_parameter)
+		{
+			read_pattern_parameter(_wild_card_deconstructor_parameter);
+		}
+
+
+		public void visit(collection_pattern _collection_pattern)
+		{
+			read_collection_pattern(_collection_pattern);
+		}
+
+		public void read_collection_pattern(collection_pattern _collection_pattern)
+		{
+			read_pattern_node(_collection_pattern);
+		}
+
+
+		public void visit(collection_pattern_gap_parameter _collection_pattern_gap_parameter)
+		{
+			read_collection_pattern_gap_parameter(_collection_pattern_gap_parameter);
+		}
+
+		public void read_collection_pattern_gap_parameter(collection_pattern_gap_parameter _collection_pattern_gap_parameter)
+		{
+			read_pattern_parameter(_collection_pattern_gap_parameter);
+		}
+
+
+		public void visit(collection_pattern_wild_card _collection_pattern_wild_card)
+		{
+			read_collection_pattern_wild_card(_collection_pattern_wild_card);
+		}
+
+		public void read_collection_pattern_wild_card(collection_pattern_wild_card _collection_pattern_wild_card)
+		{
+			read_pattern_parameter(_collection_pattern_wild_card);
+		}
+
+
+		public void visit(collection_pattern_var_parameter _collection_pattern_var_parameter)
+		{
+			read_collection_pattern_var_parameter(_collection_pattern_var_parameter);
+		}
+
+		public void read_collection_pattern_var_parameter(collection_pattern_var_parameter _collection_pattern_var_parameter)
+		{
+			read_pattern_parameter(_collection_pattern_var_parameter);
+			_collection_pattern_var_parameter.identifier = _read_node() as ident;
+			_collection_pattern_var_parameter.type = _read_node() as type_definition;
+		}
+
+
+		public void visit(recursive_collection_parameter _recursive_collection_parameter)
+		{
+			read_recursive_collection_parameter(_recursive_collection_parameter);
+		}
+
+		public void read_recursive_collection_parameter(recursive_collection_parameter _recursive_collection_parameter)
+		{
+			read_recursive_pattern_parameter(_recursive_collection_parameter);
+		}
+
+
+		public void visit(recursive_pattern_parameter _recursive_pattern_parameter)
+		{
+			read_recursive_pattern_parameter(_recursive_pattern_parameter);
+		}
+
+		public void read_recursive_pattern_parameter(recursive_pattern_parameter _recursive_pattern_parameter)
+		{
+			read_pattern_parameter(_recursive_pattern_parameter);
+			_recursive_pattern_parameter.pattern = _read_node() as pattern_node;
+		}
+
+
+		public void visit(tuple_pattern _tuple_pattern)
+		{
+			read_tuple_pattern(_tuple_pattern);
+		}
+
+		public void read_tuple_pattern(tuple_pattern _tuple_pattern)
+		{
+			read_pattern_node(_tuple_pattern);
+		}
+
+
+		public void visit(tuple_pattern_var_parameter _tuple_pattern_var_parameter)
+		{
+			read_tuple_pattern_var_parameter(_tuple_pattern_var_parameter);
+		}
+
+		public void read_tuple_pattern_var_parameter(tuple_pattern_var_parameter _tuple_pattern_var_parameter)
+		{
+			read_pattern_parameter(_tuple_pattern_var_parameter);
+			_tuple_pattern_var_parameter.identifier = _read_node() as ident;
+			_tuple_pattern_var_parameter.type = _read_node() as type_definition;
+		}
+
+
+		public void visit(recursive_tuple_parameter _recursive_tuple_parameter)
+		{
+			read_recursive_tuple_parameter(_recursive_tuple_parameter);
+		}
+
+		public void read_recursive_tuple_parameter(recursive_tuple_parameter _recursive_tuple_parameter)
+		{
+			read_recursive_pattern_parameter(_recursive_tuple_parameter);
 		}
 
 	}

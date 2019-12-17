@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -113,7 +113,7 @@ namespace PascalABCCompiler
             connect(_class_definition);
             visit_node(_class_definition.body);
         }
-        public override void visit(class_body _class_body)
+        public override void visit(class_body_list _class_body)
         {
             visit_collection(_class_body.class_def_blocks);
         }

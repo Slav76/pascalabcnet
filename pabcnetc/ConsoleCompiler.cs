@@ -1,4 +1,4 @@
-// Copyright (©) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (©) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using PascalABCCompiler.Errors;
@@ -47,7 +47,7 @@ namespace PascalABCCompiler
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             Console.ForegroundColor = ConsoleColor.Gray;
-            if (command == "") return false;
+            if (command == "" || command == null) return false;
             if (command.ToLower().IndexOf("cd ") == 0)
             {
                 try
@@ -192,7 +192,12 @@ namespace PascalABCCompiler
             {
                 files = di.GetFiles(mask);
             }
-            catch(DirectoryNotFoundException)
+            catch (DirectoryNotFoundException)
+            {
+                WriteErrorText(StringResourcesGet("ERROR_DIRECTORY_NOT_FOUND") + Environment.NewLine);
+                return;
+            }
+            catch (ArgumentException)
             {
                 WriteErrorText(StringResourcesGet("ERROR_INVALID_DIRECTORY") + Environment.NewLine);
                 return;
@@ -207,7 +212,7 @@ namespace PascalABCCompiler
                 AllLinesCompiled += Compiler.LinesCompiled;
                 length += fi.Length;
             }
-            if(!short_output)
+            if (!short_output)
             if (GlobalErrorsList.Count > 0 && files.Length > 1)
             {
                 WriteErrorText(StringResourcesGet("FULL_ERROR_LIST") + Environment.NewLine);
@@ -271,6 +276,8 @@ namespace PascalABCCompiler
                 Console.WriteLine(msg);
             DateTime ldt = DateTime.Now;
             CompilerOptions co = new CompilerOptions(FileName, outputType);
+            if (FileName.ToLower().EndsWith(".pabcproj"))
+                co.ProjectCompiled = true;
             if (OutputDirectory != "")
                 co.OutputDirectory=OutputDirectory;
             co.Rebuild = Rebuild;
@@ -368,7 +375,7 @@ namespace PascalABCCompiler
             DateTime ldt = DateTime.Now;
             Compiler = new PascalABCCompiler.Compiler(null,ChangeCompilerState);
             //GC.Collect();
-            WriteColorText(Compiler.Banner + "\nCopyright (c) 2005-2017 by Ivan Bondarev, Stanislav Mihalkovich\n", ConsoleColor.Black, ConsoleColor.Green);
+            WriteColorText(Compiler.Banner + "\nCopyright (c) 2005-2019 by Ivan Bondarev, Stanislav Mikhalkovich\n", ConsoleColor.Black, ConsoleColor.Green);
             Console.WriteLine("OK {0}ms", (DateTime.Now - ldt).TotalMilliseconds);
             if (Compiler.SupportedSourceFiles.Length == 0)
                 WriteColorText(StringResourcesGet("ERROR_PARSERS_NOT_FOUND")+Environment.NewLine,ConsoleColor.Black,ConsoleColor.Red);
@@ -407,7 +414,7 @@ namespace PascalABCCompiler
 
 
         public static int Main(string[] initialArgs)
-		{
+        {
             var args = initialArgs.ToList();
             if (args.Remove("/noconsole"))
             {

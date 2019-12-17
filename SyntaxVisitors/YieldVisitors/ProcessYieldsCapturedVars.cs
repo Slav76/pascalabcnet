@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -20,6 +20,11 @@ namespace SyntaxVisitors
     public static class CapturedNamesHelper
     {
         public static int CurrentLocalVariableNum = 0;
+
+        public static void Reset()
+        {
+            CurrentLocalVariableNum = 0;
+        }
 
         public static string MakeCapturedFormalParameterName(string formalParamName)
         {
@@ -91,8 +96,8 @@ namespace SyntaxVisitors
             if (fh == null)
                 throw new SyntaxError("Only functions can contain yields", "", pd.proc_header.source_context, pd.proc_header);
             var seqt = fh.return_type as sequence_type;
-            if (seqt == null)
-                throw new SyntaxError("Functions with yields must return sequences", "", fh.return_type.source_context, fh.return_type);
+            /*if (seqt == null)
+                throw new SyntaxError("Functions with yields must return sequences", "", fh.return_type.source_context, fh.return_type);*/
 
             // Теперь на месте функции генерируем класс
 
@@ -100,7 +105,7 @@ namespace SyntaxVisitors
             var cm = class_members.Public;
             var capturedFields = fields.Select(vds =>
                                     {
-                                        ident_list ids = new ident_list(vds.vars.idents.Select(id => new ident(localsMap[id.name])).ToArray());
+                                        ident_list ids = new ident_list(vds.vars.idents.Select(id => new ident(localsMap[id.name.ToLower()])).ToArray());
                                         if (vds.vars_type == null) //&& vds.inital_value != null)
                                         {
                                             if (vds.inital_value != null)
@@ -130,12 +135,12 @@ namespace SyntaxVisitors
             if (pars != null)
                 foreach (var ps in pars.params_list)
                 {
-                    if (ps.param_kind != parametr_kind.none)
+                    if (ps.param_kind != parametr_kind.none && ps.param_kind != parametr_kind.params_parametr)
                         throw new SyntaxVisitorError("FUNCTIONS_WITH_YIELDS_CANNOT_CONTAIN_VAR_CONST_PARAMS_MODIFIERS", pars.source_context);
                     if (ps.inital_value != null)
                         throw new SyntaxVisitorError("FUNCTIONS_WITH_YIELDS_CANNOT_CONTAIN_DEFAULT_PARAMETERS", pars.source_context);
                     //var_def_statement vds = new var_def_statement(ps.idents, ps.vars_type);
-                    ident_list ids = new ident_list(ps.idents.list.Select(id => new ident(formalParamsMap[id.name])).ToArray());
+                    ident_list ids = new ident_list(ps.idents.list.Select(id => new ident(formalParamsMap[id.name.ToLower()])).ToArray());
                     var_def_statement vds = new var_def_statement(ids, ps.vars_type);
                     cm.Add(vds); // все параметры функции делаем полями класса
                     //lid.AddRange(vds.vars.idents);
@@ -146,8 +151,15 @@ namespace SyntaxVisitors
 
             var iteratorClassName = GetClassName(pd);
 
+            /*var staticClass = false;
+
+            var classDef = GetMethodClassDefinition(pd);
+
+            if (classDef != null && (classDef.attribute & class_attribute.Static) != 0)
+                staticClass = true;*/
+
             // frninja 08/18/15 - Для захвата self
-            if (iteratorClassName != null)
+            if (iteratorClassName != null /*&& !staticClass*/)
             {
                 // frninja 20/04/16 - поддержка шаблонных классов
                 var iteratorClassRef = CreateClassReference(iteratorClassName);
@@ -190,7 +202,7 @@ namespace SyntaxVisitors
             
 
             //stl.AddMany(lid.Select(id => new assign(new dot_node("$res", id), id)));
-            stl.AddMany(lid.Select(id => new assign(new dot_node("$res", new ident(formalParamsMap[id.name])), id)));
+            stl.AddMany(lid.Select(id => new assign(new dot_node("$res", new ident(formalParamsMap[id.name.ToLower()])), id)));
 
             // frninja 08/12/15 - захват self
             if (iteratorClassName != null && !pd.proc_header.class_keyword)
@@ -218,6 +230,7 @@ namespace SyntaxVisitors
                         //function_header nfh = ObjectCopier.Clone(fh);
 
                         function_header nfh = fh.TypedClone();
+                        nfh.proc_attributes.proc_attributes.RemoveAll(pat => pat.attribute_type == proc_attribute.attr_override);
 
                         //function_header nfh = new function_header();
                         //nfh.name = new method_name(fh.name.meth_name.name);
@@ -271,7 +284,7 @@ namespace SyntaxVisitors
             var stl1 = new statement_list(new var_statement("$res", new new_expr(this.CreateClassReference(className), new expression_list())));
             
 
-            stl1.AddMany(lid.Select(id => new assign(new dot_node("$res", new ident(formalParamsMap[id.name])), new ident(formalParamsMap[id.name]))));
+            stl1.AddMany(lid.Select(id => new assign(new dot_node("$res", new ident(formalParamsMap[id.name.ToLower()])), new ident(formalParamsMap[id.name.ToLower()]))));
 
             // Переприсваивание self 
             if (iteratorClassName != null && !pd.proc_header.class_keyword)
@@ -301,7 +314,7 @@ namespace SyntaxVisitors
         private void CollectFormalParamsNames(procedure_definition pd, ISet<string> collectedFormalParamsNames)
         {
             if (pd.proc_header.parameters != null)
-                collectedFormalParamsNames.UnionWith(pd.proc_header.parameters.params_list.SelectMany(tp => tp.idents.idents).Select(id => id.name));
+                collectedFormalParamsNames.UnionWith(pd.proc_header.parameters.params_list.SelectMany(tp => tp.idents.idents).Select(id => id.name.ToLower()));
         }
 
 
@@ -402,14 +415,31 @@ namespace SyntaxVisitors
             {
                 // Метод класса описан вне класса
 
-                return UpperTo<declarations>().list
+                cd = UpperTo<declarations>().list
                     .OfType<type_declarations>()
                     .SelectMany(tdecls => tdecls.types_decl)
-                    .Where(td => td.type_name.name == GetClassName(pd).name)
+                    .Where(td => td.type_name.name.ToLower() == GetClassName(pd).name.ToLower())
                     .Select(td => td.type_def as class_definition)
                     .Where(_cd => _cd != null)
                     .DefaultIfEmpty()
                     .First();
+                if (cd == null)
+                {
+                    implementation_node impl = UpperTo<implementation_node>();
+                    if (impl != null)
+                    {
+                        cd = (impl.Parent as unit_module).interface_part.interface_definitions.list
+                            .OfType<type_declarations>()
+                            .SelectMany(tdecls => tdecls.types_decl)
+                            .Where(td => td.type_name.name.ToLower() == GetClassName(pd).name.ToLower())
+                            .Select(td => td.type_def as class_definition)
+                            .Where(_cd => _cd != null)
+                            .DefaultIfEmpty()
+                            .First();
+                    }
+                }
+                
+                return cd;
             }
         }
 
@@ -427,7 +457,7 @@ namespace SyntaxVisitors
                     var pdPredefs = UpperTo<declarations>().defs
                         .OfType<procedure_definition>()
                         .Where(lpd => lpd.proc_body == null
-                                && lpd.proc_header.name.meth_name.name == pd.proc_header.name.meth_name.name
+                                && lpd.proc_header.name.meth_name.name.ToLower() == pd.proc_header.name.meth_name.name.ToLower()
                                 && lpd.proc_header.proc_attributes.proc_attributes.FindIndex(attr => attr.attribute_type == proc_attribute.attr_forward) != -1);
                     if (pdPredefs.Count() > 0)
                     {
@@ -470,7 +500,7 @@ namespace SyntaxVisitors
                 {
                     cu.visit(fieldsVis);
                     // Collect
-                    collectedFields.UnionWith(fieldsVis.CollectedFields.Select(id => id.name));
+                    collectedFields.UnionWith(fieldsVis.CollectedFields.Select(id => id.name.ToLower()));
                 }
             }
         }
@@ -487,7 +517,7 @@ namespace SyntaxVisitors
                 {
                     cu.visit(methodsVis);
                     // Collect
-                    collectedMethods.UnionWith(methodsVis.CollectedMethods.Select(id => id.name));
+                    collectedMethods.UnionWith(methodsVis.CollectedMethods.Select(id => id.name.ToLower()));
                 }
             }
         }
@@ -504,7 +534,7 @@ namespace SyntaxVisitors
                 {
                     cu.visit(propertiesVis);
                     // Collect
-                    collectedProperties.UnionWith(propertiesVis.CollectedProperties.Select(id => id.name));
+                    collectedProperties.UnionWith(propertiesVis.CollectedProperties.Select(id => id.name.ToLower()));
                 }
             }
         }
@@ -517,7 +547,7 @@ namespace SyntaxVisitors
                 var ugVis = new CollectUnitGlobalsVisitor();
                 cu.visit(ugVis);
                 // Collect
-                collectedUnitGlobalsName.UnionWith(ugVis.CollectedGlobals.Select(id => id.name));
+                collectedUnitGlobalsName.UnionWith(ugVis.CollectedGlobals.Select(id => id.name.ToLower()));
             }
         }
 
@@ -561,20 +591,33 @@ namespace SyntaxVisitors
                     // Метод класса описан вне класса
 
                     var decls = UpperTo<declarations>();
+                    
                     var classMembers = decls.list
                         .Select(decl => decl as type_declarations)
                         .Where(tdecls => tdecls != null)
                         .SelectMany(tdecls => tdecls.types_decl)
-                        .Where(td => td.type_name.name == GetClassName(pd).name)
+                        .Where(td => td.type_name.name.ToLower() == GetClassName(pd).name.ToLower())
                         .Select(td => td.type_def as class_definition)
-                        .Where(_cd => _cd != null)
+                        .Where(_cd => _cd != null && _cd.body != null)
                         .SelectMany(_cd => _cd.body.class_def_blocks);
-
+                    implementation_node impl = UpperTo<implementation_node>();
+                    if (impl != null)
+                    {
+                        classMembers = classMembers.Union((impl.Parent as unit_module).interface_part.interface_definitions.list
+                        .Select(decl => decl as type_declarations)
+                        .Where(tdecls => tdecls != null)
+                        .SelectMany(tdecls => tdecls.types_decl)
+                        .Where(td => td.type_name.name.ToLower() == GetClassName(pd).name.ToLower())
+                        .Select(td => td.type_def as class_definition)
+                        .Where(_cd => _cd != null && _cd.body != null)
+                        .SelectMany(_cd => _cd.body.class_def_blocks));
+                    }
 
                     // Вставляем предописание метода-хелпера 
                     var helperPredefHeader = ObjectCopier.Clone(helper.proc_header);
                     helperPredefHeader.name.class_name = null;
-                    classMembers.First().members.Insert(0, helperPredefHeader);
+                    //classMembers.First().members.Insert(0, helperPredefHeader);
+                    classMembers.First().members.Add(helperPredefHeader); // SSM bug fix #1474
 
                     // Вставляем тело метода-хелпера
                     UpperTo<declarations>().InsertBefore(pd, helper);
@@ -596,6 +639,8 @@ namespace SyntaxVisitors
             // Клонируем исходный метод для проверок ошибок бэкендом
             //var pdCloned = ObjectCopier.Clone(pd);
             var pdCloned = (procedure_definition)pd.Clone();
+
+            pdCloned.proc_header.proc_attributes.proc_attributes.RemoveAll(pat => pat.attribute_type == proc_attribute.attr_override);
 
             pdCloned.has_yield = false;
 
@@ -640,6 +685,8 @@ namespace SyntaxVisitors
             pdCloned.proc_header.name.meth_name = new ident(YieldConsts.YieldHelperMethodPrefix+ "_locals_type_detector>" + pd.proc_header.name.meth_name.name,
                 // frninja 05/06/16 - фиксим source_context
                 pd.proc_header.name.meth_name.source_context); // = new method_name("<yield_helper_locals_type_detector>" + pd.proc_header.className.meth_name.className);
+
+            //pdCloned.proc_header.proc_attributes.proc_attributes.RemoveAll(pat => pat.attribute_type == proc_attribute.attr_override);
 
             InsertHelperMethod(pd, pdCloned); // SSM 13.07.16 - вызов этого метода можно не добавлять
         }
@@ -750,7 +797,7 @@ namespace SyntaxVisitors
 
             // Collect locals
             CollectedLocals.UnionWith(deletedLocals);
-            CollectedLocalsNames.UnionWith(deletedLocals.SelectMany(vds => vds.vars.idents).Select(id => id.name));
+            CollectedLocalsNames.UnionWith(deletedLocals.SelectMany(vds => vds.vars.idents).Select(id => id.name.ToLower()));
             // Collect formal params
             CollectFormalParams(pd, CollectedFormalParams);
             CollectFormalParamsNames(pd, CollectedFormalParamsNames);
@@ -792,7 +839,12 @@ namespace SyntaxVisitors
         private bool IsExtensionMethod(procedure_definition pd)
         {
             var tdecls = UpperTo<declarations>().defs.OfType<type_declarations>().SelectMany(tds => tds.types_decl);
-
+            implementation_node impl = UpperTo<implementation_node>();
+            if (impl != null)
+            {
+                tdecls = tdecls.Union((impl.Parent as unit_module).interface_part.interface_definitions.defs.OfType<type_declarations>().SelectMany(tds => tds.types_decl));
+            }
+            
             var isExtension = pd.proc_header.proc_attributes.proc_attributes.Any(attr => attr.name == "extensionmethod");
 
             if (isExtension)
@@ -814,7 +866,7 @@ namespace SyntaxVisitors
 
                 
                 // Разрешаем только имена типов из этого модуля (не расширения)
-                if (!tdecls.Any(td => td.type_name.name == pd.proc_header.name.class_name.name))
+                if (!tdecls.Any(td => td.type_name.name.ToLower() == pd.proc_header.name.class_name.name.ToLower()))
                 {
                     // Имя в модуле не найдено -> метод расширение описанный без extensionmethod. Ругаемся!!!
                     throw new SyntaxVisitorError("Possible extension-method definintion without extensionmethod keyword. Please use extensionmethod syntax",
@@ -858,7 +910,7 @@ namespace SyntaxVisitors
             var pdPredefs = UpperTo<declarations>().defs
                 .OfType<procedure_definition>()
                 .Where(lpd => lpd.proc_body == null
-                        && lpd.proc_header.name.meth_name.name == pd.proc_header.name.meth_name.name
+                        && lpd.proc_header.name.meth_name.name.ToLower() == pd.proc_header.name.meth_name.name.ToLower()
                         && lpd.proc_header.proc_attributes.proc_attributes.FindIndex(attr => attr.attribute_type == proc_attribute.attr_forward) != -1);
 
 
@@ -893,7 +945,7 @@ namespace SyntaxVisitors
 
         public override void visit(procedure_definition pd)
         {
-            // frninja 14/06/16 - проверяем наличие yield у вложенных методов (и запрещаем )
+            // frninja 14/06/16 - проверяем наличие yield у вложенных методов (и запрещаем)
             CheckInnerMethodsWithYield(pd);
 
             if (!pd.has_yield)
@@ -940,7 +992,7 @@ namespace SyntaxVisitors
                 var fpids = pd.proc_header.parameters.params_list.SelectMany(tp => tp.idents.idents);
                 foreach (var v in fpids)
                 {
-                    var vds = new var_statement(new ident("$fp_"+v.name, v.source_context), v);
+                    var vds = new var_statement(new ident("$fp_"+v.name.ToLower(), v.source_context), v);
                     bb.program_code.AddFirst(vds);
                 }
             }

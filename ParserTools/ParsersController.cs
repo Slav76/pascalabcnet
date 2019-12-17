@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.IO;
@@ -148,7 +148,17 @@ namespace PascalABCCompiler.Parsers
         }
         public SyntaxTree.compilation_unit GetCompilationUnitForFormatter(string FileName, string Text, List<Error> Errors, List<CompilerWarning> Warnings)
         {
-            SyntaxTree.syntax_tree_node cu = Compile(FileName, Text, Errors, Warnings, ParseMode.ForFormatter);
+            SyntaxTree.syntax_tree_node cu = null;
+            try // SSM 06.09.18 
+            { 
+                cu = Compile(FileName, Text, Errors, Warnings, ParseMode.ForFormatter);
+            }
+            catch (Errors.ParserBadFileExtension e)
+            {
+                Errors.Add(e);
+                return null;
+                // Погасить исключение если оно не погашено ранее
+            }
             if (cu == null)
                 return null;
             if (cu is SyntaxTree.compilation_unit)
@@ -158,7 +168,15 @@ namespace PascalABCCompiler.Parsers
         }
         public SyntaxTree.expression GetExpression(string FileName, string Text, List<Error> Errors, List<CompilerWarning> Warnings)
         {
-            SyntaxTree.syntax_tree_node cu = Compile(FileName, Text, Errors, Warnings, ParseMode.Expression);
+            SyntaxTree.syntax_tree_node cu = null;
+            try // SSM 06.09.18 
+            {
+                cu = Compile(FileName, Text, Errors, Warnings, ParseMode.Expression);
+            }
+            catch
+            {
+
+            }
             if (cu == null)
                 return null;
             if (cu is SyntaxTree.expression)

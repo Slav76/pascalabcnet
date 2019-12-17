@@ -6,6 +6,106 @@ using System.Collections.Generic;
 namespace PascalABCCompiler.SyntaxTree
 {
 	///<summary>
+	///Выражение
+	///</summary>
+	[Serializable]
+	public partial class expression : declaration
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public expression()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			expression copy = new expression();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new expression TypedClone()
+		{
+			return Clone() as expression;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
 	///Базовый класс для всех классов синтаксического дерева
 	///</summary>
 	[Serializable]
@@ -126,106 +226,6 @@ namespace PascalABCCompiler.SyntaxTree
 		///<param name="visitor">Объект-посетитель.</param>
 		///<returns>Return value is void</returns>
 		public virtual void visit(IVisitor visitor)
-		{
-			visitor.visit(this);
-		}
-
-	}
-
-
-	///<summary>
-	///Выражение
-	///</summary>
-	[Serializable]
-	public partial class expression : declaration
-	{
-
-		///<summary>
-		///Конструктор без параметров.
-		///</summary>
-		public expression()
-		{
-
-		}
-
-		/// <summary> Создает копию узла </summary>
-		public override syntax_tree_node Clone()
-		{
-			expression copy = new expression();
-			copy.Parent = this.Parent;
-			if (source_context != null)
-				copy.source_context = new SourceContext(source_context);
-			if (attributes != null)
-			{
-				copy.attributes = (attribute_list)attributes.Clone();
-				copy.attributes.Parent = copy;
-			}
-			return copy;
-		}
-
-		/// <summary> Получает копию данного узла корректного типа </summary>
-		public new expression TypedClone()
-		{
-			return Clone() as expression;
-		}
-
-		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
-		public override void FillParentsInDirectChilds()
-		{
-			if (attributes != null)
-				attributes.Parent = this;
-		}
-
-		///<summary> Заполняет поля Parent во всем поддереве </summary>
-		public override void FillParentsInAllChilds()
-		{
-			FillParentsInDirectChilds();
-			attributes?.FillParentsInAllChilds();
-		}
-
-		///<summary>
-		///Свойство для получения количества всех подузлов без элементов поля типа List
-		///</summary>
-		public override Int32 subnodes_without_list_elements_count
-		{
-			get
-			{
-				return 0;
-			}
-		}
-		///<summary>
-		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
-		///</summary>
-		public override Int32 subnodes_count
-		{
-			get
-			{
-				return 0;
-			}
-		}
-		///<summary>
-		///Индексатор для получения всех подузлов
-		///</summary>
-		public override syntax_tree_node this[Int32 ind]
-		{
-			get
-			{
-				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
-					throw new IndexOutOfRangeException();
-				return null;
-			}
-			set
-			{
-				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
-					throw new IndexOutOfRangeException();
-			}
-		}
-		///<summary>
-		///Метод для обхода дерева посетителем
-		///</summary>
-		///<param name="visitor">Объект-посетитель.</param>
-		///<returns>Return value is void</returns>
-		public override void visit(IVisitor visitor)
 		{
 			visitor.visit(this);
 		}
@@ -410,6 +410,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left_logical_bracket=value;
+				if (_left_logical_bracket != null)
+					_left_logical_bracket.Parent = this;
 			}
 		}
 
@@ -425,6 +427,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right_logical_bracket=value;
+				if (_right_logical_bracket != null)
+					_right_logical_bracket.Parent = this;
 			}
 		}
 
@@ -456,12 +460,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			subnodes.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<statement> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			subnodes.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -470,6 +478,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params statement[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			subnodes.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -478,6 +488,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = subnodes.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -486,32 +498,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(statement el, statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			subnodes.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(statement el, IEnumerable<statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			subnodes.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(statement el, statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			subnodes.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(statement el, IEnumerable<statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			subnodes.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(statement el)
@@ -521,19 +547,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(statement el, statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			subnodes[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(statement el, IEnumerable<statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			subnodes.RemoveAt(ind);
 			subnodes.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<statement> match)
@@ -543,8 +576,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public statement Last()
 		{
-			return subnodes[subnodes.Count - 1];
+			if (subnodes.Count > 0)
+		        return subnodes[subnodes.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return subnodes.Count; }
+		}
+		
+		public void Insert(int pos, statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			subnodes.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -895,6 +945,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_to=value;
+				if (_to != null)
+					_to.Parent = this;
 			}
 		}
 
@@ -910,6 +962,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_from=value;
+				if (_from != null)
+					_from.Parent = this;
 			}
 		}
 
@@ -1100,6 +1154,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -1115,6 +1171,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -1302,6 +1360,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_subnode=value;
+				if (_subnode != null)
+					_subnode.Parent = this;
 			}
 		}
 
@@ -1987,6 +2047,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_subprogram_code=value;
+				if (_subprogram_code != null)
+					_subprogram_code.Parent = this;
 			}
 		}
 
@@ -2002,6 +2064,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_subprogram_defs=value;
+				if (_subprogram_defs != null)
+					_subprogram_defs.Parent = this;
 			}
 		}
 
@@ -2262,6 +2326,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_attr_list=value;
+				if (_attr_list != null)
+					_attr_list.Parent = this;
 			}
 		}
 
@@ -2598,12 +2664,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			names.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<ident> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			names.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -2612,6 +2682,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params ident[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			names.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -2620,6 +2692,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = names.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -2628,32 +2702,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			names.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			names.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			names.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			names.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(ident el)
@@ -2663,19 +2751,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			names[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			names.RemoveAt(ind);
 			names.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<ident> match)
@@ -2685,8 +2780,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public ident Last()
 		{
-			return names[names.Count - 1];
+			if (names.Count > 0)
+		        return names[names.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return names.Count; }
+		}
+		
+		public void Insert(int pos, ident el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			names.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -2902,12 +3014,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(var_def_statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var_definitions.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<var_def_statement> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			var_definitions.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -2916,6 +3032,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params var_def_statement[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			var_definitions.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -2924,6 +3042,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(var_def_statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = var_definitions.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -2932,32 +3052,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			var_definitions.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var_definitions.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			var_definitions.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var_definitions.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(var_def_statement el)
@@ -2967,19 +3101,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			var_definitions[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			var_definitions.RemoveAt(ind);
 			var_definitions.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<var_def_statement> match)
@@ -2989,8 +3130,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public var_def_statement Last()
 		{
-			return var_definitions[var_definitions.Count - 1];
+			if (var_definitions.Count > 0)
+		        return var_definitions[var_definitions.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return var_definitions.Count; }
+		}
+		
+		public void Insert(int pos, var_def_statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			var_definitions.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -3187,12 +3345,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			idents.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<ident> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			idents.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -3201,6 +3363,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params ident[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			idents.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -3209,6 +3373,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = idents.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -3217,32 +3383,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			idents.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			idents.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			idents.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			idents.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(ident el)
@@ -3252,19 +3432,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			idents[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			idents.RemoveAt(ind);
 			idents.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<ident> match)
@@ -3274,8 +3461,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public ident Last()
 		{
-			return idents[idents.Count - 1];
+			if (idents.Count > 0)
+		        return idents[idents.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return idents.Count; }
+		}
+		
+		public void Insert(int pos, ident el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			idents.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -3396,7 +3600,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///Описание переменных одной строкой. Не содержит var, т.к. встречается исключительно внутри другой конструкции.Может встречаться как до beginа (внутри variable_definitions), так и как внутриблочное описание (внутри var_statement).
+	///Описание переменных одной строкой. Не содержит var, т.к. встречается исключительно внутри другой конструкции. Может встречаться как до beginа (внутри variable_definitions), так и как внутриблочное описание (внутри var_statement).
 
 	///</summary>
 	[Serializable]
@@ -3455,6 +3659,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars=value;
+				if (_vars != null)
+					_vars.Parent = this;
 			}
 		}
 
@@ -3470,6 +3676,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars_type=value;
+				if (_vars_type != null)
+					_vars_type.Parent = this;
 			}
 		}
 
@@ -3485,6 +3693,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_inital_value=value;
+				if (_inital_value != null)
+					_inital_value.Parent = this;
 			}
 		}
 
@@ -3698,6 +3908,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_attributes=value;
+				if (_attributes != null)
+					_attributes.Parent = this;
 			}
 		}
 
@@ -3867,12 +4079,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			defs.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<declaration> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -3881,6 +4097,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params declaration[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -3889,6 +4107,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = defs.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -3897,32 +4117,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(declaration el)
@@ -3932,19 +4166,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			defs.RemoveAt(ind);
 			defs.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<declaration> match)
@@ -3954,8 +4195,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public declaration Last()
 		{
-			return defs[defs.Count - 1];
+			if (defs.Count > 0)
+		        return defs[defs.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return defs.Count; }
+		}
+		
+		public void Insert(int pos, declaration el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			defs.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -4144,12 +4402,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(compilation_unit el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			compilation_units.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<compilation_unit> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			compilation_units.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -4158,6 +4420,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params compilation_unit[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			compilation_units.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -4166,6 +4430,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(compilation_unit el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = compilation_units.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -4174,32 +4440,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(compilation_unit el, compilation_unit newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compilation_units.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(compilation_unit el, IEnumerable<compilation_unit> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			compilation_units.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(compilation_unit el, compilation_unit newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compilation_units.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(compilation_unit el, IEnumerable<compilation_unit> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			compilation_units.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(compilation_unit el)
@@ -4209,19 +4489,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(compilation_unit el, compilation_unit newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compilation_units[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(compilation_unit el, IEnumerable<compilation_unit> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			compilation_units.RemoveAt(ind);
 			compilation_units.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<compilation_unit> match)
@@ -4231,8 +4518,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public compilation_unit Last()
 		{
-			return compilation_units[compilation_units.Count - 1];
+			if (compilation_units.Count > 0)
+		        return compilation_units[compilation_units.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return compilation_units.Count; }
+		}
+		
+		public void Insert(int pos, compilation_unit el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			compilation_units.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -4399,6 +4703,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_prog_name=value;
+				if (_prog_name != null)
+					_prog_name.Parent = this;
 			}
 		}
 
@@ -4705,12 +5011,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(expression el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			expressions.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<expression> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			expressions.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -4719,6 +5029,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params expression[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			expressions.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -4727,6 +5039,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(expression el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = expressions.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -4735,32 +5049,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(expression el, expression newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			expressions.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(expression el, IEnumerable<expression> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			expressions.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(expression el, expression newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			expressions.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(expression el, IEnumerable<expression> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			expressions.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(expression el)
@@ -4770,19 +5098,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(expression el, expression newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			expressions[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(expression el, IEnumerable<expression> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			expressions.RemoveAt(ind);
 			expressions.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<expression> match)
@@ -4792,8 +5127,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public expression Last()
 		{
-			return expressions[expressions.Count - 1];
+			if (expressions.Count > 0)
+		        return expressions[expressions.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return expressions.Count; }
+		}
+		
+		public void Insert(int pos, expression el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			expressions.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -4960,6 +5312,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_dereferencing_value=value;
+				if (_dereferencing_value != null)
+					_dereferencing_value.Parent = this;
 			}
 		}
 
@@ -5136,6 +5490,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_indexes=value;
+				if (_indexes != null)
+					_indexes.Parent = this;
 			}
 		}
 
@@ -5325,6 +5681,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_loop_variable=value;
+				if (_loop_variable != null)
+					_loop_variable.Parent = this;
 			}
 		}
 
@@ -5340,6 +5698,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_initial_value=value;
+				if (_initial_value != null)
+					_initial_value.Parent = this;
 			}
 		}
 
@@ -5355,6 +5715,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_finish_value=value;
+				if (_finish_value != null)
+					_finish_value.Parent = this;
 			}
 		}
 
@@ -5370,6 +5732,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_statements=value;
+				if (_statements != null)
+					_statements.Parent = this;
 			}
 		}
 
@@ -5400,6 +5764,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_increment_value=value;
+				if (_increment_value != null)
+					_increment_value.Parent = this;
 			}
 		}
 
@@ -5415,6 +5781,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -5655,6 +6023,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_statements=value;
+				if (_statements != null)
+					_statements.Parent = this;
 			}
 		}
 
@@ -5670,6 +6040,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -5844,6 +6216,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -5859,6 +6233,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_statements=value;
+				if (_statements != null)
+					_statements.Parent = this;
 			}
 		}
 
@@ -6049,6 +6425,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_condition=value;
+				if (_condition != null)
+					_condition.Parent = this;
 			}
 		}
 
@@ -6064,6 +6442,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_then_body=value;
+				if (_then_body != null)
+					_then_body.Parent = this;
 			}
 		}
 
@@ -6079,6 +6459,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_else_body=value;
+				if (_else_body != null)
+					_else_body.Parent = this;
 			}
 		}
 
@@ -6281,6 +6663,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_pointed_to=value;
+				if (_pointed_to != null)
+					_pointed_to.Parent = this;
 			}
 		}
 
@@ -6475,6 +6859,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -6490,6 +6876,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -6714,12 +7102,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			indexers.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<type_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			indexers.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -6728,6 +7120,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params type_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			indexers.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -6736,6 +7130,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = indexers.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -6744,32 +7140,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			indexers.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			indexers.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			indexers.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			indexers.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(type_definition el)
@@ -6779,19 +7189,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			indexers[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			indexers.RemoveAt(ind);
 			indexers.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<type_definition> match)
@@ -6801,8 +7218,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public type_definition Last()
 		{
-			return indexers[indexers.Count - 1];
+			if (indexers.Count > 0)
+		        return indexers[indexers.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return indexers.Count; }
+		}
+		
+		public void Insert(int pos, type_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			indexers.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -7022,6 +7456,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_indexers=value;
+				if (_indexers != null)
+					_indexers.Parent = this;
 			}
 		}
 
@@ -7037,6 +7473,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_elements_type=value;
+				if (_elements_type != null)
+					_elements_type.Parent = this;
 			}
 		}
 
@@ -7218,6 +7656,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_labels=value;
+				if (_labels != null)
+					_labels.Parent = this;
 			}
 		}
 
@@ -7541,6 +7981,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_idents=value;
+				if (_idents != null)
+					_idents.Parent = this;
 			}
 		}
 
@@ -7556,6 +7998,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars_type=value;
+				if (_vars_type != null)
+					_vars_type.Parent = this;
 			}
 		}
 
@@ -7586,6 +8030,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_inital_value=value;
+				if (_inital_value != null)
+					_inital_value.Parent = this;
 			}
 		}
 
@@ -7790,12 +8236,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(typed_parameters el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			params_list.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<typed_parameters> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			params_list.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -7804,6 +8254,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params typed_parameters[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			params_list.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -7812,6 +8264,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(typed_parameters el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = params_list.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -7820,32 +8274,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(typed_parameters el, typed_parameters newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(typed_parameters el, IEnumerable<typed_parameters> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			params_list.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(typed_parameters el, typed_parameters newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(typed_parameters el, IEnumerable<typed_parameters> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			params_list.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(typed_parameters el)
@@ -7855,19 +8323,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(typed_parameters el, typed_parameters newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(typed_parameters el, IEnumerable<typed_parameters> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			params_list.RemoveAt(ind);
 			params_list.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<typed_parameters> match)
@@ -7877,8 +8352,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public typed_parameters Last()
 		{
-			return params_list[params_list.Count - 1];
+			if (params_list.Count > 0)
+		        return params_list[params_list.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return params_list.Count; }
+		}
+		
+		public void Insert(int pos, typed_parameters el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			params_list.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -8067,12 +8559,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(procedure_attribute el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			proc_attributes.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<procedure_attribute> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			proc_attributes.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -8081,6 +8577,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params procedure_attribute[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			proc_attributes.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -8089,6 +8587,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(procedure_attribute el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = proc_attributes.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -8097,32 +8597,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(procedure_attribute el, procedure_attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			proc_attributes.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(procedure_attribute el, IEnumerable<procedure_attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			proc_attributes.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(procedure_attribute el, procedure_attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			proc_attributes.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(procedure_attribute el, IEnumerable<procedure_attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			proc_attributes.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(procedure_attribute el)
@@ -8132,19 +8646,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(procedure_attribute el, procedure_attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			proc_attributes[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(procedure_attribute el, IEnumerable<procedure_attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			proc_attributes.RemoveAt(ind);
 			proc_attributes.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<procedure_attribute> match)
@@ -8154,8 +8675,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public procedure_attribute Last()
 		{
-			return proc_attributes[proc_attributes.Count - 1];
+			if (proc_attributes.Count > 0)
+		        return proc_attributes[proc_attributes.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return proc_attributes.Count; }
+		}
+		
+		public void Insert(int pos, procedure_attribute el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			proc_attributes.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -8373,6 +8911,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameters=value;
+				if (_parameters != null)
+					_parameters.Parent = this;
 			}
 		}
 
@@ -8388,6 +8928,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_proc_attributes=value;
+				if (_proc_attributes != null)
+					_proc_attributes.Parent = this;
 			}
 		}
 
@@ -8403,6 +8945,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -8448,6 +8992,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_template_args=value;
+				if (_template_args != null)
+					_template_args.Parent = this;
 			}
 		}
 
@@ -8463,6 +9009,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_where_defs=value;
+				if (_where_defs != null)
+					_where_defs.Parent = this;
 			}
 		}
 
@@ -8720,6 +9268,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_return_type=value;
+				if (_return_type != null)
+					_return_type.Parent = this;
 			}
 		}
 
@@ -8961,6 +9511,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_proc_header=value;
+				if (_proc_header != null)
+					_proc_header.Parent = this;
 			}
 		}
 
@@ -8976,6 +9528,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_proc_body=value;
+				if (_proc_body != null)
+					_proc_body.Parent = this;
 			}
 		}
 
@@ -9163,6 +9717,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -9178,6 +9734,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_def=value;
+				if (_type_def != null)
+					_type_def.Parent = this;
 			}
 		}
 
@@ -9368,12 +9926,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(type_declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			types_decl.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<type_declaration> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			types_decl.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -9382,6 +9944,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params type_declaration[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			types_decl.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -9390,6 +9954,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(type_declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = types_decl.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -9398,32 +9964,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(type_declaration el, type_declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types_decl.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(type_declaration el, IEnumerable<type_declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			types_decl.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_declaration el, type_declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types_decl.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_declaration el, IEnumerable<type_declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			types_decl.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(type_declaration el)
@@ -9433,19 +10013,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(type_declaration el, type_declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types_decl[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(type_declaration el, IEnumerable<type_declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			types_decl.RemoveAt(ind);
 			types_decl.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<type_declaration> match)
@@ -9455,8 +10042,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public type_declaration Last()
 		{
-			return types_decl[types_decl.Count - 1];
+			if (types_decl.Count > 0)
+		        return types_decl[types_decl.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return types_decl.Count; }
+		}
+		
+		public void Insert(int pos, type_declaration el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			types_decl.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -9807,6 +10411,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_const_type=value;
+				if (_const_type != null)
+					_const_type.Parent = this;
 			}
 		}
 
@@ -9991,6 +10597,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_const_name=value;
+				if (_const_name != null)
+					_const_name.Parent = this;
 			}
 		}
 
@@ -10006,6 +10614,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_const_value=value;
+				if (_const_value != null)
+					_const_value.Parent = this;
 			}
 		}
 
@@ -10196,12 +10806,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(const_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			const_defs.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<const_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			const_defs.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -10210,6 +10824,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params const_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			const_defs.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -10218,6 +10834,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(const_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = const_defs.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -10226,32 +10844,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(const_definition el, const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			const_defs.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(const_definition el, IEnumerable<const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			const_defs.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(const_definition el, const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			const_defs.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(const_definition el, IEnumerable<const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			const_defs.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(const_definition el)
@@ -10261,19 +10893,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(const_definition el, const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			const_defs[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(const_definition el, IEnumerable<const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			const_defs.RemoveAt(ind);
 			const_defs.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<const_definition> match)
@@ -10283,8 +10922,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public const_definition Last()
 		{
-			return const_defs[const_defs.Count - 1];
+			if (const_defs.Count > 0)
+		        return const_defs[const_defs.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return const_defs.Count; }
+		}
+		
+		public void Insert(int pos, const_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			const_defs.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -10462,6 +11118,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_idunit_name=value;
+				if (_idunit_name != null)
+					_idunit_name.Parent = this;
 			}
 		}
 
@@ -10625,6 +11283,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -10793,6 +11453,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_in_file=value;
+				if (_in_file != null)
+					_in_file.Parent = this;
 			}
 		}
 
@@ -10975,12 +11637,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(unit_or_namespace el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			units.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<unit_or_namespace> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			units.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -10989,6 +11655,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params unit_or_namespace[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			units.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -10997,6 +11665,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(unit_or_namespace el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = units.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -11005,32 +11675,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			units.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			units.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			units.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			units.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(unit_or_namespace el)
@@ -11040,19 +11724,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			units[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			units.RemoveAt(ind);
 			units.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<unit_or_namespace> match)
@@ -11062,8 +11753,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public unit_or_namespace Last()
 		{
-			return units[units.Count - 1];
+			if (units.Count > 0)
+		        return units[units.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return units.Count; }
+		}
+		
+		public void Insert(int pos, unit_or_namespace el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			units.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -11239,6 +11947,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_used_units=value;
+				if (_used_units != null)
+					_used_units.Parent = this;
 			}
 		}
 
@@ -11254,6 +11964,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_program_definitions=value;
+				if (_program_definitions != null)
+					_program_definitions.Parent = this;
 			}
 		}
 
@@ -11269,6 +11981,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_program_code=value;
+				if (_program_code != null)
+					_program_code.Parent = this;
 			}
 		}
 
@@ -11284,6 +11998,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_using_list=value;
+				if (_using_list != null)
+					_using_list.Parent = this;
 			}
 		}
 
@@ -11528,12 +12244,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(compiler_directive el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			compiler_directives.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<compiler_directive> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			compiler_directives.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -11542,6 +12262,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params compiler_directive[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			compiler_directives.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -11550,6 +12272,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(compiler_directive el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = compiler_directives.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -11558,32 +12282,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compiler_directives.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			compiler_directives.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compiler_directives.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			compiler_directives.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(compiler_directive el)
@@ -11593,19 +12331,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			compiler_directives[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			compiler_directives.RemoveAt(ind);
 			compiler_directives.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<compiler_directive> match)
@@ -11615,8 +12360,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public compiler_directive Last()
 		{
-			return compiler_directives[compiler_directives.Count - 1];
+			if (compiler_directives.Count > 0)
+		        return compiler_directives[compiler_directives.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return compiler_directives.Count; }
+		}
+		
+		public void Insert(int pos, compiler_directive el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			compiler_directives.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -11835,6 +12597,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_unit_name=value;
+				if (_unit_name != null)
+					_unit_name.Parent = this;
 			}
 		}
 
@@ -11850,6 +12614,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_interface_part=value;
+				if (_interface_part != null)
+					_interface_part.Parent = this;
 			}
 		}
 
@@ -11865,6 +12631,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_implementation_part=value;
+				if (_implementation_part != null)
+					_implementation_part.Parent = this;
 			}
 		}
 
@@ -11880,6 +12648,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_initialization_part=value;
+				if (_initialization_part != null)
+					_initialization_part.Parent = this;
 			}
 		}
 
@@ -11895,6 +12665,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_finalization_part=value;
+				if (_finalization_part != null)
+					_finalization_part.Parent = this;
 			}
 		}
 
@@ -11910,6 +12682,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_attributes=value;
+				if (_attributes != null)
+					_attributes.Parent = this;
 			}
 		}
 
@@ -12205,6 +12979,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_program_name=value;
+				if (_program_name != null)
+					_program_name.Parent = this;
 			}
 		}
 
@@ -12220,6 +12996,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_used_units=value;
+				if (_used_units != null)
+					_used_units.Parent = this;
 			}
 		}
 
@@ -12235,6 +13013,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_program_block=value;
+				if (_program_block != null)
+					_program_block.Parent = this;
 			}
 		}
 
@@ -12250,6 +13030,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_using_namespaces=value;
+				if (_using_namespaces != null)
+					_using_namespaces.Parent = this;
 			}
 		}
 
@@ -12599,6 +13381,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_address_of=value;
+				if (_address_of != null)
+					_address_of.Parent = this;
 			}
 		}
 
@@ -12757,6 +13541,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_conditions=value;
+				if (_conditions != null)
+					_conditions.Parent = this;
 			}
 		}
 
@@ -12772,6 +13558,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_exec_if_true=value;
+				if (_exec_if_true != null)
+					_exec_if_true.Parent = this;
 			}
 		}
 
@@ -12946,6 +13734,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_param=value;
+				if (_param != null)
+					_param.Parent = this;
 			}
 		}
 
@@ -12961,6 +13751,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_conditions=value;
+				if (_conditions != null)
+					_conditions.Parent = this;
 			}
 		}
 
@@ -12976,6 +13768,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_else_statement=value;
+				if (_else_statement != null)
+					_else_statement.Parent = this;
 			}
 		}
 
@@ -13155,7 +13949,7 @@ namespace PascalABCCompiler.SyntaxTree
 		    FillParentsInDirectChilds();
 		}
 		
-		protected List<ident> _ln;
+		protected List<ident> _ln=new List<ident>();
 		protected ident _class_name;
 		protected ident _meth_name;
 		protected ident _explicit_interface_name;
@@ -13187,6 +13981,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_class_name=value;
+				if (_class_name != null)
+					_class_name.Parent = this;
 			}
 		}
 
@@ -13202,6 +13998,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_meth_name=value;
+				if (_meth_name != null)
+					_meth_name.Parent = this;
 			}
 		}
 
@@ -13217,6 +14015,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_explicit_interface_name=value;
+				if (_explicit_interface_name != null)
+					_explicit_interface_name.Parent = this;
 			}
 		}
 
@@ -13233,12 +14033,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			ln.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<ident> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			ln.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -13247,6 +14051,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params ident[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			ln.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -13255,6 +14061,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(ident el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = ln.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -13263,32 +14071,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			ln.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			ln.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			ln.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			ln.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(ident el)
@@ -13298,19 +14120,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(ident el, ident newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			ln[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(ident el, IEnumerable<ident> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			ln.RemoveAt(ind);
 			ln.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<ident> match)
@@ -13320,8 +14149,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public ident Last()
 		{
-			return ln[ln.Count - 1];
+			if (ln.Count > 0)
+		        return ln[ln.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return ln.Count; }
+		}
+		
+		public void Insert(int pos, ident el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			ln.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -13536,6 +14382,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -13551,6 +14399,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -13819,6 +14669,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_label=value;
+				if (_label != null)
+					_label.Parent = this;
 			}
 		}
 
@@ -13977,6 +14829,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_label_name=value;
+				if (_label_name != null)
+					_label_name.Parent = this;
 			}
 		}
 
@@ -13992,6 +14846,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_to_statement=value;
+				if (_to_statement != null)
+					_to_statement.Parent = this;
 			}
 		}
 
@@ -14163,6 +15019,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_what_do=value;
+				if (_what_do != null)
+					_what_do.Parent = this;
 			}
 		}
 
@@ -14178,6 +15036,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_do_with=value;
+				if (_do_with != null)
+					_do_with.Parent = this;
 			}
 		}
 
@@ -14367,6 +15227,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameters=value;
+				if (_parameters != null)
+					_parameters.Parent = this;
 			}
 		}
 
@@ -14535,6 +15397,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_values=value;
+				if (_values != null)
+					_values.Parent = this;
 			}
 		}
 
@@ -14690,6 +15554,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_elements=value;
+				if (_elements != null)
+					_elements.Parent = this;
 			}
 		}
 
@@ -14799,7 +15665,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///
+	///procedure_definition pr != null если метод сгенерирован по выражению. //pr сделано object чтобы не обходилось лишний раз
 	///</summary>
 	[Serializable]
 	public partial class write_accessor_name : syntax_tree_node
@@ -14816,22 +15682,28 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public write_accessor_name(ident _accessor_name)
+		public write_accessor_name(ident _accessor_name,procedure_definition _pr,statement _statment_for_formatting)
 		{
 			this._accessor_name=_accessor_name;
+			this._pr=_pr;
+			this._statment_for_formatting=_statment_for_formatting;
 			FillParentsInDirectChilds();
 		}
 
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public write_accessor_name(ident _accessor_name,SourceContext sc)
+		public write_accessor_name(ident _accessor_name,procedure_definition _pr,statement _statment_for_formatting,SourceContext sc)
 		{
 			this._accessor_name=_accessor_name;
+			this._pr=_pr;
+			this._statment_for_formatting=_statment_for_formatting;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
 		protected ident _accessor_name;
+		protected procedure_definition _pr;
+		protected statement _statment_for_formatting;
 
 		///<summary>
 		///
@@ -14845,6 +15717,42 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_accessor_name=value;
+				if (_accessor_name != null)
+					_accessor_name.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public procedure_definition pr
+		{
+			get
+			{
+				return _pr;
+			}
+			set
+			{
+				_pr=value;
+				if (_pr != null)
+					_pr.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public statement statment_for_formatting
+		{
+			get
+			{
+				return _statment_for_formatting;
+			}
+			set
+			{
+				_statment_for_formatting=value;
+				if (_statment_for_formatting != null)
+					_statment_for_formatting.Parent = this;
 			}
 		}
 
@@ -14861,6 +15769,16 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.accessor_name = (ident)accessor_name.Clone();
 				copy.accessor_name.Parent = copy;
 			}
+			if (pr != null)
+			{
+				copy.pr = (procedure_definition)pr.Clone();
+				copy.pr.Parent = copy;
+			}
+			if (statment_for_formatting != null)
+			{
+				copy.statment_for_formatting = (statement)statment_for_formatting.Clone();
+				copy.statment_for_formatting.Parent = copy;
+			}
 			return copy;
 		}
 
@@ -14875,6 +15793,10 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			if (accessor_name != null)
 				accessor_name.Parent = this;
+			if (pr != null)
+				pr.Parent = this;
+			if (statment_for_formatting != null)
+				statment_for_formatting.Parent = this;
 		}
 
 		///<summary> Заполняет поля Parent во всем поддереве </summary>
@@ -14882,6 +15804,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			FillParentsInDirectChilds();
 			accessor_name?.FillParentsInAllChilds();
+			pr?.FillParentsInAllChilds();
+			statment_for_formatting?.FillParentsInAllChilds();
 		}
 
 		///<summary>
@@ -14891,7 +15815,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 3;
 			}
 		}
 		///<summary>
@@ -14901,7 +15825,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 3;
 			}
 		}
 		///<summary>
@@ -14917,6 +15841,10 @@ namespace PascalABCCompiler.SyntaxTree
 				{
 					case 0:
 						return accessor_name;
+					case 1:
+						return pr;
+					case 2:
+						return statment_for_formatting;
 				}
 				return null;
 			}
@@ -14928,6 +15856,12 @@ namespace PascalABCCompiler.SyntaxTree
 				{
 					case 0:
 						accessor_name = (ident)value;
+						break;
+					case 1:
+						pr = (procedure_definition)value;
+						break;
+					case 2:
+						statment_for_formatting = (statement)value;
 						break;
 				}
 			}
@@ -14946,7 +15880,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///
+	///procedure_definition pr != null если метод сгенерирован по выражению. //pr сделано object чтобы не обходилось лишний раз
 	///</summary>
 	[Serializable]
 	public partial class read_accessor_name : syntax_tree_node
@@ -14963,22 +15897,28 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public read_accessor_name(ident _accessor_name)
+		public read_accessor_name(ident _accessor_name,procedure_definition _pr,expression _expression_for_formatting)
 		{
 			this._accessor_name=_accessor_name;
+			this._pr=_pr;
+			this._expression_for_formatting=_expression_for_formatting;
 			FillParentsInDirectChilds();
 		}
 
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public read_accessor_name(ident _accessor_name,SourceContext sc)
+		public read_accessor_name(ident _accessor_name,procedure_definition _pr,expression _expression_for_formatting,SourceContext sc)
 		{
 			this._accessor_name=_accessor_name;
+			this._pr=_pr;
+			this._expression_for_formatting=_expression_for_formatting;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
 		protected ident _accessor_name;
+		protected procedure_definition _pr;
+		protected expression _expression_for_formatting;
 
 		///<summary>
 		///
@@ -14992,6 +15932,42 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_accessor_name=value;
+				if (_accessor_name != null)
+					_accessor_name.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public procedure_definition pr
+		{
+			get
+			{
+				return _pr;
+			}
+			set
+			{
+				_pr=value;
+				if (_pr != null)
+					_pr.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public expression expression_for_formatting
+		{
+			get
+			{
+				return _expression_for_formatting;
+			}
+			set
+			{
+				_expression_for_formatting=value;
+				if (_expression_for_formatting != null)
+					_expression_for_formatting.Parent = this;
 			}
 		}
 
@@ -15008,6 +15984,16 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.accessor_name = (ident)accessor_name.Clone();
 				copy.accessor_name.Parent = copy;
 			}
+			if (pr != null)
+			{
+				copy.pr = (procedure_definition)pr.Clone();
+				copy.pr.Parent = copy;
+			}
+			if (expression_for_formatting != null)
+			{
+				copy.expression_for_formatting = (expression)expression_for_formatting.Clone();
+				copy.expression_for_formatting.Parent = copy;
+			}
 			return copy;
 		}
 
@@ -15022,6 +16008,10 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			if (accessor_name != null)
 				accessor_name.Parent = this;
+			if (pr != null)
+				pr.Parent = this;
+			if (expression_for_formatting != null)
+				expression_for_formatting.Parent = this;
 		}
 
 		///<summary> Заполняет поля Parent во всем поддереве </summary>
@@ -15029,6 +16019,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			FillParentsInDirectChilds();
 			accessor_name?.FillParentsInAllChilds();
+			pr?.FillParentsInAllChilds();
+			expression_for_formatting?.FillParentsInAllChilds();
 		}
 
 		///<summary>
@@ -15038,7 +16030,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 3;
 			}
 		}
 		///<summary>
@@ -15048,7 +16040,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 3;
 			}
 		}
 		///<summary>
@@ -15064,6 +16056,10 @@ namespace PascalABCCompiler.SyntaxTree
 				{
 					case 0:
 						return accessor_name;
+					case 1:
+						return pr;
+					case 2:
+						return expression_for_formatting;
 				}
 				return null;
 			}
@@ -15075,6 +16071,12 @@ namespace PascalABCCompiler.SyntaxTree
 				{
 					case 0:
 						accessor_name = (ident)value;
+						break;
+					case 1:
+						pr = (procedure_definition)value;
+						break;
+					case 2:
+						expression_for_formatting = (expression)value;
 						break;
 				}
 			}
@@ -15142,6 +16144,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_read_accessor=value;
+				if (_read_accessor != null)
+					_read_accessor.Parent = this;
 			}
 		}
 
@@ -15157,6 +16161,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_write_accessor=value;
+				if (_write_accessor != null)
+					_write_accessor.Parent = this;
 			}
 		}
 
@@ -15271,7 +16277,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///property property_name[parameter_list]:property_type index index_expression accessors;array_default;
+	///property property_name[parameter_list]:property_type index index_expression accessors; [virtual;] array_default;
 	///</summary>
 	[Serializable]
 	public partial class simple_property : declaration
@@ -15288,7 +16294,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public simple_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr)
+		public simple_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,proc_attribute _virt_over_none_attr,bool _is_auto,expression _initial_value)
 		{
 			this._property_name=_property_name;
 			this._property_type=_property_type;
@@ -15297,13 +16303,16 @@ namespace PascalABCCompiler.SyntaxTree
 			this._array_default=_array_default;
 			this._parameter_list=_parameter_list;
 			this._attr=_attr;
+			this._virt_over_none_attr=_virt_over_none_attr;
+			this._is_auto=_is_auto;
+			this._initial_value=_initial_value;
 			FillParentsInDirectChilds();
 		}
 
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public simple_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,SourceContext sc)
+		public simple_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,proc_attribute _virt_over_none_attr,bool _is_auto,expression _initial_value,SourceContext sc)
 		{
 			this._property_name=_property_name;
 			this._property_type=_property_type;
@@ -15312,6 +16321,9 @@ namespace PascalABCCompiler.SyntaxTree
 			this._array_default=_array_default;
 			this._parameter_list=_parameter_list;
 			this._attr=_attr;
+			this._virt_over_none_attr=_virt_over_none_attr;
+			this._is_auto=_is_auto;
+			this._initial_value=_initial_value;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
@@ -15322,6 +16334,9 @@ namespace PascalABCCompiler.SyntaxTree
 		protected property_array_default _array_default;
 		protected property_parameter_list _parameter_list;
 		protected definition_attribute _attr;
+		protected proc_attribute _virt_over_none_attr;
+		protected bool _is_auto;
+		protected expression _initial_value;
 
 		///<summary>
 		///
@@ -15335,6 +16350,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_property_name=value;
+				if (_property_name != null)
+					_property_name.Parent = this;
 			}
 		}
 
@@ -15350,6 +16367,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_property_type=value;
+				if (_property_type != null)
+					_property_type.Parent = this;
 			}
 		}
 
@@ -15365,6 +16384,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_index_expression=value;
+				if (_index_expression != null)
+					_index_expression.Parent = this;
 			}
 		}
 
@@ -15380,6 +16401,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_accessors=value;
+				if (_accessors != null)
+					_accessors.Parent = this;
 			}
 		}
 
@@ -15395,6 +16418,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_array_default=value;
+				if (_array_default != null)
+					_array_default.Parent = this;
 			}
 		}
 
@@ -15410,6 +16435,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameter_list=value;
+				if (_parameter_list != null)
+					_parameter_list.Parent = this;
 			}
 		}
 
@@ -15425,6 +16452,53 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_attr=value;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public proc_attribute virt_over_none_attr
+		{
+			get
+			{
+				return _virt_over_none_attr;
+			}
+			set
+			{
+				_virt_over_none_attr=value;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public bool is_auto
+		{
+			get
+			{
+				return _is_auto;
+			}
+			set
+			{
+				_is_auto=value;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public expression initial_value
+		{
+			get
+			{
+				return _initial_value;
+			}
+			set
+			{
+				_initial_value=value;
+				if (_initial_value != null)
+					_initial_value.Parent = this;
 			}
 		}
 
@@ -15472,6 +16546,13 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.parameter_list.Parent = copy;
 			}
 			copy.attr = attr;
+			copy.virt_over_none_attr = virt_over_none_attr;
+			copy.is_auto = is_auto;
+			if (initial_value != null)
+			{
+				copy.initial_value = (expression)initial_value.Clone();
+				copy.initial_value.Parent = copy;
+			}
 			return copy;
 		}
 
@@ -15498,6 +16579,8 @@ namespace PascalABCCompiler.SyntaxTree
 				array_default.Parent = this;
 			if (parameter_list != null)
 				parameter_list.Parent = this;
+			if (initial_value != null)
+				initial_value.Parent = this;
 		}
 
 		///<summary> Заполняет поля Parent во всем поддереве </summary>
@@ -15511,6 +16594,7 @@ namespace PascalABCCompiler.SyntaxTree
 			accessors?.FillParentsInAllChilds();
 			array_default?.FillParentsInAllChilds();
 			parameter_list?.FillParentsInAllChilds();
+			initial_value?.FillParentsInAllChilds();
 		}
 
 		///<summary>
@@ -15520,7 +16604,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 6;
+				return 7;
 			}
 		}
 		///<summary>
@@ -15530,7 +16614,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 6;
+				return 7;
 			}
 		}
 		///<summary>
@@ -15556,6 +16640,8 @@ namespace PascalABCCompiler.SyntaxTree
 						return array_default;
 					case 5:
 						return parameter_list;
+					case 6:
+						return initial_value;
 				}
 				return null;
 			}
@@ -15582,6 +16668,9 @@ namespace PascalABCCompiler.SyntaxTree
 						break;
 					case 5:
 						parameter_list = (property_parameter_list)value;
+						break;
+					case 6:
+						initial_value = (expression)value;
 						break;
 				}
 			}
@@ -15638,7 +16727,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public index_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,formal_parameters _property_parametres,default_indexer_property_node _is_default)
+		public index_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,proc_attribute _virt_over_none_attr,bool _is_auto,expression _initial_value,formal_parameters _property_parametres,default_indexer_property_node _is_default)
 		{
 			this._property_name=_property_name;
 			this._property_type=_property_type;
@@ -15647,6 +16736,9 @@ namespace PascalABCCompiler.SyntaxTree
 			this._array_default=_array_default;
 			this._parameter_list=_parameter_list;
 			this._attr=_attr;
+			this._virt_over_none_attr=_virt_over_none_attr;
+			this._is_auto=_is_auto;
+			this._initial_value=_initial_value;
 			this._property_parametres=_property_parametres;
 			this._is_default=_is_default;
 			FillParentsInDirectChilds();
@@ -15655,7 +16747,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public index_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,formal_parameters _property_parametres,default_indexer_property_node _is_default,SourceContext sc)
+		public index_property(ident _property_name,type_definition _property_type,expression _index_expression,property_accessors _accessors,property_array_default _array_default,property_parameter_list _parameter_list,definition_attribute _attr,proc_attribute _virt_over_none_attr,bool _is_auto,expression _initial_value,formal_parameters _property_parametres,default_indexer_property_node _is_default,SourceContext sc)
 		{
 			this._property_name=_property_name;
 			this._property_type=_property_type;
@@ -15664,6 +16756,9 @@ namespace PascalABCCompiler.SyntaxTree
 			this._array_default=_array_default;
 			this._parameter_list=_parameter_list;
 			this._attr=_attr;
+			this._virt_over_none_attr=_virt_over_none_attr;
+			this._is_auto=_is_auto;
+			this._initial_value=_initial_value;
 			this._property_parametres=_property_parametres;
 			this._is_default=_is_default;
 			source_context = sc;
@@ -15684,6 +16779,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_property_parametres=value;
+				if (_property_parametres != null)
+					_property_parametres.Parent = this;
 			}
 		}
 
@@ -15699,6 +16796,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_is_default=value;
+				if (_is_default != null)
+					_is_default.Parent = this;
 			}
 		}
 
@@ -15746,6 +16845,13 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.parameter_list.Parent = copy;
 			}
 			copy.attr = attr;
+			copy.virt_over_none_attr = virt_over_none_attr;
+			copy.is_auto = is_auto;
+			if (initial_value != null)
+			{
+				copy.initial_value = (expression)initial_value.Clone();
+				copy.initial_value.Parent = copy;
+			}
 			if (property_parametres != null)
 			{
 				copy.property_parametres = (formal_parameters)property_parametres.Clone();
@@ -15782,6 +16888,8 @@ namespace PascalABCCompiler.SyntaxTree
 				array_default.Parent = this;
 			if (parameter_list != null)
 				parameter_list.Parent = this;
+			if (initial_value != null)
+				initial_value.Parent = this;
 			if (property_parametres != null)
 				property_parametres.Parent = this;
 			if (is_default != null)
@@ -15799,6 +16907,7 @@ namespace PascalABCCompiler.SyntaxTree
 			accessors?.FillParentsInAllChilds();
 			array_default?.FillParentsInAllChilds();
 			parameter_list?.FillParentsInAllChilds();
+			initial_value?.FillParentsInAllChilds();
 			property_parametres?.FillParentsInAllChilds();
 			is_default?.FillParentsInAllChilds();
 		}
@@ -15810,7 +16919,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 8;
+				return 9;
 			}
 		}
 		///<summary>
@@ -15820,7 +16929,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 8;
+				return 9;
 			}
 		}
 		///<summary>
@@ -15847,8 +16956,10 @@ namespace PascalABCCompiler.SyntaxTree
 					case 5:
 						return parameter_list;
 					case 6:
-						return property_parametres;
+						return initial_value;
 					case 7:
+						return property_parametres;
+					case 8:
 						return is_default;
 				}
 				return null;
@@ -15878,9 +16989,12 @@ namespace PascalABCCompiler.SyntaxTree
 						parameter_list = (property_parameter_list)value;
 						break;
 					case 6:
-						property_parametres = (formal_parameters)value;
+						initial_value = (expression)value;
 						break;
 					case 7:
+						property_parametres = (formal_parameters)value;
+						break;
+					case 8:
 						is_default = (default_indexer_property_node)value;
 						break;
 				}
@@ -15970,6 +17084,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_access_mod=value;
+				if (_access_mod != null)
+					_access_mod.Parent = this;
 			}
 		}
 
@@ -15986,12 +17102,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			members.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<declaration> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			members.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -16000,6 +17120,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params declaration[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			members.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -16008,6 +17130,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = members.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -16016,32 +17140,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			members.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			members.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			members.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			members.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(declaration el)
@@ -16051,19 +17189,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			members[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			members.RemoveAt(ind);
 			members.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<declaration> match)
@@ -16073,8 +17218,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public declaration Last()
 		{
-			return members[members.Count - 1];
+			if (members.Count > 0)
+		        return members[members.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return members.Count; }
+		}
+		
+		public void Insert(int pos, declaration el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			members.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -16346,13 +17508,13 @@ namespace PascalABCCompiler.SyntaxTree
 	///
 	///</summary>
 	[Serializable]
-	public partial class class_body : syntax_tree_node
+	public partial class class_body_list : syntax_tree_node
 	{
 
 		///<summary>
 		///Конструктор без параметров.
 		///</summary>
-		public class_body()
+		public class_body_list()
 		{
 
 		}
@@ -16360,7 +17522,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_body(List<class_members> _class_def_blocks)
+		public class_body_list(List<class_members> _class_def_blocks)
 		{
 			this._class_def_blocks=_class_def_blocks;
 			FillParentsInDirectChilds();
@@ -16369,13 +17531,13 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_body(List<class_members> _class_def_blocks,SourceContext sc)
+		public class_body_list(List<class_members> _class_def_blocks,SourceContext sc)
 		{
 			this._class_def_blocks=_class_def_blocks;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
-		public class_body(class_members elem, SourceContext sc = null)
+		public class_body_list(class_members elem, SourceContext sc = null)
 		{
 			Add(elem, sc);
 		    FillParentsInDirectChilds();
@@ -16399,7 +17561,7 @@ namespace PascalABCCompiler.SyntaxTree
 		}
 
 
-		public class_body Add(class_members elem, SourceContext sc = null)
+		public class_body_list Add(class_members elem, SourceContext sc = null)
 		{
 			class_def_blocks.Add(elem);
 			if (elem != null)
@@ -16411,12 +17573,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(class_members el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			class_def_blocks.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<class_members> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			class_def_blocks.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -16425,6 +17591,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params class_members[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			class_def_blocks.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -16433,6 +17601,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(class_members el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = class_def_blocks.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -16441,32 +17611,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(class_members el, class_members newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			class_def_blocks.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(class_members el, IEnumerable<class_members> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			class_def_blocks.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(class_members el, class_members newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			class_def_blocks.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(class_members el, IEnumerable<class_members> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			class_def_blocks.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(class_members el)
@@ -16476,19 +17660,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(class_members el, class_members newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			class_def_blocks[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(class_members el, IEnumerable<class_members> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			class_def_blocks.RemoveAt(ind);
 			class_def_blocks.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<class_members> match)
@@ -16498,13 +17689,30 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public class_members Last()
 		{
-			return class_def_blocks[class_def_blocks.Count - 1];
+			if (class_def_blocks.Count > 0)
+		        return class_def_blocks[class_def_blocks.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return class_def_blocks.Count; }
+		}
+		
+		public void Insert(int pos, class_members el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			class_def_blocks.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
 		{
-			class_body copy = new class_body();
+			class_body_list copy = new class_body_list();
 			copy.Parent = this.Parent;
 			if (source_context != null)
 				copy.source_context = new SourceContext(source_context);
@@ -16525,9 +17733,9 @@ namespace PascalABCCompiler.SyntaxTree
 		}
 
 		/// <summary> Получает копию данного узла корректного типа </summary>
-		public new class_body TypedClone()
+		public new class_body_list TypedClone()
 		{
-			return Clone() as class_body;
+			return Clone() as class_body_list;
 		}
 
 		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
@@ -16637,7 +17845,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_definition(named_type_reference_list _class_parents,class_body _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto)
+		public class_definition(named_type_reference_list _class_parents,class_body_list _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto)
 		{
 			this._class_parents=_class_parents;
 			this._body=_body;
@@ -16652,7 +17860,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_definition(named_type_reference_list _class_parents,class_body _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto,SourceContext sc)
+		public class_definition(named_type_reference_list _class_parents,class_body_list _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto,SourceContext sc)
 		{
 			this._class_parents=_class_parents;
 			this._body=_body;
@@ -16668,7 +17876,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_definition(type_definition_attr_list _attr_list,named_type_reference_list _class_parents,class_body _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto)
+		public class_definition(type_definition_attr_list _attr_list,named_type_reference_list _class_parents,class_body_list _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto)
 		{
 			this._attr_list=_attr_list;
 			this._class_parents=_class_parents;
@@ -16684,7 +17892,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public class_definition(type_definition_attr_list _attr_list,named_type_reference_list _class_parents,class_body _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto,SourceContext sc)
+		public class_definition(type_definition_attr_list _attr_list,named_type_reference_list _class_parents,class_body_list _body,class_keyword _keyword,ident_list _template_args,where_definition_list _where_section,class_attribute _attribute,bool _is_auto,SourceContext sc)
 		{
 			this._attr_list=_attr_list;
 			this._class_parents=_class_parents;
@@ -16698,7 +17906,7 @@ namespace PascalABCCompiler.SyntaxTree
 			FillParentsInDirectChilds();
 		}
 		protected named_type_reference_list _class_parents;
-		protected class_body _body;
+		protected class_body_list _body;
 		protected class_keyword _keyword;
 		protected ident_list _template_args;
 		protected where_definition_list _where_section;
@@ -16717,13 +17925,15 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_class_parents=value;
+				if (_class_parents != null)
+					_class_parents.Parent = this;
 			}
 		}
 
 		///<summary>
 		///
 		///</summary>
-		public class_body body
+		public class_body_list body
 		{
 			get
 			{
@@ -16732,6 +17942,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_body=value;
+				if (_body != null)
+					_body.Parent = this;
 			}
 		}
 
@@ -16762,6 +17974,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_template_args=value;
+				if (_template_args != null)
+					_template_args.Parent = this;
 			}
 		}
 
@@ -16777,6 +17991,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_where_section=value;
+				if (_where_section != null)
+					_where_section.Parent = this;
 			}
 		}
 
@@ -16835,7 +18051,7 @@ namespace PascalABCCompiler.SyntaxTree
 			}
 			if (body != null)
 			{
-				copy.body = (class_body)body.Clone();
+				copy.body = (class_body_list)body.Clone();
 				copy.body.Parent = copy;
 			}
 			copy.keyword = keyword;
@@ -16946,7 +18162,7 @@ namespace PascalABCCompiler.SyntaxTree
 						class_parents = (named_type_reference_list)value;
 						break;
 					case 2:
-						body = (class_body)value;
+						body = (class_body_list)value;
 						break;
 					case 3:
 						template_args = (ident_list)value;
@@ -17150,6 +18366,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_unit_name=value;
+				if (_unit_name != null)
+					_unit_name.Parent = this;
 			}
 		}
 
@@ -17340,6 +18558,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_of_type=value;
+				if (_of_type != null)
+					_of_type.Parent = this;
 			}
 		}
 
@@ -17511,6 +18731,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -17526,6 +18748,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_val=value;
+				if (_val != null)
+					_val.Parent = this;
 			}
 		}
 
@@ -17716,12 +18940,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(record_const_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			rec_consts.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<record_const_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			rec_consts.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -17730,6 +18958,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params record_const_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			rec_consts.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -17738,6 +18968,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(record_const_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = rec_consts.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -17746,32 +18978,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(record_const_definition el, record_const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			rec_consts.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(record_const_definition el, IEnumerable<record_const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			rec_consts.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(record_const_definition el, record_const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			rec_consts.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(record_const_definition el, IEnumerable<record_const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			rec_consts.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(record_const_definition el)
@@ -17781,19 +19027,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(record_const_definition el, record_const_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			rec_consts[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(record_const_definition el, IEnumerable<record_const_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			rec_consts.RemoveAt(ind);
 			rec_consts.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<record_const_definition> match)
@@ -17803,8 +19056,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public record_const_definition Last()
 		{
-			return rec_consts[rec_consts.Count - 1];
+			if (rec_consts.Count > 0)
+		        return rec_consts[rec_consts.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return rec_consts.Count; }
+		}
+		
+		public void Insert(int pos, record_const_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			rec_consts.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -18005,6 +19275,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parts=value;
+				if (_parts != null)
+					_parts.Parent = this;
 			}
 		}
 
@@ -18020,6 +19292,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_base_type=value;
+				if (_base_type != null)
+					_base_type.Parent = this;
 			}
 		}
 
@@ -18222,6 +19496,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_enumerators=value;
+				if (_enumerators != null)
+					_enumerators.Parent = this;
 			}
 		}
 
@@ -18527,6 +19803,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_excep=value;
+				if (_excep != null)
+					_excep.Parent = this;
 			}
 		}
 
@@ -18841,12 +20119,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(literal el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			literals.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<literal> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			literals.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -18855,6 +20137,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params literal[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			literals.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -18863,6 +20147,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(literal el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = literals.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -18871,32 +20157,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(literal el, literal newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			literals.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(literal el, IEnumerable<literal> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			literals.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(literal el, literal newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			literals.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(literal el, IEnumerable<literal> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			literals.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(literal el)
@@ -18906,19 +20206,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(literal el, literal newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			literals[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(literal el, IEnumerable<literal> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			literals.RemoveAt(ind);
 			literals.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<literal> match)
@@ -18928,8 +20235,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public literal Last()
 		{
-			return literals[literals.Count - 1];
+			if (literals.Count > 0)
+		        return literals[literals.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return literals.Count; }
+		}
+		
+		public void Insert(int pos, literal el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			literals.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -19130,6 +20454,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_num_of_symbols=value;
+				if (_num_of_symbols != null)
+					_num_of_symbols.Parent = this;
 			}
 		}
 
@@ -19145,6 +20471,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -19329,6 +20657,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars=value;
+				if (_vars != null)
+					_vars.Parent = this;
 			}
 		}
 
@@ -19344,6 +20674,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars_type=value;
+				if (_vars_type != null)
+					_vars_type.Parent = this;
 			}
 		}
 
@@ -19526,12 +20858,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(variant el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			vars.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<variant> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -19540,6 +20876,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params variant[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -19548,6 +20886,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(variant el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = vars.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -19556,32 +20896,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(variant el, variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(variant el, IEnumerable<variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(variant el, variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(variant el, IEnumerable<variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(variant el)
@@ -19591,19 +20945,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(variant el, variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(variant el, IEnumerable<variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			vars.RemoveAt(ind);
 			vars.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<variant> match)
@@ -19613,8 +20974,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public variant Last()
 		{
-			return vars[vars.Count - 1];
+			if (vars.Count > 0)
+		        return vars[vars.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return vars.Count; }
+		}
+		
+		public void Insert(int pos, variant el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			vars.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -19784,6 +21162,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_case_exprs=value;
+				if (_case_exprs != null)
+					_case_exprs.Parent = this;
 			}
 		}
 
@@ -19799,6 +21179,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parts=value;
+				if (_parts != null)
+					_parts.Parent = this;
 			}
 		}
 
@@ -19981,12 +21363,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(variant_type el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			vars.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<variant_type> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -19995,6 +21381,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params variant_type[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -20003,6 +21391,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(variant_type el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = vars.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -20011,32 +21401,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(variant_type el, variant_type newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(variant_type el, IEnumerable<variant_type> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(variant_type el, variant_type newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(variant_type el, IEnumerable<variant_type> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(variant_type el)
@@ -20046,19 +21450,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(variant_type el, variant_type newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(variant_type el, IEnumerable<variant_type> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			vars.RemoveAt(ind);
 			vars.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<variant_type> match)
@@ -20068,8 +21479,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public variant_type Last()
 		{
-			return vars[vars.Count - 1];
+			if (vars.Count > 0)
+		        return vars[vars.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return vars.Count; }
+		}
+		
+		public void Insert(int pos, variant_type el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			vars.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -20242,6 +21670,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_var_name=value;
+				if (_var_name != null)
+					_var_name.Parent = this;
 			}
 		}
 
@@ -20257,6 +21687,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_var_type=value;
+				if (_var_type != null)
+					_var_type.Parent = this;
 			}
 		}
 
@@ -20272,6 +21704,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars=value;
+				if (_vars != null)
+					_vars.Parent = this;
 			}
 		}
 
@@ -20399,7 +21833,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///
+	///bool is_ident; // является ли вызов процедуры идентификатором. Нужно исключительно для секции write свойств
 	///</summary>
 	[Serializable]
 	public partial class procedure_call : statement
@@ -20416,22 +21850,25 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public procedure_call(addressed_value _func_name)
+		public procedure_call(addressed_value _func_name,bool _is_ident)
 		{
 			this._func_name=_func_name;
+			this._is_ident=_is_ident;
 			FillParentsInDirectChilds();
 		}
 
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public procedure_call(addressed_value _func_name,SourceContext sc)
+		public procedure_call(addressed_value _func_name,bool _is_ident,SourceContext sc)
 		{
 			this._func_name=_func_name;
+			this._is_ident=_is_ident;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
 		protected addressed_value _func_name;
+		protected bool _is_ident;
 
 		///<summary>
 		///
@@ -20445,6 +21882,23 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_func_name=value;
+				if (_func_name != null)
+					_func_name.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public bool is_ident
+		{
+			get
+			{
+				return _is_ident;
+			}
+			set
+			{
+				_is_ident=value;
 			}
 		}
 
@@ -20466,6 +21920,7 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.func_name = (addressed_value)func_name.Clone();
 				copy.func_name.Parent = copy;
 			}
+			copy.is_ident = is_ident;
 			return copy;
 		}
 
@@ -20623,6 +22078,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_class_name=value;
+				if (_class_name != null)
+					_class_name.Parent = this;
 			}
 		}
 
@@ -20925,6 +22382,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_elem_type=value;
+				if (_elem_type != null)
+					_elem_type.Parent = this;
 			}
 		}
 
@@ -21534,6 +22993,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_method_name=value;
+				if (_method_name != null)
+					_method_name.Parent = this;
 			}
 		}
 
@@ -21549,6 +23010,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_exprs=value;
+				if (_exprs != null)
+					_exprs.Parent = this;
 			}
 		}
 
@@ -21723,6 +23186,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -21738,6 +23203,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_def=value;
+				if (_type_def != null)
+					_type_def.Parent = this;
 			}
 		}
 
@@ -21928,6 +23395,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_interface_definitions=value;
+				if (_interface_definitions != null)
+					_interface_definitions.Parent = this;
 			}
 		}
 
@@ -21943,6 +23412,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_uses_modules=value;
+				if (_uses_modules != null)
+					_uses_modules.Parent = this;
 			}
 		}
 
@@ -21958,6 +23429,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_using_namespaces=value;
+				if (_using_namespaces != null)
+					_using_namespaces.Parent = this;
 			}
 		}
 
@@ -22137,6 +23610,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_uses_modules=value;
+				if (_uses_modules != null)
+					_uses_modules.Parent = this;
 			}
 		}
 
@@ -22152,6 +23627,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_implementation_definitions=value;
+				if (_implementation_definitions != null)
+					_implementation_definitions.Parent = this;
 			}
 		}
 
@@ -22167,6 +23644,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_using_namespaces=value;
+				if (_using_namespaces != null)
+					_using_namespaces.Parent = this;
 			}
 		}
 
@@ -22343,6 +23822,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -22358,6 +23839,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -22529,6 +24012,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_defs=value;
+				if (_defs != null)
+					_defs.Parent = this;
 			}
 		}
 
@@ -22544,6 +24029,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_program_code=value;
+				if (_program_code != null)
+					_program_code.Parent = this;
 			}
 		}
 
@@ -22817,6 +24304,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -23245,12 +24734,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(case_variant el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			variants.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<case_variant> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			variants.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -23259,6 +24752,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params case_variant[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			variants.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -23267,6 +24762,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(case_variant el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = variants.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -23275,32 +24772,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(case_variant el, case_variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variants.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(case_variant el, IEnumerable<case_variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			variants.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(case_variant el, case_variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variants.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(case_variant el, IEnumerable<case_variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			variants.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(case_variant el)
@@ -23310,19 +24821,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(case_variant el, case_variant newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variants[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(case_variant el, IEnumerable<case_variant> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			variants.RemoveAt(ind);
 			variants.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<case_variant> match)
@@ -23332,8 +24850,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public case_variant Last()
 		{
-			return variants[variants.Count - 1];
+			if (variants.Count > 0)
+		        return variants[variants.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return variants.Count; }
+		}
+		
+		public void Insert(int pos, case_variant el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			variants.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -23503,6 +25038,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -23518,6 +25055,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -23708,12 +25247,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(var_def_statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			vars.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<var_def_statement> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -23722,6 +25265,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params var_def_statement[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			vars.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -23730,6 +25275,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(var_def_statement el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = vars.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -23738,32 +25285,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			vars.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(var_def_statement el)
@@ -23773,19 +25334,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(var_def_statement el, var_def_statement newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			vars[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(var_def_statement el, IEnumerable<var_def_statement> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			vars.RemoveAt(ind);
 			vars.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<var_def_statement> match)
@@ -23795,8 +25363,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public var_def_statement Last()
 		{
-			return vars[vars.Count - 1];
+			if (vars.Count > 0)
+		        return vars[vars.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return vars.Count; }
+		}
+		
+		public void Insert(int pos, var_def_statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			vars.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -23966,6 +25551,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_fixed_part=value;
+				if (_fixed_part != null)
+					_fixed_part.Parent = this;
 			}
 		}
 
@@ -23981,6 +25568,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_variant_part=value;
+				if (_variant_part != null)
+					_variant_part.Parent = this;
 			}
 		}
 
@@ -24239,6 +25828,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameter_list=value;
+				if (_parameter_list != null)
+					_parameter_list.Parent = this;
 			}
 		}
 
@@ -24254,6 +25845,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_property_type=value;
+				if (_property_type != null)
+					_property_type.Parent = this;
 			}
 		}
 
@@ -24269,6 +25862,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_index_expression=value;
+				if (_index_expression != null)
+					_index_expression.Parent = this;
 			}
 		}
 
@@ -24445,6 +26040,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_names=value;
+				if (_names != null)
+					_names.Parent = this;
 			}
 		}
 
@@ -24460,6 +26057,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type=value;
+				if (_type != null)
+					_type.Parent = this;
 			}
 		}
 
@@ -24642,12 +26241,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(property_parameter el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			parameters.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<property_parameter> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			parameters.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -24656,6 +26259,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params property_parameter[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			parameters.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -24664,6 +26269,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(property_parameter el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = parameters.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -24672,32 +26279,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(property_parameter el, property_parameter newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(property_parameter el, IEnumerable<property_parameter> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			parameters.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(property_parameter el, property_parameter newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(property_parameter el, IEnumerable<property_parameter> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			parameters.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(property_parameter el)
@@ -24707,19 +26328,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(property_parameter el, property_parameter newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(property_parameter el, IEnumerable<property_parameter> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			parameters.RemoveAt(ind);
 			parameters.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<property_parameter> match)
@@ -24729,8 +26357,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public property_parameter Last()
 		{
-			return parameters[parameters.Count - 1];
+			if (parameters.Count > 0)
+		        return parameters[parameters.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return parameters.Count; }
+		}
+		
+		public void Insert(int pos, property_parameter el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			parameters.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -25023,6 +26668,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -25038,6 +26685,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_format1=value;
+				if (_format1 != null)
+					_format1.Parent = this;
 			}
 		}
 
@@ -25053,6 +26702,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_format2=value;
+				if (_format2 != null)
+					_format2.Parent = this;
 			}
 		}
 
@@ -25237,6 +26888,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_initialization_sect=value;
+				if (_initialization_sect != null)
+					_initialization_sect.Parent = this;
 			}
 		}
 
@@ -25252,6 +26905,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_finalization_sect=value;
+				if (_finalization_sect != null)
+					_finalization_sect.Parent = this;
 			}
 		}
 
@@ -25544,6 +27199,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -25559,6 +27216,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_address=value;
+				if (_address != null)
+					_address.Parent = this;
 			}
 		}
 
@@ -25899,6 +27558,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_file_of_type=value;
+				if (_file_of_type != null)
+					_file_of_type.Parent = this;
 			}
 		}
 
@@ -26232,6 +27893,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_variable=value;
+				if (_variable != null)
+					_variable.Parent = this;
 			}
 		}
 
@@ -26247,6 +27910,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -26262,6 +27927,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_statements=value;
+				if (_statements != null)
+					_statements.Parent = this;
 			}
 		}
 
@@ -26438,6 +28105,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_variable=value;
+				if (_variable != null)
+					_variable.Parent = this;
 			}
 		}
 
@@ -26453,6 +28122,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -26635,12 +28306,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(exception_handler el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			handlers.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<exception_handler> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			handlers.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -26649,6 +28324,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params exception_handler[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			handlers.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -26657,6 +28334,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(exception_handler el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = handlers.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -26665,32 +28344,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(exception_handler el, exception_handler newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			handlers.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(exception_handler el, IEnumerable<exception_handler> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			handlers.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(exception_handler el, exception_handler newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			handlers.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(exception_handler el, IEnumerable<exception_handler> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			handlers.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(exception_handler el)
@@ -26700,19 +28393,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(exception_handler el, exception_handler newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			handlers[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(exception_handler el, IEnumerable<exception_handler> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			handlers.RemoveAt(ind);
 			handlers.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<exception_handler> match)
@@ -26722,8 +28422,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public exception_handler Last()
 		{
-			return handlers[handlers.Count - 1];
+			if (handlers.Count > 0)
+		        return handlers[handlers.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return handlers.Count; }
+		}
+		
+		public void Insert(int pos, exception_handler el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			handlers.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -26896,6 +28613,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt_list=value;
+				if (_stmt_list != null)
+					_stmt_list.Parent = this;
 			}
 		}
 
@@ -26911,6 +28630,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_handlers=value;
+				if (_handlers != null)
+					_handlers.Parent = this;
 			}
 		}
 
@@ -26926,6 +28647,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_else_stmt_list=value;
+				if (_else_stmt_list != null)
+					_else_stmt_list.Parent = this;
 			}
 		}
 
@@ -27191,6 +28914,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt_list=value;
+				if (_stmt_list != null)
+					_stmt_list.Parent = this;
 			}
 		}
 
@@ -27338,6 +29063,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_except_block=value;
+				if (_except_block != null)
+					_except_block.Parent = this;
 			}
 		}
 
@@ -27488,6 +29215,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt_list=value;
+				if (_stmt_list != null)
+					_stmt_list.Parent = this;
 			}
 		}
 
@@ -27503,6 +29232,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_handler=value;
+				if (_handler != null)
+					_handler.Parent = this;
 			}
 		}
 
@@ -27774,6 +29505,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_modulename=value;
+				if (_modulename != null)
+					_modulename.Parent = this;
 			}
 		}
 
@@ -27789,6 +29522,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -27971,12 +29706,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(unit_or_namespace el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			namespaces.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<unit_or_namespace> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			namespaces.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -27985,6 +29724,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params unit_or_namespace[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			namespaces.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -27993,6 +29734,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(unit_or_namespace el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = namespaces.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -28001,32 +29744,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			namespaces.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			namespaces.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			namespaces.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			namespaces.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(unit_or_namespace el)
@@ -28036,19 +29793,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(unit_or_namespace el, unit_or_namespace newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			namespaces[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(unit_or_namespace el, IEnumerable<unit_or_namespace> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			namespaces.RemoveAt(ind);
 			namespaces.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<unit_or_namespace> match)
@@ -28058,8 +29822,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public unit_or_namespace Last()
 		{
-			return namespaces[namespaces.Count - 1];
+			if (namespaces.Count > 0)
+		        return namespaces[namespaces.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return namespaces.Count; }
+		}
+		
+		public void Insert(int pos, unit_or_namespace el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			namespaces.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -28229,6 +30010,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -28371,8 +30154,9 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public loop_stmt(statement _stmt)
+		public loop_stmt(expression _count,statement _stmt)
 		{
+			this._count=_count;
 			this._stmt=_stmt;
 			FillParentsInDirectChilds();
 		}
@@ -28380,13 +30164,32 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public loop_stmt(statement _stmt,SourceContext sc)
+		public loop_stmt(expression _count,statement _stmt,SourceContext sc)
 		{
+			this._count=_count;
 			this._stmt=_stmt;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
+		protected expression _count;
 		protected statement _stmt;
+
+		///<summary>
+		///
+		///</summary>
+		public expression count
+		{
+			get
+			{
+				return _count;
+			}
+			set
+			{
+				_count=value;
+				if (_count != null)
+					_count.Parent = this;
+			}
+		}
 
 		///<summary>
 		///
@@ -28400,6 +30203,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt=value;
+				if (_stmt != null)
+					_stmt.Parent = this;
 			}
 		}
 
@@ -28415,6 +30220,11 @@ namespace PascalABCCompiler.SyntaxTree
 			{
 				copy.attributes = (attribute_list)attributes.Clone();
 				copy.attributes.Parent = copy;
+			}
+			if (count != null)
+			{
+				copy.count = (expression)count.Clone();
+				copy.count.Parent = copy;
 			}
 			if (stmt != null)
 			{
@@ -28435,6 +30245,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			if (attributes != null)
 				attributes.Parent = this;
+			if (count != null)
+				count.Parent = this;
 			if (stmt != null)
 				stmt.Parent = this;
 		}
@@ -28444,6 +30256,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			FillParentsInDirectChilds();
 			attributes?.FillParentsInAllChilds();
+			count?.FillParentsInAllChilds();
 			stmt?.FillParentsInAllChilds();
 		}
 
@@ -28454,7 +30267,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 2;
 			}
 		}
 		///<summary>
@@ -28464,7 +30277,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 1;
+				return 2;
 			}
 		}
 		///<summary>
@@ -28479,6 +30292,8 @@ namespace PascalABCCompiler.SyntaxTree
 				switch(ind)
 				{
 					case 0:
+						return count;
+					case 1:
 						return stmt;
 				}
 				return null;
@@ -28490,6 +30305,9 @@ namespace PascalABCCompiler.SyntaxTree
 				switch(ind)
 				{
 					case 0:
+						count = (expression)value;
+						break;
+					case 1:
 						stmt = (statement)value;
 						break;
 				}
@@ -28564,6 +30382,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_identifier=value;
+				if (_identifier != null)
+					_identifier.Parent = this;
 			}
 		}
 
@@ -28579,6 +30399,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -28594,6 +30416,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_in_what=value;
+				if (_in_what != null)
+					_in_what.Parent = this;
 			}
 		}
 
@@ -28609,6 +30433,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt=value;
+				if (_stmt != null)
+					_stmt.Parent = this;
 			}
 		}
 
@@ -28925,12 +30751,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(named_type_reference el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			types.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<named_type_reference> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			types.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -28939,6 +30769,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params named_type_reference[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			types.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -28947,6 +30779,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(named_type_reference el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = types.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -28955,32 +30789,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(named_type_reference el, named_type_reference newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(named_type_reference el, IEnumerable<named_type_reference> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			types.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(named_type_reference el, named_type_reference newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(named_type_reference el, IEnumerable<named_type_reference> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			types.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(named_type_reference el)
@@ -28990,19 +30838,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(named_type_reference el, named_type_reference newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			types[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(named_type_reference el, IEnumerable<named_type_reference> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			types.RemoveAt(ind);
 			types.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<named_type_reference> match)
@@ -29012,8 +30867,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public named_type_reference Last()
 		{
-			return types[types.Count - 1];
+			if (types.Count > 0)
+		        return types[types.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return types.Count; }
+		}
+		
+		public void Insert(int pos, named_type_reference el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			types.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -29223,12 +31095,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			params_list.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<type_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			params_list.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -29237,6 +31113,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params type_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			params_list.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -29245,6 +31123,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = params_list.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -29253,32 +31133,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			params_list.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			params_list.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(type_definition el)
@@ -29288,19 +31182,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			params_list[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			params_list.RemoveAt(ind);
 			params_list.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<type_definition> match)
@@ -29310,8 +31211,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public type_definition Last()
 		{
-			return params_list[params_list.Count - 1];
+			if (params_list.Count > 0)
+		        return params_list[params_list.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return params_list.Count; }
+		}
+		
+		public void Insert(int pos, type_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			params_list.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -29533,6 +31451,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -29548,6 +31468,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_params_list=value;
+				if (_params_list != null)
+					_params_list.Parent = this;
 			}
 		}
 
@@ -30053,6 +31975,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type=value;
+				if (_type != null)
+					_type.Parent = this;
 			}
 		}
 
@@ -30068,6 +31992,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_params_list=value;
+				if (_params_list != null)
+					_params_list.Parent = this;
 			}
 		}
 
@@ -30098,6 +32024,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_array_init_expr=value;
+				if (_array_init_expr != null)
+					_array_init_expr.Parent = this;
 			}
 		}
 
@@ -30302,12 +32230,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			defs.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<type_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -30316,6 +32248,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params type_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -30324,6 +32258,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(type_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = defs.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -30332,32 +32268,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(type_definition el)
@@ -30367,19 +32317,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(type_definition el, type_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(type_definition el, IEnumerable<type_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			defs.RemoveAt(ind);
 			defs.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<type_definition> match)
@@ -30389,8 +32346,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public type_definition Last()
 		{
-			return defs[defs.Count - 1];
+			if (defs.Count > 0)
+		        return defs[defs.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return defs.Count; }
+		}
+		
+		public void Insert(int pos, type_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			defs.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -30560,6 +32534,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_names=value;
+				if (_names != null)
+					_names.Parent = this;
 			}
 		}
 
@@ -30575,6 +32551,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_types=value;
+				if (_types != null)
+					_types.Parent = this;
 			}
 		}
 
@@ -30757,12 +32735,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(where_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			defs.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<where_definition> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -30771,6 +32753,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params where_definition[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -30779,6 +32763,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(where_definition el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = defs.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -30787,32 +32773,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(where_definition el, where_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(where_definition el, IEnumerable<where_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(where_definition el, where_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(where_definition el, IEnumerable<where_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(where_definition el)
@@ -30822,19 +32822,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(where_definition el, where_definition newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(where_definition el, IEnumerable<where_definition> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			defs.RemoveAt(ind);
 			defs.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<where_definition> match)
@@ -30844,8 +32851,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public where_definition Last()
 		{
-			return defs[defs.Count - 1];
+			if (defs.Count > 0)
+		        return defs[defs.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return defs.Count; }
+		}
+		
+		public void Insert(int pos, where_definition el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			defs.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -31015,6 +33039,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_def=value;
+				if (_type_def != null)
+					_type_def.Parent = this;
 			}
 		}
 
@@ -31030,6 +33056,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -31198,6 +33226,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -31356,6 +33386,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_Name=value;
+				if (_Name != null)
+					_Name.Parent = this;
 			}
 		}
 
@@ -31371,6 +33403,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_Directive=value;
+				if (_Directive != null)
+					_Directive.Parent = this;
 			}
 		}
 
@@ -31690,6 +33724,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_var_def=value;
+				if (_var_def != null)
+					_var_def.Parent = this;
 			}
 		}
 
@@ -31851,6 +33887,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_condition=value;
+				if (_condition != null)
+					_condition.Parent = this;
 			}
 		}
 
@@ -31866,6 +33904,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ret_if_true=value;
+				if (_ret_if_true != null)
+					_ret_if_true.Parent = this;
 			}
 		}
 
@@ -31881,6 +33921,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ret_if_false=value;
+				if (_ret_if_false != null)
+					_ret_if_false.Parent = this;
 			}
 		}
 
@@ -32062,6 +34104,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -32445,6 +34489,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_defs=value;
+				if (_defs != null)
+					_defs.Parent = this;
 			}
 		}
 
@@ -32460,6 +34506,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_used_units=value;
+				if (_used_units != null)
+					_used_units.Parent = this;
 			}
 		}
 
@@ -32663,6 +34711,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_defs=value;
+				if (_defs != null)
+					_defs.Parent = this;
 			}
 		}
 
@@ -32839,6 +34889,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_max_value=value;
+				if (_max_value != null)
+					_max_value.Parent = this;
 			}
 		}
 
@@ -33010,6 +35062,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -33025,6 +35079,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_value=value;
+				if (_value != null)
+					_value.Parent = this;
 			}
 		}
 
@@ -33207,12 +35263,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(enumerator el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			enumerators.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<enumerator> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			enumerators.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -33221,6 +35281,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params enumerator[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			enumerators.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -33229,6 +35291,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(enumerator el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = enumerators.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -33237,32 +35301,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(enumerator el, enumerator newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			enumerators.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(enumerator el, IEnumerable<enumerator> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			enumerators.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(enumerator el, enumerator newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			enumerators.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(enumerator el, IEnumerable<enumerator> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			enumerators.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(enumerator el)
@@ -33272,19 +35350,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(enumerator el, enumerator newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			enumerators[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(enumerator el, IEnumerable<enumerator> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			enumerators.RemoveAt(ind);
 			enumerators.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<enumerator> match)
@@ -33294,8 +35379,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public enumerator Last()
 		{
-			return enumerators[enumerators.Count - 1];
+			if (enumerators.Count > 0)
+		        return enumerators[enumerators.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return enumerators.Count; }
+		}
+		
+		public void Insert(int pos, enumerator el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			enumerators.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -33471,6 +35573,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr1=value;
+				if (_expr1 != null)
+					_expr1.Parent = this;
 			}
 		}
 
@@ -33486,6 +35590,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr2=value;
+				if (_expr2 != null)
+					_expr2.Parent = this;
 			}
 		}
 
@@ -33501,6 +35607,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr3=value;
+				if (_expr3 != null)
+					_expr3.Parent = this;
 			}
 		}
 
@@ -33516,6 +35624,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt=value;
+				if (_stmt != null)
+					_stmt.Parent = this;
 			}
 		}
 
@@ -33716,6 +35826,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_condition=value;
+				if (_condition != null)
+					_condition.Parent = this;
 			}
 		}
 
@@ -33731,6 +35843,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt=value;
+				if (_stmt != null)
+					_stmt.Parent = this;
 			}
 		}
 
@@ -33937,12 +36051,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(type_definition_attr el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			attributes.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<type_definition_attr> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -33951,6 +36069,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params type_definition_attr[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -33959,6 +36079,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(type_definition_attr el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = attributes.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -33967,32 +36089,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(type_definition_attr el, type_definition_attr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(type_definition_attr el, IEnumerable<type_definition_attr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition_attr el, type_definition_attr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(type_definition_attr el, IEnumerable<type_definition_attr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(type_definition_attr el)
@@ -34002,19 +36138,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(type_definition_attr el, type_definition_attr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(type_definition_attr el, IEnumerable<type_definition_attr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			attributes.RemoveAt(ind);
 			attributes.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<type_definition_attr> match)
@@ -34024,8 +36167,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public type_definition_attr Last()
 		{
-			return attributes[attributes.Count - 1];
+			if (attributes.Count > 0)
+		        return attributes[attributes.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return attributes.Count; }
+		}
+		
+		public void Insert(int pos, type_definition_attr el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			attributes.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -34372,6 +36532,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_lock_object=value;
+				if (_lock_object != null)
+					_lock_object.Parent = this;
 			}
 		}
 
@@ -34387,6 +36549,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_stmt=value;
+				if (_stmt != null)
+					_stmt.Parent = this;
 			}
 		}
 
@@ -34600,12 +36764,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(compiler_directive el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			directives.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<compiler_directive> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			directives.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -34614,6 +36782,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params compiler_directive[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			directives.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -34622,6 +36792,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(compiler_directive el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = directives.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -34630,32 +36802,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			directives.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			directives.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			directives.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			directives.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(compiler_directive el)
@@ -34665,19 +36851,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(compiler_directive el, compiler_directive newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			directives[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(compiler_directive el, IEnumerable<compiler_directive> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			directives.RemoveAt(ind);
 			directives.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<compiler_directive> match)
@@ -34687,8 +36880,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public compiler_directive Last()
 		{
-			return directives[directives.Count - 1];
+			if (directives.Count > 0)
+		        return directives[directives.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return directives.Count; }
+		}
+		
+		public void Insert(int pos, compiler_directive el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			directives.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -34915,6 +37125,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_if_part=value;
+				if (_if_part != null)
+					_if_part.Parent = this;
 			}
 		}
 
@@ -34930,6 +37142,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_elseif_part=value;
+				if (_elseif_part != null)
+					_elseif_part.Parent = this;
 			}
 		}
 
@@ -35138,12 +37352,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(documentation_comment_section el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			sections.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<documentation_comment_section> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			sections.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -35152,6 +37370,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params documentation_comment_section[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			sections.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -35160,6 +37380,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(documentation_comment_section el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = sections.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -35168,32 +37390,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(documentation_comment_section el, documentation_comment_section newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			sections.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(documentation_comment_section el, IEnumerable<documentation_comment_section> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			sections.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_section el, documentation_comment_section newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			sections.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_section el, IEnumerable<documentation_comment_section> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			sections.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(documentation_comment_section el)
@@ -35203,19 +37439,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(documentation_comment_section el, documentation_comment_section newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			sections[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(documentation_comment_section el, IEnumerable<documentation_comment_section> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			sections.RemoveAt(ind);
 			sections.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<documentation_comment_section> match)
@@ -35225,8 +37468,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public documentation_comment_section Last()
 		{
-			return sections[sections.Count - 1];
+			if (sections.Count > 0)
+		        return sections[sections.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return sections.Count; }
+		}
+		
+		public void Insert(int pos, documentation_comment_section el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			sections.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -35451,12 +37711,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(documentation_comment_tag_param el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			parameters.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<documentation_comment_tag_param> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			parameters.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -35465,6 +37729,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params documentation_comment_tag_param[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			parameters.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -35473,6 +37739,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(documentation_comment_tag_param el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = parameters.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -35481,32 +37749,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(documentation_comment_tag_param el, documentation_comment_tag_param newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(documentation_comment_tag_param el, IEnumerable<documentation_comment_tag_param> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			parameters.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_tag_param el, documentation_comment_tag_param newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_tag_param el, IEnumerable<documentation_comment_tag_param> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			parameters.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(documentation_comment_tag_param el)
@@ -35516,19 +37798,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(documentation_comment_tag_param el, documentation_comment_tag_param newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			parameters[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(documentation_comment_tag_param el, IEnumerable<documentation_comment_tag_param> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			parameters.RemoveAt(ind);
 			parameters.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<documentation_comment_tag_param> match)
@@ -35538,8 +37827,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public documentation_comment_tag_param Last()
 		{
-			return parameters[parameters.Count - 1];
+			if (parameters.Count > 0)
+		        return parameters[parameters.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return parameters.Count; }
+		}
+		
+		public void Insert(int pos, documentation_comment_tag_param el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			parameters.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -35896,12 +38202,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(documentation_comment_tag el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			tags.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<documentation_comment_tag> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			tags.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -35910,6 +38220,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params documentation_comment_tag[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			tags.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -35918,6 +38230,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(documentation_comment_tag el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = tags.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -35926,32 +38240,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(documentation_comment_tag el, documentation_comment_tag newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			tags.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(documentation_comment_tag el, IEnumerable<documentation_comment_tag> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			tags.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_tag el, documentation_comment_tag newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			tags.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(documentation_comment_tag el, IEnumerable<documentation_comment_tag> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			tags.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(documentation_comment_tag el)
@@ -35961,19 +38289,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(documentation_comment_tag el, documentation_comment_tag newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			tags[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(documentation_comment_tag el, IEnumerable<documentation_comment_tag> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			tags.RemoveAt(ind);
 			tags.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<documentation_comment_tag> match)
@@ -35983,8 +38318,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public documentation_comment_tag Last()
 		{
-			return tags[tags.Count - 1];
+			if (tags.Count > 0)
+		        return tags[tags.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return tags.Count; }
+		}
+		
+		public void Insert(int pos, documentation_comment_tag el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			tags.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -36504,6 +38856,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -36519,6 +38873,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_template_params=value;
+				if (_template_params != null)
+					_template_params.Parent = this;
 			}
 		}
 
@@ -36708,6 +39064,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_template_args=value;
+				if (_template_args != null)
+					_template_args.Parent = this;
 			}
 		}
 
@@ -36864,6 +39222,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type_name=value;
+				if (_type_name != null)
+					_type_name.Parent = this;
 			}
 		}
 
@@ -37019,6 +39379,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -37180,6 +39542,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_qualifier=value;
+				if (_qualifier != null)
+					_qualifier.Parent = this;
 			}
 		}
 
@@ -37195,6 +39559,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_type=value;
+				if (_type != null)
+					_type.Parent = this;
 			}
 		}
 
@@ -37210,6 +39576,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_arguments=value;
+				if (_arguments != null)
+					_arguments.Parent = this;
 			}
 		}
 
@@ -37405,12 +39773,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(attribute el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			attributes.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<attribute> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -37419,6 +39791,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params attribute[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -37427,6 +39801,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(attribute el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = attributes.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -37435,32 +39811,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(attribute el, attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(attribute el, IEnumerable<attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(attribute el, attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(attribute el, IEnumerable<attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(attribute el)
@@ -37470,19 +39860,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(attribute el, attribute newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(attribute el, IEnumerable<attribute> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			attributes.RemoveAt(ind);
 			attributes.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<attribute> match)
@@ -37492,8 +39889,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public attribute Last()
 		{
-			return attributes[attributes.Count - 1];
+			if (attributes.Count > 0)
+		        return attributes[attributes.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return attributes.Count; }
+		}
+		
+		public void Insert(int pos, attribute el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			attributes.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -37682,12 +40096,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(simple_attribute_list el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			attributes.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<simple_attribute_list> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -37696,6 +40114,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params simple_attribute_list[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			attributes.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -37704,6 +40124,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(simple_attribute_list el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = attributes.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -37712,32 +40134,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(simple_attribute_list el, simple_attribute_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(simple_attribute_list el, IEnumerable<simple_attribute_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(simple_attribute_list el, simple_attribute_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(simple_attribute_list el, IEnumerable<simple_attribute_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			attributes.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(simple_attribute_list el)
@@ -37747,19 +40183,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(simple_attribute_list el, simple_attribute_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			attributes[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(simple_attribute_list el, IEnumerable<simple_attribute_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			attributes.RemoveAt(ind);
 			attributes.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<simple_attribute_list> match)
@@ -37769,8 +40212,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public simple_attribute_list Last()
 		{
-			return attributes[attributes.Count - 1];
+			if (attributes.Count > 0)
+		        return attributes[attributes.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return attributes.Count; }
+		}
+		
+		public void Insert(int pos, simple_attribute_list el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			attributes.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -37908,7 +40368,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public function_lambda_definition(ident_list _ident_list,type_definition _return_type,formal_parameters _formal_parameters,statement _proc_body,procedure_definition _proc_definition,expression_list _parameters,string _lambda_name,List<declaration> _defs,LambdaVisitMode _lambda_visit_mode,syntax_tree_node _substituting_node,int _usedkeyword)
+		public function_lambda_definition(ident_list _ident_list,type_definition _return_type,formal_parameters _formal_parameters,statement _proc_body,object _proc_definition,expression_list _parameters,string _lambda_name,List<declaration> _defs,LambdaVisitMode _lambda_visit_mode,syntax_tree_node _substituting_node,int _usedkeyword)
 		{
 			this._ident_list=_ident_list;
 			this._return_type=_return_type;
@@ -37927,7 +40387,7 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public function_lambda_definition(ident_list _ident_list,type_definition _return_type,formal_parameters _formal_parameters,statement _proc_body,procedure_definition _proc_definition,expression_list _parameters,string _lambda_name,List<declaration> _defs,LambdaVisitMode _lambda_visit_mode,syntax_tree_node _substituting_node,int _usedkeyword,SourceContext sc)
+		public function_lambda_definition(ident_list _ident_list,type_definition _return_type,formal_parameters _formal_parameters,statement _proc_body,object _proc_definition,expression_list _parameters,string _lambda_name,List<declaration> _defs,LambdaVisitMode _lambda_visit_mode,syntax_tree_node _substituting_node,int _usedkeyword,SourceContext sc)
 		{
 			this._ident_list=_ident_list;
 			this._return_type=_return_type;
@@ -37953,10 +40413,10 @@ namespace PascalABCCompiler.SyntaxTree
 		protected type_definition _return_type;
 		protected formal_parameters _formal_parameters;
 		protected statement _proc_body;
-		protected procedure_definition _proc_definition;
+		protected object _proc_definition;
 		protected expression_list _parameters;
 		protected string _lambda_name;
-		protected List<declaration> _defs;
+		protected List<declaration> _defs=new List<declaration>();
 		protected LambdaVisitMode _lambda_visit_mode;
 		protected syntax_tree_node _substituting_node;
 		protected int _usedkeyword;
@@ -37973,6 +40433,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ident_list=value;
+				if (_ident_list != null)
+					_ident_list.Parent = this;
 			}
 		}
 
@@ -37988,6 +40450,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_return_type=value;
+				if (_return_type != null)
+					_return_type.Parent = this;
 			}
 		}
 
@@ -38003,6 +40467,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_formal_parameters=value;
+				if (_formal_parameters != null)
+					_formal_parameters.Parent = this;
 			}
 		}
 
@@ -38018,13 +40484,15 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_proc_body=value;
+				if (_proc_body != null)
+					_proc_body.Parent = this;
 			}
 		}
 
 		///<summary>
 		///
 		///</summary>
-		public procedure_definition proc_definition
+		public object proc_definition
 		{
 			get
 			{
@@ -38048,6 +40516,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameters=value;
+				if (_parameters != null)
+					_parameters.Parent = this;
 			}
 		}
 
@@ -38108,6 +40578,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_substituting_node=value;
+				if (_substituting_node != null)
+					_substituting_node.Parent = this;
 			}
 		}
 
@@ -38139,12 +40611,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			defs.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<declaration> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -38153,6 +40629,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params declaration[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			defs.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -38161,6 +40639,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(declaration el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = defs.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -38169,32 +40649,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			defs.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(declaration el)
@@ -38204,19 +40698,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(declaration el, declaration newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			defs[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(declaration el, IEnumerable<declaration> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			defs.RemoveAt(ind);
 			defs.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<declaration> match)
@@ -38226,8 +40727,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public declaration Last()
 		{
-			return defs[defs.Count - 1];
+			if (defs.Count > 0)
+		        return defs[defs.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return defs.Count; }
+		}
+		
+		public void Insert(int pos, declaration el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			defs.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -38261,11 +40779,7 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.proc_body = (statement)proc_body.Clone();
 				copy.proc_body.Parent = copy;
 			}
-			if (proc_definition != null)
-			{
-				copy.proc_definition = (procedure_definition)proc_definition.Clone();
-				copy.proc_definition.Parent = copy;
-			}
+			copy.proc_definition = proc_definition;
 			if (parameters != null)
 			{
 				copy.parameters = (expression_list)parameters.Clone();
@@ -38314,8 +40828,6 @@ namespace PascalABCCompiler.SyntaxTree
 				formal_parameters.Parent = this;
 			if (proc_body != null)
 				proc_body.Parent = this;
-			if (proc_definition != null)
-				proc_definition.Parent = this;
 			if (parameters != null)
 				parameters.Parent = this;
 			if (defs != null)
@@ -38337,7 +40849,6 @@ namespace PascalABCCompiler.SyntaxTree
 			return_type?.FillParentsInAllChilds();
 			formal_parameters?.FillParentsInAllChilds();
 			proc_body?.FillParentsInAllChilds();
-			proc_definition?.FillParentsInAllChilds();
 			parameters?.FillParentsInAllChilds();
 			if (defs != null)
 			{
@@ -38354,7 +40865,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 7;
+				return 6;
 			}
 		}
 		///<summary>
@@ -38364,7 +40875,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			get
 			{
-				return 7 + (defs == null ? 0 : defs.Count);
+				return 6 + (defs == null ? 0 : defs.Count);
 			}
 		}
 		///<summary>
@@ -38387,13 +40898,11 @@ namespace PascalABCCompiler.SyntaxTree
 					case 3:
 						return proc_body;
 					case 4:
-						return proc_definition;
-					case 5:
 						return parameters;
-					case 6:
+					case 5:
 						return substituting_node;
 				}
-				Int32 index_counter=ind - 7;
+				Int32 index_counter=ind - 6;
 				if(defs != null)
 				{
 					if(index_counter < defs.Count)
@@ -38422,16 +40931,13 @@ namespace PascalABCCompiler.SyntaxTree
 						proc_body = (statement)value;
 						break;
 					case 4:
-						proc_definition = (procedure_definition)value;
-						break;
-					case 5:
 						parameters = (expression_list)value;
 						break;
-					case 6:
+					case 5:
 						substituting_node = (syntax_tree_node)value;
 						break;
 				}
-				Int32 index_counter=ind - 7;
+				Int32 index_counter=ind - 6;
 				if(defs != null)
 				{
 					if(index_counter < defs.Count)
@@ -38505,6 +41011,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_f_lambda_def=value;
+				if (_f_lambda_def != null)
+					_f_lambda_def.Parent = this;
 			}
 		}
 
@@ -38520,6 +41028,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_parameters=value;
+				if (_parameters != null)
+					_parameters.Parent = this;
 			}
 		}
 
@@ -38746,12 +41256,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(syntax_tree_node el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			param.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<syntax_tree_node> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			param.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -38760,6 +41274,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params syntax_tree_node[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			param.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -38768,6 +41284,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(syntax_tree_node el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = param.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -38776,32 +41294,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			param.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			param.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			param.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			param.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(syntax_tree_node el)
@@ -38811,19 +41343,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			param[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			param.RemoveAt(ind);
 			param.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<syntax_tree_node> match)
@@ -38833,8 +41372,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public syntax_tree_node Last()
 		{
-			return param[param.Count - 1];
+			if (param.Count > 0)
+		        return param[param.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return param.Count; }
+		}
+		
+		public void Insert(int pos, syntax_tree_node el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			param.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -39209,6 +41765,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ex=value;
+				if (_ex != null)
+					_ex.Parent = this;
 			}
 		}
 
@@ -39380,6 +41938,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_name=value;
+				if (_name != null)
+					_name.Parent = this;
 			}
 		}
 
@@ -39395,6 +41955,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -39577,12 +42139,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(name_assign_expr el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			name_expr.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<name_assign_expr> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			name_expr.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -39591,6 +42157,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params name_assign_expr[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			name_expr.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -39599,6 +42167,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(name_assign_expr el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = name_expr.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -39607,32 +42177,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(name_assign_expr el, name_assign_expr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			name_expr.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(name_assign_expr el, IEnumerable<name_assign_expr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			name_expr.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(name_assign_expr el, name_assign_expr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			name_expr.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(name_assign_expr el, IEnumerable<name_assign_expr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			name_expr.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(name_assign_expr el)
@@ -39642,19 +42226,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(name_assign_expr el, name_assign_expr newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			name_expr[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(name_assign_expr el, IEnumerable<name_assign_expr> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			name_expr.RemoveAt(ind);
 			name_expr.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<name_assign_expr> match)
@@ -39664,8 +42255,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public name_assign_expr Last()
 		{
-			return name_expr[name_expr.Count - 1];
+			if (name_expr.Count > 0)
+		        return name_expr[name_expr.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return name_expr.Count; }
+		}
+		
+		public void Insert(int pos, name_assign_expr el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			name_expr.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -39788,10 +42396,12 @@ namespace PascalABCCompiler.SyntaxTree
 	///<summary>
 	///Это - сахарная конструкция.
 /// Объект безымянного класса. Например: new class(Name := 'Иванов'; Age := 25);
-/// ne - это узел для генерации кода, основной узел предназначен для форматирования
+/// new_ex - это узел для генерации кода, основной узел предназначен для форматирования
+
+/// Сделал потомком addressed_value из-за #1843
 	///</summary>
 	[Serializable]
-	public partial class unnamed_type_object : expression
+	public partial class unnamed_type_object : addressed_value
 	{
 
 		///<summary>
@@ -39840,6 +42450,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ne_list=value;
+				if (_ne_list != null)
+					_ne_list.Parent = this;
 			}
 		}
 
@@ -39870,6 +42482,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_new_ex=value;
+				if (_new_ex != null)
+					_new_ex.Parent = this;
 			}
 		}
 
@@ -40241,6 +42855,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_procdef=value;
+				if (_procdef != null)
+					_procdef.Parent = this;
 			}
 		}
 
@@ -40564,6 +43180,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -40579,6 +43197,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -40768,6 +43388,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_substitution=value;
+				if (_substitution != null)
+					_substitution.Parent = this;
 			}
 		}
 
@@ -40945,6 +43567,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_elements_type=value;
+				if (_elements_type != null)
+					_elements_type.Parent = this;
 			}
 		}
 
@@ -41144,6 +43768,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_aloneparam=value;
+				if (_aloneparam != null)
+					_aloneparam.Parent = this;
 			}
 		}
 
@@ -41159,6 +43785,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_el=value;
+				if (_el != null)
+					_el.Parent = this;
 			}
 		}
 
@@ -41174,6 +43802,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_res=value;
+				if (_res != null)
+					_res.Parent = this;
 			}
 		}
 
@@ -41368,6 +43998,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ex=value;
+				if (_ex != null)
+					_ex.Parent = this;
 			}
 		}
 
@@ -41546,6 +44178,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_opname=value;
+				if (_opname != null)
+					_opname.Parent = this;
 			}
 		}
 
@@ -41855,6 +44489,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_tn=value;
+				if (_tn != null)
+					_tn.Parent = this;
 			}
 		}
 
@@ -41870,6 +44506,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_exprs=value;
+				if (_exprs != null)
+					_exprs.Parent = this;
 			}
 		}
 
@@ -42033,6 +44671,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_vars=value;
+				if (_vars != null)
+					_vars.Parent = this;
 			}
 		}
 
@@ -42048,6 +44688,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
 			}
 		}
 
@@ -42238,12 +44880,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(addressed_value el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			variables.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<addressed_value> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			variables.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -42252,6 +44898,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params addressed_value[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			variables.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -42260,6 +44908,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(addressed_value el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = variables.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -42268,32 +44918,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(addressed_value el, addressed_value newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variables.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(addressed_value el, IEnumerable<addressed_value> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			variables.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(addressed_value el, addressed_value newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variables.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(addressed_value el, IEnumerable<addressed_value> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			variables.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(addressed_value el)
@@ -42303,19 +44967,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(addressed_value el, addressed_value newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			variables[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(addressed_value el, IEnumerable<addressed_value> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			variables.RemoveAt(ind);
 			variables.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<addressed_value> match)
@@ -42325,8 +44996,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public addressed_value Last()
 		{
-			return variables[variables.Count - 1];
+			if (variables.Count > 0)
+		        return variables[variables.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return variables.Count; }
+		}
+		
+		public void Insert(int pos, addressed_value el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			variables.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -42493,6 +45181,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_el=value;
+				if (_el != null)
+					_el.Parent = this;
 			}
 		}
 
@@ -42691,12 +45381,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(uses_list el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			listunitsections.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<uses_list> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			listunitsections.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -42705,6 +45399,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params uses_list[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			listunitsections.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -42713,6 +45409,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(uses_list el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = listunitsections.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -42721,32 +45419,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(uses_list el, uses_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			listunitsections.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(uses_list el, IEnumerable<uses_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			listunitsections.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(uses_list el, uses_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			listunitsections.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(uses_list el, IEnumerable<uses_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			listunitsections.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(uses_list el)
@@ -42756,19 +45468,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(uses_list el, uses_list newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			listunitsections[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(uses_list el, IEnumerable<uses_list> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			listunitsections.RemoveAt(ind);
 			listunitsections.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<uses_list> match)
@@ -42778,8 +45497,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public uses_list Last()
 		{
-			return listunitsections[listunitsections.Count - 1];
+			if (listunitsections.Count > 0)
+		        return listunitsections[listunitsections.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return listunitsections.Count; }
+		}
+		
+		public void Insert(int pos, uses_list el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			listunitsections.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -42992,6 +45728,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_left=value;
+				if (_left != null)
+					_left.Parent = this;
 			}
 		}
 
@@ -43007,6 +45745,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_right=value;
+				if (_right != null)
+					_right.Parent = this;
 			}
 		}
 
@@ -43211,6 +45951,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_v=value;
+				if (_v != null)
+					_v.Parent = this;
 			}
 		}
 
@@ -43226,6 +45968,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_from=value;
+				if (_from != null)
+					_from.Parent = this;
 			}
 		}
 
@@ -43241,6 +45985,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_to=value;
+				if (_to != null)
+					_to.Parent = this;
 			}
 		}
 
@@ -43256,6 +46002,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_step=value;
+				if (_step != null)
+					_step.Parent = this;
 			}
 		}
 
@@ -43997,6 +46745,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_ex=value;
+				if (_ex != null)
+					_ex.Parent = this;
 			}
 		}
 
@@ -44109,7 +46859,7 @@ namespace PascalABCCompiler.SyntaxTree
 	///
 	///</summary>
 	[Serializable]
-	public partial class assign_var_tuple : assign_tuple
+	public partial class assign_var_tuple : statement
 	{
 
 		///<summary>
@@ -44120,13 +46870,12 @@ namespace PascalABCCompiler.SyntaxTree
 
 		}
 
-
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public assign_var_tuple(addressed_value_list _vars,expression _expr)
+		public assign_var_tuple(ident_list _idents,expression _expr)
 		{
-			this._vars=_vars;
+			this._idents=_idents;
 			this._expr=_expr;
 			FillParentsInDirectChilds();
 		}
@@ -44134,13 +46883,51 @@ namespace PascalABCCompiler.SyntaxTree
 		///<summary>
 		///Конструктор с параметрами.
 		///</summary>
-		public assign_var_tuple(addressed_value_list _vars,expression _expr,SourceContext sc)
+		public assign_var_tuple(ident_list _idents,expression _expr,SourceContext sc)
 		{
-			this._vars=_vars;
+			this._idents=_idents;
 			this._expr=_expr;
 			source_context = sc;
 			FillParentsInDirectChilds();
 		}
+		protected ident_list _idents;
+		protected expression _expr;
+
+		///<summary>
+		///
+		///</summary>
+		public ident_list idents
+		{
+			get
+			{
+				return _idents;
+			}
+			set
+			{
+				_idents=value;
+				if (_idents != null)
+					_idents.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public expression expr
+		{
+			get
+			{
+				return _expr;
+			}
+			set
+			{
+				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
+			}
+		}
+
+
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
 		{
@@ -44153,10 +46940,10 @@ namespace PascalABCCompiler.SyntaxTree
 				copy.attributes = (attribute_list)attributes.Clone();
 				copy.attributes.Parent = copy;
 			}
-			if (vars != null)
+			if (idents != null)
 			{
-				copy.vars = (addressed_value_list)vars.Clone();
-				copy.vars.Parent = copy;
+				copy.idents = (ident_list)idents.Clone();
+				copy.idents.Parent = copy;
 			}
 			if (expr != null)
 			{
@@ -44177,8 +46964,8 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			if (attributes != null)
 				attributes.Parent = this;
-			if (vars != null)
-				vars.Parent = this;
+			if (idents != null)
+				idents.Parent = this;
 			if (expr != null)
 				expr.Parent = this;
 		}
@@ -44188,7 +46975,7 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 			FillParentsInDirectChilds();
 			attributes?.FillParentsInAllChilds();
-			vars?.FillParentsInAllChilds();
+			idents?.FillParentsInAllChilds();
 			expr?.FillParentsInAllChilds();
 		}
 
@@ -44224,7 +47011,7 @@ namespace PascalABCCompiler.SyntaxTree
 				switch(ind)
 				{
 					case 0:
-						return vars;
+						return idents;
 					case 1:
 						return expr;
 				}
@@ -44237,7 +47024,7 @@ namespace PascalABCCompiler.SyntaxTree
 				switch(ind)
 				{
 					case 0:
-						vars = (addressed_value_list)value;
+						idents = (ident_list)value;
 						break;
 					case 1:
 						expr = (expression)value;
@@ -44457,7 +47244,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 
 	///<summary>
-	///Узел, не генерирующий кода, но осуществляющий семантические проверки сахарных узлов. stat - это на самом деле statement. stat сделано типа object - чтобы оно автоматически не обходилось
+	///
 	///</summary>
 	[Serializable]
 	public partial class semantic_check_sugared_statement_node : statement
@@ -44543,12 +47330,16 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddFirst(syntax_tree_node el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			lst.Insert(0, el);
 			FillParentsInDirectChilds();
 		}
 		
 		public void AddFirst(IEnumerable<syntax_tree_node> els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			lst.InsertRange(0, els);
 			foreach (var el in els)
 				if (el != null)
@@ -44557,6 +47348,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void AddMany(params syntax_tree_node[] els)
 		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
 			lst.AddRange(els);
 			foreach (var el in els)
 				if (el != null)
@@ -44565,6 +47358,8 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		private int FindIndexInList(syntax_tree_node el)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
 			var ind = lst.FindIndex(x => x == el);
 			if (ind == -1)
 				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
@@ -44573,32 +47368,46 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void InsertAfter(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			lst.Insert(FindIndexInList(el) + 1, newel);
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertAfter(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			lst.InsertRange(FindIndexInList(el) + 1, newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public void InsertBefore(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			lst.Insert(FindIndexInList(el), newel);
-			if (newel != null)
-				newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void InsertBefore(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			lst.InsertRange(FindIndexInList(el), newels);
 			foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public bool Remove(syntax_tree_node el)
@@ -44608,19 +47417,26 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public void ReplaceInList(syntax_tree_node el, syntax_tree_node newel)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
 			lst[FindIndexInList(el)] = newel;
-			if (newel != null)
-			   	newel.Parent = this;
+			newel.Parent = this;
 		}
 		
 		public void ReplaceInList(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
 		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
 			var ind = FindIndexInList(el);
 			lst.RemoveAt(ind);
 			lst.InsertRange(ind, newels);
 		    foreach (var newel in newels)
-				if (el != null)
-					el.Parent = this;
+				if (newel != null)
+					newel.Parent = this;
 		}
 		
 		public int RemoveAll(Predicate<syntax_tree_node> match)
@@ -44630,8 +47446,25 @@ namespace PascalABCCompiler.SyntaxTree
 		
 		public syntax_tree_node Last()
 		{
-			return lst[lst.Count - 1];
+			if (lst.Count > 0)
+		        return lst[lst.Count - 1];
+			throw new InvalidOperationException("Список пуст");
 		}
+		
+		public int Count
+		{
+		    get { return lst.Count; }
+		}
+		
+		public void Insert(int pos, syntax_tree_node el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			lst.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
 		
 		/// <summary> Создает копию узла </summary>
 		public override syntax_tree_node Clone()
@@ -44825,6 +47658,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_new_expr=value;
+				if (_new_expr != null)
+					_new_expr.Parent = this;
 			}
 		}
 
@@ -44999,6 +47834,8 @@ namespace PascalABCCompiler.SyntaxTree
 			set
 			{
 				_new_addr_value=value;
+				if (_new_addr_value != null)
+					_new_addr_value.Parent = this;
 			}
 		}
 
@@ -45091,6 +47928,5329 @@ namespace PascalABCCompiler.SyntaxTree
 				{
 					case 0:
 						new_addr_value = (addressed_value)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class double_question_node : addressed_value_funcname
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public double_question_node()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public double_question_node(expression _left,expression _right)
+		{
+			this._left=_left;
+			this._right=_right;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public double_question_node(expression _left,expression _right,SourceContext sc)
+		{
+			this._left=_left;
+			this._right=_right;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected expression _left;
+		protected expression _right;
+
+		///<summary>
+		///
+		///</summary>
+		public expression left
+		{
+			get
+			{
+				return _left;
+			}
+			set
+			{
+				_left=value;
+				if (_left != null)
+					_left.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public expression right
+		{
+			get
+			{
+				return _right;
+			}
+			set
+			{
+				_right=value;
+				if (_right != null)
+					_right.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			double_question_node copy = new double_question_node();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (left != null)
+			{
+				copy.left = (expression)left.Clone();
+				copy.left.Parent = copy;
+			}
+			if (right != null)
+			{
+				copy.right = (expression)right.Clone();
+				copy.right.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new double_question_node TypedClone()
+		{
+			return Clone() as double_question_node;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (left != null)
+				left.Parent = this;
+			if (right != null)
+				right.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			left?.FillParentsInAllChilds();
+			right?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return left;
+					case 1:
+						return right;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						left = (expression)value;
+						break;
+					case 1:
+						right = (expression)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class pattern_node : syntax_tree_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public pattern_node()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_node(List<pattern_parameter> _parameters)
+		{
+			this._parameters=_parameters;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_node(List<pattern_parameter> _parameters,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		public pattern_node(pattern_parameter elem, SourceContext sc = null)
+		{
+			Add(elem, sc);
+		    FillParentsInDirectChilds();
+		}
+		
+		protected List<pattern_parameter> _parameters=new List<pattern_parameter>();
+
+		///<summary>
+		///
+		///</summary>
+		public List<pattern_parameter> parameters
+		{
+			get
+			{
+				return _parameters;
+			}
+			set
+			{
+				_parameters=value;
+			}
+		}
+
+
+		public pattern_node Add(pattern_parameter elem, SourceContext sc = null)
+		{
+			parameters.Add(elem);
+			if (elem != null)
+				elem.Parent = this;
+			if (sc != null)
+				source_context = sc;
+			return this;
+		}
+		
+		public void AddFirst(pattern_parameter el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			parameters.Insert(0, el);
+			FillParentsInDirectChilds();
+		}
+		
+		public void AddFirst(IEnumerable<pattern_parameter> els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			parameters.InsertRange(0, els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		public void AddMany(params pattern_parameter[] els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			parameters.AddRange(els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		private int FindIndexInList(pattern_parameter el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			var ind = parameters.FindIndex(x => x == el);
+			if (ind == -1)
+				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
+			return ind;
+		}
+		
+		public void InsertAfter(pattern_parameter el, pattern_parameter newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			parameters.Insert(FindIndexInList(el) + 1, newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertAfter(pattern_parameter el, IEnumerable<pattern_parameter> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			parameters.InsertRange(FindIndexInList(el) + 1, newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public void InsertBefore(pattern_parameter el, pattern_parameter newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			parameters.Insert(FindIndexInList(el), newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertBefore(pattern_parameter el, IEnumerable<pattern_parameter> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			parameters.InsertRange(FindIndexInList(el), newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public bool Remove(pattern_parameter el)
+		{
+			return parameters.Remove(el);
+		}
+		
+		public void ReplaceInList(pattern_parameter el, pattern_parameter newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			parameters[FindIndexInList(el)] = newel;
+			newel.Parent = this;
+		}
+		
+		public void ReplaceInList(pattern_parameter el, IEnumerable<pattern_parameter> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			var ind = FindIndexInList(el);
+			parameters.RemoveAt(ind);
+			parameters.InsertRange(ind, newels);
+		    foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public int RemoveAll(Predicate<pattern_parameter> match)
+		{
+			return parameters.RemoveAll(match);
+		}
+		
+		public pattern_parameter Last()
+		{
+			if (parameters.Count > 0)
+		        return parameters[parameters.Count - 1];
+			throw new InvalidOperationException("Список пуст");
+		}
+		
+		public int Count
+		{
+		    get { return parameters.Count; }
+		}
+		
+		public void Insert(int pos, pattern_parameter el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			parameters.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
+		
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			pattern_node copy = new pattern_node();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new pattern_node TypedClone()
+		{
+			return Clone() as pattern_node;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class type_pattern : pattern_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public type_pattern()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public type_pattern(ident _identifier,type_definition _type)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public type_pattern(ident _identifier,type_definition _type,SourceContext sc)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public type_pattern(List<pattern_parameter> _parameters,ident _identifier,type_definition _type)
+		{
+			this._parameters=_parameters;
+			this._identifier=_identifier;
+			this._type=_type;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public type_pattern(List<pattern_parameter> _parameters,ident _identifier,type_definition _type,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			this._identifier=_identifier;
+			this._type=_type;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected ident _identifier;
+		protected type_definition _type;
+
+		///<summary>
+		///
+		///</summary>
+		public ident identifier
+		{
+			get
+			{
+				return _identifier;
+			}
+			set
+			{
+				_identifier=value;
+				if (_identifier != null)
+					_identifier.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public type_definition type
+		{
+			get
+			{
+				return _type;
+			}
+			set
+			{
+				_type=value;
+				if (_type != null)
+					_type.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			type_pattern copy = new type_pattern();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			if (identifier != null)
+			{
+				copy.identifier = (ident)identifier.Clone();
+				copy.identifier.Parent = copy;
+			}
+			if (type != null)
+			{
+				copy.type = (type_definition)type.Clone();
+				copy.type.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new type_pattern TypedClone()
+		{
+			return Clone() as type_pattern;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+			if (identifier != null)
+				identifier.Parent = this;
+			if (type != null)
+				type.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+			identifier?.FillParentsInAllChilds();
+			type?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return identifier;
+					case 1:
+						return type;
+				}
+				Int32 index_counter=ind - 2;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						identifier = (ident)value;
+						break;
+					case 1:
+						type = (type_definition)value;
+						break;
+				}
+				Int32 index_counter=ind - 2;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class is_pattern_expr : expression
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public is_pattern_expr()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public is_pattern_expr(expression _left,pattern_node _right)
+		{
+			this._left=_left;
+			this._right=_right;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public is_pattern_expr(expression _left,pattern_node _right,SourceContext sc)
+		{
+			this._left=_left;
+			this._right=_right;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected expression _left;
+		protected pattern_node _right;
+
+		///<summary>
+		///
+		///</summary>
+		public expression left
+		{
+			get
+			{
+				return _left;
+			}
+			set
+			{
+				_left=value;
+				if (_left != null)
+					_left.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public pattern_node right
+		{
+			get
+			{
+				return _right;
+			}
+			set
+			{
+				_right=value;
+				if (_right != null)
+					_right.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			is_pattern_expr copy = new is_pattern_expr();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (left != null)
+			{
+				copy.left = (expression)left.Clone();
+				copy.left.Parent = copy;
+			}
+			if (right != null)
+			{
+				copy.right = (pattern_node)right.Clone();
+				copy.right.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new is_pattern_expr TypedClone()
+		{
+			return Clone() as is_pattern_expr;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (left != null)
+				left.Parent = this;
+			if (right != null)
+				right.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			left?.FillParentsInAllChilds();
+			right?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return left;
+					case 1:
+						return right;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						left = (expression)value;
+						break;
+					case 1:
+						right = (pattern_node)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class match_with : statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public match_with()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public match_with(expression _expr,pattern_cases _case_list,statement _defaultAction)
+		{
+			this._expr=_expr;
+			this._case_list=_case_list;
+			this._defaultAction=_defaultAction;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public match_with(expression _expr,pattern_cases _case_list,statement _defaultAction,SourceContext sc)
+		{
+			this._expr=_expr;
+			this._case_list=_case_list;
+			this._defaultAction=_defaultAction;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected expression _expr;
+		protected pattern_cases _case_list;
+		protected statement _defaultAction;
+
+		///<summary>
+		///
+		///</summary>
+		public expression expr
+		{
+			get
+			{
+				return _expr;
+			}
+			set
+			{
+				_expr=value;
+				if (_expr != null)
+					_expr.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public pattern_cases case_list
+		{
+			get
+			{
+				return _case_list;
+			}
+			set
+			{
+				_case_list=value;
+				if (_case_list != null)
+					_case_list.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public statement defaultAction
+		{
+			get
+			{
+				return _defaultAction;
+			}
+			set
+			{
+				_defaultAction=value;
+				if (_defaultAction != null)
+					_defaultAction.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			match_with copy = new match_with();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (expr != null)
+			{
+				copy.expr = (expression)expr.Clone();
+				copy.expr.Parent = copy;
+			}
+			if (case_list != null)
+			{
+				copy.case_list = (pattern_cases)case_list.Clone();
+				copy.case_list.Parent = copy;
+			}
+			if (defaultAction != null)
+			{
+				copy.defaultAction = (statement)defaultAction.Clone();
+				copy.defaultAction.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new match_with TypedClone()
+		{
+			return Clone() as match_with;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (expr != null)
+				expr.Parent = this;
+			if (case_list != null)
+				case_list.Parent = this;
+			if (defaultAction != null)
+				defaultAction.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			expr?.FillParentsInAllChilds();
+			case_list?.FillParentsInAllChilds();
+			defaultAction?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return expr;
+					case 1:
+						return case_list;
+					case 2:
+						return defaultAction;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						expr = (expression)value;
+						break;
+					case 1:
+						case_list = (pattern_cases)value;
+						break;
+					case 2:
+						defaultAction = (statement)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class pattern_case : statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public pattern_case()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_case(pattern_node _pattern,statement _case_action,expression _condition)
+		{
+			this._pattern=_pattern;
+			this._case_action=_case_action;
+			this._condition=_condition;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_case(pattern_node _pattern,statement _case_action,expression _condition,SourceContext sc)
+		{
+			this._pattern=_pattern;
+			this._case_action=_case_action;
+			this._condition=_condition;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected pattern_node _pattern;
+		protected statement _case_action;
+		protected expression _condition;
+
+		///<summary>
+		///
+		///</summary>
+		public pattern_node pattern
+		{
+			get
+			{
+				return _pattern;
+			}
+			set
+			{
+				_pattern=value;
+				if (_pattern != null)
+					_pattern.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public statement case_action
+		{
+			get
+			{
+				return _case_action;
+			}
+			set
+			{
+				_case_action=value;
+				if (_case_action != null)
+					_case_action.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public expression condition
+		{
+			get
+			{
+				return _condition;
+			}
+			set
+			{
+				_condition=value;
+				if (_condition != null)
+					_condition.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			pattern_case copy = new pattern_case();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (pattern != null)
+			{
+				copy.pattern = (pattern_node)pattern.Clone();
+				copy.pattern.Parent = copy;
+			}
+			if (case_action != null)
+			{
+				copy.case_action = (statement)case_action.Clone();
+				copy.case_action.Parent = copy;
+			}
+			if (condition != null)
+			{
+				copy.condition = (expression)condition.Clone();
+				copy.condition.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new pattern_case TypedClone()
+		{
+			return Clone() as pattern_case;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (pattern != null)
+				pattern.Parent = this;
+			if (case_action != null)
+				case_action.Parent = this;
+			if (condition != null)
+				condition.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			pattern?.FillParentsInAllChilds();
+			case_action?.FillParentsInAllChilds();
+			condition?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern;
+					case 1:
+						return case_action;
+					case 2:
+						return condition;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern = (pattern_node)value;
+						break;
+					case 1:
+						case_action = (statement)value;
+						break;
+					case 2:
+						condition = (expression)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class pattern_cases : statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public pattern_cases()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_cases(List<pattern_case> _elements)
+		{
+			this._elements=_elements;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public pattern_cases(List<pattern_case> _elements,SourceContext sc)
+		{
+			this._elements=_elements;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		public pattern_cases(pattern_case elem, SourceContext sc = null)
+		{
+			Add(elem, sc);
+		    FillParentsInDirectChilds();
+		}
+		
+		protected List<pattern_case> _elements=new List<pattern_case>();
+
+		///<summary>
+		///
+		///</summary>
+		public List<pattern_case> elements
+		{
+			get
+			{
+				return _elements;
+			}
+			set
+			{
+				_elements=value;
+			}
+		}
+
+
+		public pattern_cases Add(pattern_case elem, SourceContext sc = null)
+		{
+			elements.Add(elem);
+			if (elem != null)
+				elem.Parent = this;
+			if (sc != null)
+				source_context = sc;
+			return this;
+		}
+		
+		public void AddFirst(pattern_case el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			elements.Insert(0, el);
+			FillParentsInDirectChilds();
+		}
+		
+		public void AddFirst(IEnumerable<pattern_case> els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			elements.InsertRange(0, els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		public void AddMany(params pattern_case[] els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			elements.AddRange(els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		private int FindIndexInList(pattern_case el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			var ind = elements.FindIndex(x => x == el);
+			if (ind == -1)
+				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
+			return ind;
+		}
+		
+		public void InsertAfter(pattern_case el, pattern_case newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			elements.Insert(FindIndexInList(el) + 1, newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertAfter(pattern_case el, IEnumerable<pattern_case> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			elements.InsertRange(FindIndexInList(el) + 1, newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public void InsertBefore(pattern_case el, pattern_case newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			elements.Insert(FindIndexInList(el), newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertBefore(pattern_case el, IEnumerable<pattern_case> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			elements.InsertRange(FindIndexInList(el), newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public bool Remove(pattern_case el)
+		{
+			return elements.Remove(el);
+		}
+		
+		public void ReplaceInList(pattern_case el, pattern_case newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			elements[FindIndexInList(el)] = newel;
+			newel.Parent = this;
+		}
+		
+		public void ReplaceInList(pattern_case el, IEnumerable<pattern_case> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			var ind = FindIndexInList(el);
+			elements.RemoveAt(ind);
+			elements.InsertRange(ind, newels);
+		    foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public int RemoveAll(Predicate<pattern_case> match)
+		{
+			return elements.RemoveAll(match);
+		}
+		
+		public pattern_case Last()
+		{
+			if (elements.Count > 0)
+		        return elements[elements.Count - 1];
+			throw new InvalidOperationException("Список пуст");
+		}
+		
+		public int Count
+		{
+		    get { return elements.Count; }
+		}
+		
+		public void Insert(int pos, pattern_case el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			elements.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
+		
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			pattern_cases copy = new pattern_cases();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (elements != null)
+			{
+				foreach (pattern_case elem in elements)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_case)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new pattern_cases TypedClone()
+		{
+			return Clone() as pattern_cases;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (elements != null)
+			{
+				foreach (var child in elements)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			if (elements != null)
+			{
+				foreach (var child in elements)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0 + (elements == null ? 0 : elements.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(elements != null)
+				{
+					if(index_counter < elements.Count)
+					{
+						return elements[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(elements != null)
+				{
+					if(index_counter < elements.Count)
+					{
+						elements[index_counter]= (pattern_case)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class deconstructor_pattern : pattern_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public deconstructor_pattern()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstructor_pattern(type_definition _type,expression _const_params_check)
+		{
+			this._type=_type;
+			this._const_params_check=_const_params_check;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstructor_pattern(type_definition _type,expression _const_params_check,SourceContext sc)
+		{
+			this._type=_type;
+			this._const_params_check=_const_params_check;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstructor_pattern(List<pattern_parameter> _parameters,type_definition _type,expression _const_params_check)
+		{
+			this._parameters=_parameters;
+			this._type=_type;
+			this._const_params_check=_const_params_check;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstructor_pattern(List<pattern_parameter> _parameters,type_definition _type,expression _const_params_check,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			this._type=_type;
+			this._const_params_check=_const_params_check;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected type_definition _type;
+		protected expression _const_params_check;
+
+		///<summary>
+		///Деконструируемый тип
+		///</summary>
+		public type_definition type
+		{
+			get
+			{
+				return _type;
+			}
+			set
+			{
+				_type=value;
+				if (_type != null)
+					_type.Parent = this;
+			}
+		}
+
+		///<summary>
+		///Проверка соответствия для константных параметрах деконструирования
+		///</summary>
+		public expression const_params_check
+		{
+			get
+			{
+				return _const_params_check;
+			}
+			set
+			{
+				_const_params_check=value;
+				if (_const_params_check != null)
+					_const_params_check.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			deconstructor_pattern copy = new deconstructor_pattern();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			if (type != null)
+			{
+				copy.type = (type_definition)type.Clone();
+				copy.type.Parent = copy;
+			}
+			if (const_params_check != null)
+			{
+				copy.const_params_check = (expression)const_params_check.Clone();
+				copy.const_params_check.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new deconstructor_pattern TypedClone()
+		{
+			return Clone() as deconstructor_pattern;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+			if (type != null)
+				type.Parent = this;
+			if (const_params_check != null)
+				const_params_check.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+			type?.FillParentsInAllChilds();
+			const_params_check?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return type;
+					case 1:
+						return const_params_check;
+				}
+				Int32 index_counter=ind - 2;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						type = (type_definition)value;
+						break;
+					case 1:
+						const_params_check = (expression)value;
+						break;
+				}
+				Int32 index_counter=ind - 2;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Базовый класс параметра для pattern_node
+	///</summary>
+	[Serializable]
+	public partial class pattern_parameter : syntax_tree_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public pattern_parameter()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			pattern_parameter copy = new pattern_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new pattern_parameter TypedClone()
+		{
+			return Clone() as pattern_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Представляет объединение объявлений пременных, порожденных деконструкцией. Деконструируемое выражение необходимо хранить для выведения типа на этапе семантики.
+	///</summary>
+	[Serializable]
+	public partial class desugared_deconstruction : statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public desugared_deconstruction()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public desugared_deconstruction(deconstruction_variables_definition _variables,expression _deconstruction_target)
+		{
+			this._variables=_variables;
+			this._deconstruction_target=_deconstruction_target;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public desugared_deconstruction(deconstruction_variables_definition _variables,expression _deconstruction_target,SourceContext sc)
+		{
+			this._variables=_variables;
+			this._deconstruction_target=_deconstruction_target;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected deconstruction_variables_definition _variables;
+		protected expression _deconstruction_target;
+
+		///<summary>
+		///Объявления порожденных переменных
+		///</summary>
+		public deconstruction_variables_definition variables
+		{
+			get
+			{
+				return _variables;
+			}
+			set
+			{
+				_variables=value;
+				if (_variables != null)
+					_variables.Parent = this;
+			}
+		}
+
+		///<summary>
+		///Деконструируемое выражение
+		///</summary>
+		public expression deconstruction_target
+		{
+			get
+			{
+				return _deconstruction_target;
+			}
+			set
+			{
+				_deconstruction_target=value;
+				if (_deconstruction_target != null)
+					_deconstruction_target.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			desugared_deconstruction copy = new desugared_deconstruction();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (variables != null)
+			{
+				copy.variables = (deconstruction_variables_definition)variables.Clone();
+				copy.variables.Parent = copy;
+			}
+			if (deconstruction_target != null)
+			{
+				copy.deconstruction_target = (expression)deconstruction_target.Clone();
+				copy.deconstruction_target.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new desugared_deconstruction TypedClone()
+		{
+			return Clone() as desugared_deconstruction;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (variables != null)
+				variables.Parent = this;
+			if (deconstruction_target != null)
+				deconstruction_target.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			variables?.FillParentsInAllChilds();
+			deconstruction_target?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return variables;
+					case 1:
+						return deconstruction_target;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						variables = (deconstruction_variables_definition)value;
+						break;
+					case 1:
+						deconstruction_target = (expression)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Параметр-объявление переменной (возможно без типа)
+	///</summary>
+	[Serializable]
+	public partial class var_deconstructor_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public var_deconstructor_parameter()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public var_deconstructor_parameter(ident _identifier,type_definition _type,bool _var_keyword_used)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			this._var_keyword_used=_var_keyword_used;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public var_deconstructor_parameter(ident _identifier,type_definition _type,bool _var_keyword_used,SourceContext sc)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			this._var_keyword_used=_var_keyword_used;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected ident _identifier;
+		protected type_definition _type;
+		protected bool _var_keyword_used;
+
+		///<summary>
+		///
+		///</summary>
+		public ident identifier
+		{
+			get
+			{
+				return _identifier;
+			}
+			set
+			{
+				_identifier=value;
+				if (_identifier != null)
+					_identifier.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public type_definition type
+		{
+			get
+			{
+				return _type;
+			}
+			set
+			{
+				_type=value;
+				if (_type != null)
+					_type.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public bool var_keyword_used
+		{
+			get
+			{
+				return _var_keyword_used;
+			}
+			set
+			{
+				_var_keyword_used=value;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			var_deconstructor_parameter copy = new var_deconstructor_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (identifier != null)
+			{
+				copy.identifier = (ident)identifier.Clone();
+				copy.identifier.Parent = copy;
+			}
+			if (type != null)
+			{
+				copy.type = (type_definition)type.Clone();
+				copy.type.Parent = copy;
+			}
+			copy.var_keyword_used = var_keyword_used;
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new var_deconstructor_parameter TypedClone()
+		{
+			return Clone() as var_deconstructor_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (identifier != null)
+				identifier.Parent = this;
+			if (type != null)
+				type.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			identifier?.FillParentsInAllChilds();
+			type?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return identifier;
+					case 1:
+						return type;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						identifier = (ident)value;
+						break;
+					case 1:
+						type = (type_definition)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Параметр-паттерн. Часть рекурсивного паттерна.
+	///</summary>
+	[Serializable]
+	public partial class recursive_deconstructor_parameter : recursive_pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public recursive_deconstructor_parameter()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_deconstructor_parameter(pattern_node _pattern)
+		{
+			this._pattern=_pattern;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_deconstructor_parameter(pattern_node _pattern,SourceContext sc)
+		{
+			this._pattern=_pattern;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			recursive_deconstructor_parameter copy = new recursive_deconstructor_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (pattern != null)
+			{
+				copy.pattern = (pattern_node)pattern.Clone();
+				copy.pattern.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new recursive_deconstructor_parameter TypedClone()
+		{
+			return Clone() as recursive_deconstructor_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (pattern != null)
+				pattern.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			pattern?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern = (pattern_node)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Список объявлений для deconstructor pattern
+	///</summary>
+	[Serializable]
+	public partial class deconstruction_variables_definition : declaration
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public deconstruction_variables_definition()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstruction_variables_definition(List<var_def_statement> _definitions)
+		{
+			this._definitions=_definitions;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public deconstruction_variables_definition(List<var_def_statement> _definitions,SourceContext sc)
+		{
+			this._definitions=_definitions;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		public deconstruction_variables_definition(var_def_statement elem, SourceContext sc = null)
+		{
+			Add(elem, sc);
+		    FillParentsInDirectChilds();
+		}
+		
+		protected List<var_def_statement> _definitions=new List<var_def_statement>();
+
+		///<summary>
+		///
+		///</summary>
+		public List<var_def_statement> definitions
+		{
+			get
+			{
+				return _definitions;
+			}
+			set
+			{
+				_definitions=value;
+			}
+		}
+
+
+		public deconstruction_variables_definition Add(var_def_statement elem, SourceContext sc = null)
+		{
+			definitions.Add(elem);
+			if (elem != null)
+				elem.Parent = this;
+			if (sc != null)
+				source_context = sc;
+			return this;
+		}
+		
+		public void AddFirst(var_def_statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			definitions.Insert(0, el);
+			FillParentsInDirectChilds();
+		}
+		
+		public void AddFirst(IEnumerable<var_def_statement> els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			definitions.InsertRange(0, els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		public void AddMany(params var_def_statement[] els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			definitions.AddRange(els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		private int FindIndexInList(var_def_statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			var ind = definitions.FindIndex(x => x == el);
+			if (ind == -1)
+				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
+			return ind;
+		}
+		
+		public void InsertAfter(var_def_statement el, var_def_statement newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			definitions.Insert(FindIndexInList(el) + 1, newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertAfter(var_def_statement el, IEnumerable<var_def_statement> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			definitions.InsertRange(FindIndexInList(el) + 1, newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public void InsertBefore(var_def_statement el, var_def_statement newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			definitions.Insert(FindIndexInList(el), newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertBefore(var_def_statement el, IEnumerable<var_def_statement> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			definitions.InsertRange(FindIndexInList(el), newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public bool Remove(var_def_statement el)
+		{
+			return definitions.Remove(el);
+		}
+		
+		public void ReplaceInList(var_def_statement el, var_def_statement newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			definitions[FindIndexInList(el)] = newel;
+			newel.Parent = this;
+		}
+		
+		public void ReplaceInList(var_def_statement el, IEnumerable<var_def_statement> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			var ind = FindIndexInList(el);
+			definitions.RemoveAt(ind);
+			definitions.InsertRange(ind, newels);
+		    foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public int RemoveAll(Predicate<var_def_statement> match)
+		{
+			return definitions.RemoveAll(match);
+		}
+		
+		public var_def_statement Last()
+		{
+			if (definitions.Count > 0)
+		        return definitions[definitions.Count - 1];
+			throw new InvalidOperationException("Список пуст");
+		}
+		
+		public int Count
+		{
+		    get { return definitions.Count; }
+		}
+		
+		public void Insert(int pos, var_def_statement el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			definitions.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
+		
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			deconstruction_variables_definition copy = new deconstruction_variables_definition();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (definitions != null)
+			{
+				foreach (var_def_statement elem in definitions)
+				{
+					if (elem != null)
+					{
+						copy.Add((var_def_statement)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new deconstruction_variables_definition TypedClone()
+		{
+			return Clone() as deconstruction_variables_definition;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (definitions != null)
+			{
+				foreach (var child in definitions)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			if (definitions != null)
+			{
+				foreach (var child in definitions)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0 + (definitions == null ? 0 : definitions.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(definitions != null)
+				{
+					if(index_counter < definitions.Count)
+					{
+						return definitions[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(definitions != null)
+				{
+					if(index_counter < definitions.Count)
+					{
+						definitions[index_counter]= (var_def_statement)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class var_tuple_def_statement : var_def_statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public var_tuple_def_statement()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public var_tuple_def_statement(ident_list _vars,type_definition _vars_type,expression _inital_value,definition_attribute _var_attr,bool _is_event)
+		{
+			this._vars=_vars;
+			this._vars_type=_vars_type;
+			this._inital_value=_inital_value;
+			this._var_attr=_var_attr;
+			this._is_event=_is_event;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public var_tuple_def_statement(ident_list _vars,type_definition _vars_type,expression _inital_value,definition_attribute _var_attr,bool _is_event,SourceContext sc)
+		{
+			this._vars=_vars;
+			this._vars_type=_vars_type;
+			this._inital_value=_inital_value;
+			this._var_attr=_var_attr;
+			this._is_event=_is_event;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			var_tuple_def_statement copy = new var_tuple_def_statement();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (vars != null)
+			{
+				copy.vars = (ident_list)vars.Clone();
+				copy.vars.Parent = copy;
+			}
+			if (vars_type != null)
+			{
+				copy.vars_type = (type_definition)vars_type.Clone();
+				copy.vars_type.Parent = copy;
+			}
+			if (inital_value != null)
+			{
+				copy.inital_value = (expression)inital_value.Clone();
+				copy.inital_value.Parent = copy;
+			}
+			copy.var_attr = var_attr;
+			copy.is_event = is_event;
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new var_tuple_def_statement TypedClone()
+		{
+			return Clone() as var_tuple_def_statement;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (vars != null)
+				vars.Parent = this;
+			if (vars_type != null)
+				vars_type.Parent = this;
+			if (inital_value != null)
+				inital_value.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			vars?.FillParentsInAllChilds();
+			vars_type?.FillParentsInAllChilds();
+			inital_value?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return vars;
+					case 1:
+						return vars_type;
+					case 2:
+						return inital_value;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						vars = (ident_list)value;
+						break;
+					case 1:
+						vars_type = (type_definition)value;
+						break;
+					case 2:
+						inital_value = (expression)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class semantic_check_sugared_var_def_statement_node : var_def_statement
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public semantic_check_sugared_var_def_statement_node()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public semantic_check_sugared_var_def_statement_node(object _typ,List<syntax_tree_node> _lst)
+		{
+			this._typ=_typ;
+			this._lst=_lst;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public semantic_check_sugared_var_def_statement_node(object _typ,List<syntax_tree_node> _lst,SourceContext sc)
+		{
+			this._typ=_typ;
+			this._lst=_lst;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public semantic_check_sugared_var_def_statement_node(ident_list _vars,type_definition _vars_type,expression _inital_value,definition_attribute _var_attr,bool _is_event,object _typ,List<syntax_tree_node> _lst)
+		{
+			this._vars=_vars;
+			this._vars_type=_vars_type;
+			this._inital_value=_inital_value;
+			this._var_attr=_var_attr;
+			this._is_event=_is_event;
+			this._typ=_typ;
+			this._lst=_lst;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public semantic_check_sugared_var_def_statement_node(ident_list _vars,type_definition _vars_type,expression _inital_value,definition_attribute _var_attr,bool _is_event,object _typ,List<syntax_tree_node> _lst,SourceContext sc)
+		{
+			this._vars=_vars;
+			this._vars_type=_vars_type;
+			this._inital_value=_inital_value;
+			this._var_attr=_var_attr;
+			this._is_event=_is_event;
+			this._typ=_typ;
+			this._lst=_lst;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		public semantic_check_sugared_var_def_statement_node(syntax_tree_node elem, SourceContext sc = null)
+		{
+			Add(elem, sc);
+		    FillParentsInDirectChilds();
+		}
+		
+		protected object _typ;
+		protected List<syntax_tree_node> _lst=new List<syntax_tree_node>();
+
+		///<summary>
+		///
+		///</summary>
+		public object typ
+		{
+			get
+			{
+				return _typ;
+			}
+			set
+			{
+				_typ=value;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public List<syntax_tree_node> lst
+		{
+			get
+			{
+				return _lst;
+			}
+			set
+			{
+				_lst=value;
+			}
+		}
+
+
+		public semantic_check_sugared_var_def_statement_node Add(syntax_tree_node elem, SourceContext sc = null)
+		{
+			lst.Add(elem);
+			if (elem != null)
+				elem.Parent = this;
+			if (sc != null)
+				source_context = sc;
+			return this;
+		}
+		
+		public void AddFirst(syntax_tree_node el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			lst.Insert(0, el);
+			FillParentsInDirectChilds();
+		}
+		
+		public void AddFirst(IEnumerable<syntax_tree_node> els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			lst.InsertRange(0, els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		public void AddMany(params syntax_tree_node[] els)
+		{
+			if (els == null)
+				throw new ArgumentNullException(nameof(els));
+			lst.AddRange(els);
+			foreach (var el in els)
+				if (el != null)
+					el.Parent = this;
+		}
+		
+		private int FindIndexInList(syntax_tree_node el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			var ind = lst.FindIndex(x => x == el);
+			if (ind == -1)
+				throw new Exception(string.Format("У списка {0} не найден элемент {1} среди дочерних\n", this, el));
+			return ind;
+		}
+		
+		public void InsertAfter(syntax_tree_node el, syntax_tree_node newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			lst.Insert(FindIndexInList(el) + 1, newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertAfter(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			lst.InsertRange(FindIndexInList(el) + 1, newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public void InsertBefore(syntax_tree_node el, syntax_tree_node newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			lst.Insert(FindIndexInList(el), newel);
+			newel.Parent = this;
+		}
+		
+		public void InsertBefore(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			lst.InsertRange(FindIndexInList(el), newels);
+			foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public bool Remove(syntax_tree_node el)
+		{
+			return lst.Remove(el);
+		}
+		
+		public void ReplaceInList(syntax_tree_node el, syntax_tree_node newel)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newel == null)
+				throw new ArgumentNullException(nameof(newel));
+			lst[FindIndexInList(el)] = newel;
+			newel.Parent = this;
+		}
+		
+		public void ReplaceInList(syntax_tree_node el, IEnumerable<syntax_tree_node> newels)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			if (newels == null)
+				throw new ArgumentNullException(nameof(newels));
+			var ind = FindIndexInList(el);
+			lst.RemoveAt(ind);
+			lst.InsertRange(ind, newels);
+		    foreach (var newel in newels)
+				if (newel != null)
+					newel.Parent = this;
+		}
+		
+		public int RemoveAll(Predicate<syntax_tree_node> match)
+		{
+			return lst.RemoveAll(match);
+		}
+		
+		public syntax_tree_node Last()
+		{
+			if (lst.Count > 0)
+		        return lst[lst.Count - 1];
+			throw new InvalidOperationException("Список пуст");
+		}
+		
+		public int Count
+		{
+		    get { return lst.Count; }
+		}
+		
+		public void Insert(int pos, syntax_tree_node el)
+		{
+			if (el == null)
+				throw new ArgumentNullException(nameof(el));
+			lst.Insert(pos,el);
+			if (el != null)
+			   	el.Parent = this;
+		}
+		
+		
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			semantic_check_sugared_var_def_statement_node copy = new semantic_check_sugared_var_def_statement_node();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (attributes != null)
+			{
+				copy.attributes = (attribute_list)attributes.Clone();
+				copy.attributes.Parent = copy;
+			}
+			if (vars != null)
+			{
+				copy.vars = (ident_list)vars.Clone();
+				copy.vars.Parent = copy;
+			}
+			if (vars_type != null)
+			{
+				copy.vars_type = (type_definition)vars_type.Clone();
+				copy.vars_type.Parent = copy;
+			}
+			if (inital_value != null)
+			{
+				copy.inital_value = (expression)inital_value.Clone();
+				copy.inital_value.Parent = copy;
+			}
+			copy.var_attr = var_attr;
+			copy.is_event = is_event;
+			copy.typ = typ;
+			if (lst != null)
+			{
+				foreach (syntax_tree_node elem in lst)
+				{
+					if (elem != null)
+					{
+						copy.Add(elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new semantic_check_sugared_var_def_statement_node TypedClone()
+		{
+			return Clone() as semantic_check_sugared_var_def_statement_node;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (attributes != null)
+				attributes.Parent = this;
+			if (vars != null)
+				vars.Parent = this;
+			if (vars_type != null)
+				vars_type.Parent = this;
+			if (inital_value != null)
+				inital_value.Parent = this;
+			if (lst != null)
+			{
+				foreach (var child in lst)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			attributes?.FillParentsInAllChilds();
+			vars?.FillParentsInAllChilds();
+			vars_type?.FillParentsInAllChilds();
+			inital_value?.FillParentsInAllChilds();
+			if (lst != null)
+			{
+				foreach (var child in lst)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 3;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 3 + (lst == null ? 0 : lst.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return vars;
+					case 1:
+						return vars_type;
+					case 2:
+						return inital_value;
+				}
+				Int32 index_counter=ind - 3;
+				if(lst != null)
+				{
+					if(index_counter < lst.Count)
+					{
+						return lst[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						vars = (ident_list)value;
+						break;
+					case 1:
+						vars_type = (type_definition)value;
+						break;
+					case 2:
+						inital_value = (expression)value;
+						break;
+				}
+				Int32 index_counter=ind - 3;
+				if(lst != null)
+				{
+					if(index_counter < lst.Count)
+					{
+						lst[index_counter]= (syntax_tree_node)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///паттерн для константного матчинга
+	///</summary>
+	[Serializable]
+	public partial class const_pattern : pattern_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public const_pattern()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern(expression_list _pattern_expressions)
+		{
+			this._pattern_expressions=_pattern_expressions;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern(expression_list _pattern_expressions,SourceContext sc)
+		{
+			this._pattern_expressions=_pattern_expressions;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern(List<pattern_parameter> _parameters,expression_list _pattern_expressions)
+		{
+			this._parameters=_parameters;
+			this._pattern_expressions=_pattern_expressions;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern(List<pattern_parameter> _parameters,expression_list _pattern_expressions,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			this._pattern_expressions=_pattern_expressions;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected expression_list _pattern_expressions;
+
+		///<summary>
+		///
+		///</summary>
+		public expression_list pattern_expressions
+		{
+			get
+			{
+				return _pattern_expressions;
+			}
+			set
+			{
+				_pattern_expressions=value;
+				if (_pattern_expressions != null)
+					_pattern_expressions.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			const_pattern copy = new const_pattern();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			if (pattern_expressions != null)
+			{
+				copy.pattern_expressions = (expression_list)pattern_expressions.Clone();
+				copy.pattern_expressions.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new const_pattern TypedClone()
+		{
+			return Clone() as const_pattern;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+			if (pattern_expressions != null)
+				pattern_expressions.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+			pattern_expressions?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern_expressions;
+				}
+				Int32 index_counter=ind - 1;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern_expressions = (expression_list)value;
+						break;
+				}
+				Int32 index_counter=ind - 1;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class tuple_pattern_wild_card : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public tuple_pattern_wild_card()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			tuple_pattern_wild_card copy = new tuple_pattern_wild_card();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new tuple_pattern_wild_card TypedClone()
+		{
+			return Clone() as tuple_pattern_wild_card;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class const_pattern_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public const_pattern_parameter()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern_parameter(expression _const_param)
+		{
+			this._const_param=_const_param;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public const_pattern_parameter(expression _const_param,SourceContext sc)
+		{
+			this._const_param=_const_param;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected expression _const_param;
+
+		///<summary>
+		///
+		///</summary>
+		public expression const_param
+		{
+			get
+			{
+				return _const_param;
+			}
+			set
+			{
+				_const_param=value;
+				if (_const_param != null)
+					_const_param.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			const_pattern_parameter copy = new const_pattern_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (const_param != null)
+			{
+				copy.const_param = (expression)const_param.Clone();
+				copy.const_param.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new const_pattern_parameter TypedClone()
+		{
+			return Clone() as const_pattern_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (const_param != null)
+				const_param.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			const_param?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return const_param;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						const_param = (expression)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class wild_card_deconstructor_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public wild_card_deconstructor_parameter()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			wild_card_deconstructor_parameter copy = new wild_card_deconstructor_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new wild_card_deconstructor_parameter TypedClone()
+		{
+			return Clone() as wild_card_deconstructor_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class collection_pattern : pattern_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public collection_pattern()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public collection_pattern(List<pattern_parameter> _parameters)
+		{
+			this._parameters=_parameters;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public collection_pattern(List<pattern_parameter> _parameters,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			collection_pattern copy = new collection_pattern();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new collection_pattern TypedClone()
+		{
+			return Clone() as collection_pattern;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class collection_pattern_gap_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public collection_pattern_gap_parameter()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			collection_pattern_gap_parameter copy = new collection_pattern_gap_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new collection_pattern_gap_parameter TypedClone()
+		{
+			return Clone() as collection_pattern_gap_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class collection_pattern_wild_card : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public collection_pattern_wild_card()
+		{
+
+		}
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			collection_pattern_wild_card copy = new collection_pattern_wild_card();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new collection_pattern_wild_card TypedClone()
+		{
+			return Clone() as collection_pattern_wild_card;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Возможно без типа
+	///</summary>
+	[Serializable]
+	public partial class collection_pattern_var_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public collection_pattern_var_parameter()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public collection_pattern_var_parameter(ident _identifier,type_definition _type)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public collection_pattern_var_parameter(ident _identifier,type_definition _type,SourceContext sc)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected ident _identifier;
+		protected type_definition _type;
+
+		///<summary>
+		///
+		///</summary>
+		public ident identifier
+		{
+			get
+			{
+				return _identifier;
+			}
+			set
+			{
+				_identifier=value;
+				if (_identifier != null)
+					_identifier.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public type_definition type
+		{
+			get
+			{
+				return _type;
+			}
+			set
+			{
+				_type=value;
+				if (_type != null)
+					_type.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			collection_pattern_var_parameter copy = new collection_pattern_var_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (identifier != null)
+			{
+				copy.identifier = (ident)identifier.Clone();
+				copy.identifier.Parent = copy;
+			}
+			if (type != null)
+			{
+				copy.type = (type_definition)type.Clone();
+				copy.type.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new collection_pattern_var_parameter TypedClone()
+		{
+			return Clone() as collection_pattern_var_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (identifier != null)
+				identifier.Parent = this;
+			if (type != null)
+				type.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			identifier?.FillParentsInAllChilds();
+			type?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return identifier;
+					case 1:
+						return type;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						identifier = (ident)value;
+						break;
+					case 1:
+						type = (type_definition)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Рекурсивный паттерн-параметр. 
+	///</summary>
+	[Serializable]
+	public partial class recursive_collection_parameter : recursive_pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public recursive_collection_parameter()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_collection_parameter(pattern_node _pattern)
+		{
+			this._pattern=_pattern;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_collection_parameter(pattern_node _pattern,SourceContext sc)
+		{
+			this._pattern=_pattern;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			recursive_collection_parameter copy = new recursive_collection_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (pattern != null)
+			{
+				copy.pattern = (pattern_node)pattern.Clone();
+				copy.pattern.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new recursive_collection_parameter TypedClone()
+		{
+			return Clone() as recursive_collection_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (pattern != null)
+				pattern.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			pattern?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern = (pattern_node)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Рекурсивный паттерн-параметр.
+	///</summary>
+	[Serializable]
+	public partial class recursive_pattern_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public recursive_pattern_parameter()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_pattern_parameter(pattern_node _pattern)
+		{
+			this._pattern=_pattern;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_pattern_parameter(pattern_node _pattern,SourceContext sc)
+		{
+			this._pattern=_pattern;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected pattern_node _pattern;
+
+		///<summary>
+		///
+		///</summary>
+		public pattern_node pattern
+		{
+			get
+			{
+				return _pattern;
+			}
+			set
+			{
+				_pattern=value;
+				if (_pattern != null)
+					_pattern.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			recursive_pattern_parameter copy = new recursive_pattern_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (pattern != null)
+			{
+				copy.pattern = (pattern_node)pattern.Clone();
+				copy.pattern.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new recursive_pattern_parameter TypedClone()
+		{
+			return Clone() as recursive_pattern_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (pattern != null)
+				pattern.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			pattern?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern = (pattern_node)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class tuple_pattern : pattern_node
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public tuple_pattern()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public tuple_pattern(List<pattern_parameter> _parameters)
+		{
+			this._parameters=_parameters;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public tuple_pattern(List<pattern_parameter> _parameters,SourceContext sc)
+		{
+			this._parameters=_parameters;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			tuple_pattern copy = new tuple_pattern();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (parameters != null)
+			{
+				foreach (pattern_parameter elem in parameters)
+				{
+					if (elem != null)
+					{
+						copy.Add((pattern_parameter)elem.Clone());
+						copy.Last().Parent = copy;
+					}
+					else
+						copy.Add(null);
+				}
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new tuple_pattern TypedClone()
+		{
+			return Clone() as tuple_pattern;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					if (child != null)
+						child.Parent = this;
+			}
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			if (parameters != null)
+			{
+				foreach (var child in parameters)
+					child?.FillParentsInAllChilds();
+			}
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 0;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 0 + (parameters == null ? 0 : parameters.Count);
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						return parameters[index_counter];
+					}
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				Int32 index_counter=ind - 0;
+				if(parameters != null)
+				{
+					if(index_counter < parameters.Count)
+					{
+						parameters[index_counter]= (pattern_parameter)value;
+						return;
+					}
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///
+	///</summary>
+	[Serializable]
+	public partial class tuple_pattern_var_parameter : pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public tuple_pattern_var_parameter()
+		{
+
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public tuple_pattern_var_parameter(ident _identifier,type_definition _type)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public tuple_pattern_var_parameter(ident _identifier,type_definition _type,SourceContext sc)
+		{
+			this._identifier=_identifier;
+			this._type=_type;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		protected ident _identifier;
+		protected type_definition _type;
+
+		///<summary>
+		///
+		///</summary>
+		public ident identifier
+		{
+			get
+			{
+				return _identifier;
+			}
+			set
+			{
+				_identifier=value;
+				if (_identifier != null)
+					_identifier.Parent = this;
+			}
+		}
+
+		///<summary>
+		///
+		///</summary>
+		public type_definition type
+		{
+			get
+			{
+				return _type;
+			}
+			set
+			{
+				_type=value;
+				if (_type != null)
+					_type.Parent = this;
+			}
+		}
+
+
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			tuple_pattern_var_parameter copy = new tuple_pattern_var_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (identifier != null)
+			{
+				copy.identifier = (ident)identifier.Clone();
+				copy.identifier.Parent = copy;
+			}
+			if (type != null)
+			{
+				copy.type = (type_definition)type.Clone();
+				copy.type.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new tuple_pattern_var_parameter TypedClone()
+		{
+			return Clone() as tuple_pattern_var_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (identifier != null)
+				identifier.Parent = this;
+			if (type != null)
+				type.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			identifier?.FillParentsInAllChilds();
+			type?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 2;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return identifier;
+					case 1:
+						return type;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						identifier = (ident)value;
+						break;
+					case 1:
+						type = (type_definition)value;
+						break;
+				}
+			}
+		}
+		///<summary>
+		///Метод для обхода дерева посетителем
+		///</summary>
+		///<param name="visitor">Объект-посетитель.</param>
+		///<returns>Return value is void</returns>
+		public override void visit(IVisitor visitor)
+		{
+			visitor.visit(this);
+		}
+
+	}
+
+
+	///<summary>
+	///Рекурсивный паттерн-параметр.
+	///</summary>
+	[Serializable]
+	public partial class recursive_tuple_parameter : recursive_pattern_parameter
+	{
+
+		///<summary>
+		///Конструктор без параметров.
+		///</summary>
+		public recursive_tuple_parameter()
+		{
+
+		}
+
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_tuple_parameter(pattern_node _pattern)
+		{
+			this._pattern=_pattern;
+			FillParentsInDirectChilds();
+		}
+
+		///<summary>
+		///Конструктор с параметрами.
+		///</summary>
+		public recursive_tuple_parameter(pattern_node _pattern,SourceContext sc)
+		{
+			this._pattern=_pattern;
+			source_context = sc;
+			FillParentsInDirectChilds();
+		}
+		/// <summary> Создает копию узла </summary>
+		public override syntax_tree_node Clone()
+		{
+			recursive_tuple_parameter copy = new recursive_tuple_parameter();
+			copy.Parent = this.Parent;
+			if (source_context != null)
+				copy.source_context = new SourceContext(source_context);
+			if (pattern != null)
+			{
+				copy.pattern = (pattern_node)pattern.Clone();
+				copy.pattern.Parent = copy;
+			}
+			return copy;
+		}
+
+		/// <summary> Получает копию данного узла корректного типа </summary>
+		public new recursive_tuple_parameter TypedClone()
+		{
+			return Clone() as recursive_tuple_parameter;
+		}
+
+		///<summary> Заполняет поля Parent в непосредственных дочерних узлах </summary>
+		public override void FillParentsInDirectChilds()
+		{
+			if (pattern != null)
+				pattern.Parent = this;
+		}
+
+		///<summary> Заполняет поля Parent во всем поддереве </summary>
+		public override void FillParentsInAllChilds()
+		{
+			FillParentsInDirectChilds();
+			pattern?.FillParentsInAllChilds();
+		}
+
+		///<summary>
+		///Свойство для получения количества всех подузлов без элементов поля типа List
+		///</summary>
+		public override Int32 subnodes_without_list_elements_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Свойство для получения количества всех подузлов. Подузлом также считается каждый элемент поля типа List
+		///</summary>
+		public override Int32 subnodes_count
+		{
+			get
+			{
+				return 1;
+			}
+		}
+		///<summary>
+		///Индексатор для получения всех подузлов
+		///</summary>
+		public override syntax_tree_node this[Int32 ind]
+		{
+			get
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						return pattern;
+				}
+				return null;
+			}
+			set
+			{
+				if(subnodes_count == 0 || ind < 0 || ind > subnodes_count-1)
+					throw new IndexOutOfRangeException();
+				switch(ind)
+				{
+					case 0:
+						pattern = (pattern_node)value;
 						break;
 				}
 			}

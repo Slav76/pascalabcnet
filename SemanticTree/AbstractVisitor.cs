@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -640,6 +640,11 @@ namespace PascalABCCompiler.SemanticTree
 
         public virtual void visit(ICommonNamespaceEventNode value)
         {
+        }
+
+        public virtual void visit(IDefaultOperatorNodeAsConstant value)
+        {
+
         }
     }
 

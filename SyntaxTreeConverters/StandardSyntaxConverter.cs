@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -17,12 +17,17 @@ namespace PascalABCCompiler.SyntaxTreeConverters
         {
             // Прошивание ссылками на Parent nodes. Должно идти первым
             // FillParentNodeVisitor расположен в SyntaxTree/tree как базовый визитор, отвечающий за построение дерева
-            //FillParentNodeVisitor.New.ProcessNode(root);
-
+            //FillParentNodeVisitor.New.ProcessNode(root); // почему-то перепрошивает не всё. А следующий вызов - всё
+            root.FillParentsInAllChilds();
             // Выносим выражения с лямбдами из заголовка foreach
             StandOutExprWithLambdaInForeachSequenceVisitor.New.ProcessNode(root);
-
-            //--- Обработка синтаксически сахарных узлов
+            VarNamesInMethodsWithSameNameAsClassGenericParamsReplacer.New.ProcessNode(root); // SSM bug fix #1147
+            FindOnExceptVarsAndApplyRenameVisitor.New.ProcessNode(root);
+#if DEBUG
+            //new SimplePrettyPrinterVisitor("E:/projs/out.txt").ProcessNode(root);
+#endif
+            // loop
+            LoopDesugarVisitor.New.ProcessNode(root);
 
             // tuple_node
             TupleVisitor.New.ProcessNode(root);
@@ -36,23 +41,43 @@ namespace PascalABCCompiler.SyntaxTreeConverters
             // question_point_desugar_visitor
             QuestionPointDesugarVisitor.New.ProcessNode(root);
 
+            // double_question_desugar_visitor
+            DoubleQuestionDesugarVisitor.New.ProcessNode(root);
+
+            // Patterns
+            // SingleDeconstructChecker.New.ProcessNode(root); // SSM 21.10.18 - пока разрешил множественные деконструкторы. Если будут проблемы - запретить
+            ExtendedIsDesugaringVisitor.New.ProcessNode(root); // Десахаризация расширенного is, который используется в сложных логических выражениях
+            PatternsDesugaringVisitor.New.ProcessNode(root);  // Обязательно в этом порядке.
+
+            // simple_property
+            PropertyDesugarVisitor.New.ProcessNode(root);
 
             // Всё, связанное с yield
+            CapturedNamesHelper.Reset();
             MarkMethodHasYieldAndCheckSomeErrorsVisitor.New.ProcessNode(root);
             ProcessYieldCapturedVarsVisitor.New.ProcessNode(root);
 
-/*#if DEBUG
-            try
+#if DEBUG
+            //new SimplePrettyPrinterVisitor("D:\\Tree.txt").ProcessNode(root);
+            //FillParentNodeVisitor.New.ProcessNode(root);
+
+
+            /*var cv = CollectLightSymInfoVisitor.New;
+            cv.ProcessNode(root);
+            cv.Output(@"Light1.txt");*/
+
+            /*try
             {
-                //root.visit(new SimplePrettyPrinterVisitor(@"d:\\zzz4.txt"));
+                root.visit(new SimplePrettyPrinterVisitor(@"d:\\zzz1.txt"));
             }
-            catch
+            catch(Exception e)
             {
 
-            }
+                System.IO.File.AppendAllText(@"d:\\zzz1.txt",e.Message);
+            }*/
 
-#endif*/
 
+#endif
             return root;
         }
     }

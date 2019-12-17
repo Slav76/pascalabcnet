@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,9 @@ using PascalABCCompiler.SyntaxTree;
 
 namespace SyntaxVisitors
 {
-    public class CalcConstExprs : BaseChangeVisitor // вычисление целых и вещественных константных выражений на этапе парсинга
+    // Учебный визитор. 
+    // Вычисление целых и вещественных константных выражений на этапе парсинга
+    public class CalcConstExprs : BaseChangeVisitor 
     {
         public override void Exit(syntax_tree_node st)
         {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using PascalABCCompiler.SemanticTree;
 using System;
@@ -194,6 +194,7 @@ namespace PascalABCCompiler.NETGenerator {
     public class GenericFldInfo : FldInfo
     {
         private Type _field_type;
+        public FieldInfo prev_fi; // передаю чтобы на третьем этапе в NegGenerator.cs (примерно 1586) можно было сконструировать правильный тип. Костыль для #1632
 
         public override Type field_type
         {
@@ -203,10 +204,11 @@ namespace PascalABCCompiler.NETGenerator {
             }
         }
 
-        public GenericFldInfo(FieldInfo fi, Type field_type)
+        public GenericFldInfo(FieldInfo fi, Type field_type, FieldInfo prev_fi)
             : base(fi)
         {
             _field_type = field_type;
+            this.prev_fi = prev_fi;
         }
 	}
 	
@@ -511,10 +513,12 @@ namespace PascalABCCompiler.NETGenerator {
 	}
 	
 	public class Helper {
-		private Hashtable defs=new Hashtable();
+		public Hashtable defs=new Hashtable();
+        private Hashtable processing_types = new Hashtable();
 		private MethodInfo arr_mi=null;
 		private Hashtable pas_defs = new Hashtable();
-		
+        private Hashtable memoized_exprs = new Hashtable();
+
 		public Helper() {}
 		
 		public void AddPascalTypeReference(ITypeNode tn, Type t)
@@ -686,13 +690,25 @@ namespace PascalABCCompiler.NETGenerator {
 		public FldInfo AddField(ICommonClassFieldNode f, FieldInfo fb)
 		{
 			FldInfo fi = new FldInfo(fb);
-			defs[f] = fi;
-			return fi;
+#if DEBUG
+            /*if (f.name == "XYZW")
+            {
+                var y = f.GetHashCode();
+            } */
+#endif
+            defs[f] = fi;
+            return fi;
 		}
 		
-        public FldInfo AddGenericField(ICommonClassFieldNode f, FieldInfo fb, Type field_type)
+        public FldInfo AddGenericField(ICommonClassFieldNode f, FieldInfo fb, Type field_type, FieldInfo prev_fi)
         {
-            FldInfo fi = new GenericFldInfo(fb, field_type);
+            FldInfo fi = new GenericFldInfo(fb, field_type, prev_fi); // prev_fi - чтобы сконструировать на последнем этапе fi 
+#if DEBUG
+            /*if (f.name == "XYZW")
+            {
+                var y = f.GetHashCode();
+            }*/
+#endif
             defs[f] = fi;
             return fi;
         }
@@ -700,7 +716,24 @@ namespace PascalABCCompiler.NETGenerator {
         //получение поля
 		public FldInfo GetField(ICommonClassFieldNode f)
 		{
-			return (FldInfo)defs[f];
+            var r = (FldInfo)defs[f];
+#if DEBUG
+            /*if (f.name == "XYZW")
+            {
+                var y = f.GetHashCode();
+            } */
+#endif
+#if DEBUG
+            /*if (r == null && f.name == "XYZW")
+            {
+                foreach (var k in defs.Keys)
+                {
+                    if ((k is ICommonClassFieldNode) && (k as ICommonClassFieldNode).name == "XYZW")
+                        return (FldInfo)defs[k];
+                }
+            } */
+#endif
+            return r;
 		}
 		
         //добавление типа
@@ -792,12 +825,14 @@ namespace PascalABCCompiler.NETGenerator {
 
         public bool IsConstructedGenericType(Type t)
         {
-            if (t is TypeBuilder || t is GenericTypeParameterBuilder)
+            if (t is TypeBuilder || t is GenericTypeParameterBuilder || t is EnumBuilder)
                 return true;
             if (t.IsGenericType)
                 foreach (Type gt in t.GetGenericArguments())
                     if (IsConstructedGenericType(gt))
                         return true;
+            if (t.IsArray)
+                return IsConstructedGenericType(t.GetElementType());
             return false;
         }
 
@@ -808,8 +843,19 @@ namespace PascalABCCompiler.NETGenerator {
                 || t == TypeFactory.SingleType || t == TypeFactory.DoubleType;
         }
 
-        public MethodInfo GetEnumeratorMethod(Type t)
+        public ICommonTypeNode GetTypeNodeByTypeBuilder(TypeBuilder tb)
         {
+            foreach (object o in defs.Keys)
+            {
+                if (o is ICommonTypeNode && this.GetTypeReference(o as ICommonTypeNode).tp == tb)
+                    return o as ICommonTypeNode;
+            }
+            return null;
+        }
+
+        public MethodInfo GetEnumeratorMethod(Type t, out Type[] generic_args)
+        {
+            generic_args = null;
             Type generic_def = null;
             if (t.IsGenericType && !t.IsGenericTypeDefinition)
                 generic_def = t.GetGenericTypeDefinition();
@@ -845,6 +891,13 @@ namespace PascalABCCompiler.NETGenerator {
                         else
                             return interf.GetGenericTypeDefinition().MakeGenericType(t.GetGenericArguments()).GetMethod("GetEnumerator");
                     }
+                    else if (IsConstructedGenericType(interf))
+                    {
+                        //return TypeBuilder.GetMethod(TypeFactory.IEnumerableGenericType.MakeGenericType(interf.GetGenericArguments()), TypeFactory.IEnumerableGenericType.GetMethod("GetEnumerator"));
+                        //return TypeFactory.IEnumerableType.GetMethod("GetEnumerator", Type.EmptyTypes);
+                        generic_args = interf.GetGenericArguments();
+                        return TypeBuilder.GetMethod(interf, mi);
+                    }
                     else
                         return interf.GetMethod("GetEnumerator");
                 }
@@ -852,15 +905,36 @@ namespace PascalABCCompiler.NETGenerator {
             return TypeFactory.IEnumerableType.GetMethod("GetEnumerator", Type.EmptyTypes);
         }
 
+        public void SetAsProcessing(ICommonTypeNode type)
+        {
+            processing_types[type] = true;
+        }
+
+        public bool IsProcessing(ICommonTypeNode type)
+        {
+            return processing_types[type] != null;
+        }
+
+        public void LinkExpressionToLocalBuilder(IExpressionNode expr, LocalBuilder lb)
+        {
+            memoized_exprs[expr] = lb;
+        }
+
+        public LocalBuilder GetLocalBuilderForExpression(IExpressionNode expr)
+        {
+            return memoized_exprs[expr] as LocalBuilder;
+        }
+
         //получение типа
-		public TypeInfo GetTypeReference(ITypeNode type)
+        public TypeInfo GetTypeReference(ITypeNode type)
 		{
 			TypeInfo ti = defs[type] as TypeInfo;
 			if (ti != null) 
 			{
 				if (type.type_special_kind == type_special_kind.text_file) 
 					ti.is_text_file = true;
-				if (!ti.is_set && !ti.is_typed_file && !ti.is_text_file) return ti;
+				if (!ti.is_set && !ti.is_typed_file && !ti.is_text_file)
+                    return ti;
 				if (ti.clone_meth == null && !ti.is_typed_file && !ti.is_text_file)
                 {
                     if (type is ICommonTypeNode)

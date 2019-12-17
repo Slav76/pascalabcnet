@@ -35,6 +35,7 @@ INTNUM {Digit}+
 FLOATNUM {INTNUM}\.{INTNUM}
 EXPNUM ({INTNUM}\.)?{INTNUM}[eE][+\-]?{INTNUM}
 STRINGNUM \'([^\'\n]|\'\')*\'
+FORMATSTRINGNUM \$\'([^\'\n]|\'\')*\'
 HEXNUM ${HexDigit}+
 SHARPCHARNUM #{Digit}+
 OLDDIRECTIVE #{ID}
@@ -109,6 +110,11 @@ UNICODEARROW \x890
 	{
 		if (!Defines.Contains(directiveparam))
 			Defines.Add(directiveparam);
+	}
+	else if (directivename == "UNDEF")
+	{
+		if (Defines.Contains(directiveparam))
+			Defines.Remove(directiveparam);
 	}
 }
 
@@ -185,7 +191,9 @@ UNICODEARROW \x890
 "["              { return (int)Tokens.tkSquareOpen; }
 "]"              { return (int)Tokens.tkSquareClose; }
 "?"              { return (int)Tokens.tkQuestion; }
+"_"				 { return (int)Tokens.tkUnderscore; }
 "?."              { return (int)Tokens.tkQuestionPoint; }
+"??"              { return (int)Tokens.tkDoubleQuestion; }
 "?["              { return (int)Tokens.tkQuestionSquareOpen; }
 "@"              { yylval = new Union(); yylval.op = new op_type_node(Operators.AddressOf); return (int)Tokens.tkAddressOf; }
 ":="            { yylval = new Union(); yylval.op = new op_type_node(Operators.Assignment); return (int)Tokens.tkAssign; }
@@ -197,6 +205,7 @@ UNICODEARROW \x890
 "+"             { yylval = new Union(); yylval.op = new op_type_node(Operators.Plus); return (int)Tokens.tkPlus; }
 "/"             { yylval = new Union(); yylval.op = new op_type_node(Operators.Division); return (int)Tokens.tkSlash; }
 "*"             { yylval = new Union(); yylval.op = new op_type_node(Operators.Multiplication); return (int)Tokens.tkStar; }
+"**"            { yylval = new Union(); yylval.op = new op_type_node(Operators.Power); return (int)Tokens.tkStarStar; }
 "="             { yylval = new Union(); yylval.op = new op_type_node(Operators.Equal); return (int)Tokens.tkEqual; }
 ">"             { yylval = new Union(); yylval.op = new op_type_node(Operators.Greater); return (int)Tokens.tkGreater; }
 ">="            { yylval = new Union(); yylval.op = new op_type_node(Operators.GreaterEqual); return (int)Tokens.tkGreaterEqual; }
@@ -306,6 +315,7 @@ UNICODEARROW \x890
     case (int)Tokens.tkFinalization:
     case (int)Tokens.tkFinally:
     case (int)Tokens.tkFor:
+    case (int)Tokens.tkLoop:
     case (int)Tokens.tkForeach:
     case (int)Tokens.tkFunction:
     case (int)Tokens.tkIf:
@@ -346,10 +356,14 @@ UNICODEARROW \x890
     case (int)Tokens.tkTo:
     case (int)Tokens.tkDownto:
     case (int)Tokens.tkUnit:
+    case (int)Tokens.tkNamespace:
     case (int)Tokens.tkLibrary:
     case (int)Tokens.tkExternal:
     case (int)Tokens.tkYield:
     case (int)Tokens.tkSequence:
+    case (int)Tokens.tkMatch:
+    case (int)Tokens.tkWhen:
+    case (int)Tokens.tkStatic:
 		yylval = new Union();
         yylval.ti = new token_info(cur_yytext,currentLexLocation);
         break;
@@ -439,6 +453,13 @@ UNICODEARROW \x890
   return (int)Tokens.tkStringLiteral; 
 }
 
+{FORMATSTRINGNUM} { 
+  yylval = new Union();
+  currentLexLocation = CurrentLexLocation;
+  yylval.stn = parsertools.create_format_string_const(yytext,currentLexLocation); 
+  return (int)Tokens.tkFormatStringLiteral; 
+}
+
 {SHARPCHARNUM} {
   yylval = new Union();
   currentLexLocation = CurrentLexLocation;
@@ -507,6 +528,13 @@ UNICODEARROW \x890
                 string full_path = fName;
                 if (!Path.IsPathRooted(full_path))
                     full_path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(parsertools.CurrentFileName), fName));
+                    
+                if (fNameStack.Contains(full_path))
+                {
+                    parsertools.AddErrorFromResource("RECUR_INCLUDE", CurrentLexLocation, fName);
+                    return;
+                }
+                    
                 SetSource(File.ReadAllText(full_path), 0);
 				fNameStack.Push(parsertools.CurrentFileName);
 				parsertools.CurrentFileName = full_path;

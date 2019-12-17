@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -82,6 +82,17 @@ namespace VisualPascalABC
             AddWindowToDockPanel(DebugVariablesListWindow, MainDockPanel, OutputWindow.Dock, DockState.DockBottom, OutputWindow.IsFloat, BottomPane, int.MaxValue);
         }
 
+        void AddDisassemblyWindow()
+        {
+            if (DisassemblyWindow == null)
+            {
+                DisassemblyWindow = new DisassemblyWindow(this);
+                Form1StringResources.SetTextForAllControls(DisassemblyWindow);
+            }
+
+            AddWindowToDockPanel(DisassemblyWindow, MainDockPanel, OutputWindow.Dock, DockState.DockBottom, OutputWindow.IsFloat, BottomPane, int.MaxValue);
+        }
+
         void AddDebugWatchListWindow()
         {
             if (DebugWatchListWindow == null)
@@ -114,7 +125,13 @@ namespace VisualPascalABC
             optionsContentEngine.AddContent(new IntelliseseOptionsContent(this));
         }
 
-        void AddWindowToDockPanel(DockContent dc, DockPanel dp, DockStyle dockStyle, DockState dockState, bool isFloat, DockPane dockToPane, int ind)
+        public void UpdateOptionsForm()
+        {
+            if (optionsContentEngine != null)
+                optionsContentEngine.UpdateOptionsForm();
+        }
+
+        public void AddWindowToDockPanel(DockContent dc, DockPanel dp, DockStyle dockStyle, DockState dockState, bool isFloat, DockPane dockToPane, int ind)
         {
             if (dc.Visible && dc.Pane != null)
                 return;
@@ -157,6 +174,7 @@ namespace VisualPascalABC
             if (PropertiesWindow == null)
             {
                 PropertiesWindow = new PropertiesForm();
+                Form1StringResources.SetTextForAllControls(PropertiesWindow);
                 Panel properties = FormsDesignerViewContent.PropertyPad.PropertyPadPanel;
                 properties.Dock = DockStyle.Fill;
                 properties.Parent = PropertiesWindow;
@@ -166,7 +184,7 @@ namespace VisualPascalABC
             else PropertiesWindowVisible = true;
         }
 
-        private CodeFileDocumentControl AddNewTab(DockPanel tabControl)
+        private CodeFileDocumentControl AddNewTab(DockPanel tabControl, DockStyle dockStyle = DockStyle.Fill)
         {
             CodeFileDocumentControl tp = new CodeFileDocumentControl(this);
             //tp.BorderStyle=BorderStyle.Fixed3D;
@@ -174,7 +192,8 @@ namespace VisualPascalABC
             RichTextBox tb = OutputWindow.outputTextBox;
             if (OpenDocuments.Count > 0)
                 tb = CopyTextBox(OutputWindow.outputTextBox);
-            AddWindowToDockPanel(tp, tabControl, tp.Dock, DockState.Document, tp.IsFloat, null, 0);
+            AddWindowToDockPanel(tp, tabControl, tp.Dock != dockStyle?dockStyle:tp.Dock, DockState.Document, tp.IsFloat, null, 0);
+            tb.Font = tp.TextEditor.Font;
             OutputTextBoxs.Add(tp, tb);
 
             WorkbenchServiceFactory.CodeCompletionParserController.ParseInformationUpdated += tp.TextEditor.UpdateFolding;
@@ -228,7 +247,7 @@ namespace VisualPascalABC
         private CodeFileDocumentControl AddNewProgramToTab(DockPanel tabControl, string FileName)
         {
             CodeFileDocumentControl edit = AddNewTab(tabControl);
-            
+
             edit.FileName = FileName;
             SetTabPageText(edit);
             edit.SetHighlightingStrategyForFile(FileName);
@@ -244,6 +263,8 @@ namespace VisualPascalABC
                 AddEditorHandlers(edit);
             }
             CodeCompletionKeyHandler.Attach(edit.TextEditor);
+            edit.TextEditor.ActiveTextAreaControl.TextArea.KeyEventHandler += TextArea_KeyEventHandler;
+
             //HostCallbackImplementation.Register(this);
 
             //\ivan
@@ -311,6 +332,7 @@ namespace VisualPascalABC
             AddCompilerConsoleWindow();
             AddFindSymbolsResultWindow();
             AddImmediateWindow();
+            AddDisassemblyWindow();
             AddDebugVariablesListWindow();
             AddDebugWatchListWindow();
             if (!Tools.IsUnix())
@@ -326,6 +348,7 @@ namespace VisualPascalABC
             HideContent(DebugVariablesListWindow);
             HideContent(DebugWatchListWindow);
             HideContent(FindSymbolsResultWindow);
+            HideContent(DisassemblyWindow);
             if (!Tools.IsUnix())
             {
                 HideContent(PropertiesWindow);
@@ -465,7 +488,7 @@ namespace VisualPascalABC
                 tp.Text += string.Format(" [{0}]", PascalABCCompiler.StringResources.Get("VP_MF_FROM_METADATA"));
             if (!ProjectFactory.Instance.ProjectLoaded && !tp.FromMetadata)
             {
-                if (tp.Run && (!WorkbenchServiceFactory.DebuggerManager.IsRun(tp.EXEFileName) || !WorkbenchServiceFactory.DebuggerManager.show_debug_tabs))
+                if (tp.Run && (!WorkbenchServiceFactory.DebuggerManager.IsRun(tp.EXEFileName) || !WorkbenchServiceFactory.DebuggerManager.ShowDebugTabs))
                     tp.Text += string.Format(" [{0}]", PascalABCCompiler.StringResources.Get("VP_MF_TS_RUN"));
                 else
                     if (WorkbenchServiceFactory.DebuggerManager.IsRun(tp.EXEFileName, tp.FileName))
@@ -624,6 +647,11 @@ namespace VisualPascalABC
             }
         }
 
+        public void DisplayDisassembledCode(string code)
+        {
+            DisassemblyWindow.SetDisassembledCode(code);
+        }
+
         public void ClearDebugTabs()
         {
             foreach (TextArea ta in DebugTabs.Values)
@@ -645,7 +673,7 @@ namespace VisualPascalABC
                 DebugWatchListWindow.RefreshWatch();
                 AdvancedDataGridView.TreeGridNode.UpdateNodesForLocalList(DebugVariablesListWindow.watchList, DebugVariablesListWindow.watchList.Nodes, items);
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
 
             }

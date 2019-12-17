@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using PascalABCCompiler.SemanticTree;
@@ -65,6 +65,22 @@ namespace PascalABCCompiler.NetHelper
             }
             return null;
         }
+        
+        public List<TypeInfo> GetTypesByNamespaceList(using_namespace_list unl)
+        {
+            List<TypeInfo> types = new List<TypeInfo>();
+            foreach (TypeNamespaceInfo tni in type_infos)
+            {
+                foreach (using_namespace un in unl)
+                {
+                    if (string.Compare(un.namespace_name, tni.us_ns.namespace_name, true) == 0)
+                    {
+                        types.Add(tni.type_info);
+                    }
+                }
+            }
+            return types;
+        }
     }
 
 	public class NetScope : SymbolTable.DotNETScope {
@@ -77,7 +93,15 @@ namespace PascalABCCompiler.NetHelper
 		internal Type entry_type = null;
         private List<Type> UnitTypes = null;
 
-		public NetScope(PascalABCCompiler.TreeRealization.using_namespace_list unar,System.Reflection.Assembly assembly,
+        public NetScope(PascalABCCompiler.TreeRealization.using_namespace_list unar,
+            SymbolTable.TreeConverterSymbolTable tcst) : base(tcst)
+        {
+            _unar = unar;
+
+            _tcst = tcst;
+        }
+
+        public NetScope(PascalABCCompiler.TreeRealization.using_namespace_list unar,System.Reflection.Assembly assembly,
 			SymbolTable.TreeConverterSymbolTable tcst) : base(tcst)
 		{
 			_unar=unar;
@@ -136,25 +160,24 @@ namespace PascalABCCompiler.NetHelper
 			}
 		}*/
 
-		public override SymbolInfo Find(string name, SymbolTable.Scope CurrentScope)
-		{
-			SymbolInfo si=null;
-			string full_ns=null;
+        public override List<SymbolInfo> Find(string name, SymbolTable.Scope CurrentScope)
+        {
+            List<SymbolInfo> sil = null;
+            string full_ns = null;
             if (NetHelper.IsNetNamespace(name, _unar, out full_ns) == true)
             {
-                compiled_namespace_node cnn = new compiled_namespace_node(full_ns, _tcst);
-                si = new SymbolInfo(cnn);
+                compiled_namespace_node cnn = compiled_namespace_node.get_compiled_namespace(full_ns, _tcst);//new compiled_namespace_node(full_ns, _tcst);
+                sil = new List<SymbolInfo> { new SymbolInfo(cnn) };
             }
             else
             {
                 //Type t = Type.GetType("System."+name,false,true);
                 Type t = null;
-                int i = 0;
                 t = NetHelper.FindType(name, _unar);
                 if (t != null)
                 {
                     compiled_type_node ctn = compiled_type_node.get_type_node(t, _tcst);
-                    si = new SymbolInfo(ctn);
+                    sil = new List<SymbolInfo> { new SymbolInfo(ctn) };
                 }
                 else
                 {
@@ -163,42 +186,42 @@ namespace PascalABCCompiler.NetHelper
                         type_node pas_tn = NetHelper.FindCompiledPascalType(entry_type.Namespace + "." + name);
                         if (pas_tn != null)
                         {
-                            si = new SymbolInfo(pas_tn);
-                            return si;
+                            sil = new List<SymbolInfo> { new SymbolInfo(pas_tn) };
+                            return sil;
                         }
                         else
                         {
                             template_class tc = NetHelper.FindCompiledTemplateType(entry_type.Namespace + "." + name);
                             if (tc != null)
                             {
-                                si = new SymbolInfo(tc);
-                                return si;
+                                sil = new List<SymbolInfo> { new SymbolInfo(tc) };
+                                return sil;
                             }
                         }
                     }
                     if (SemanticRules.AllowGlobalVisibilityForPABCDll && entry_type != null)
                     {
                         t = NetHelper.FindType(entry_type.Namespace + "." + name);
-                        if (t != null) si = new SymbolInfo(compiled_type_node.get_type_node(t));
+                        if (t != null) sil = new List<SymbolInfo> { new SymbolInfo(compiled_type_node.get_type_node(t)) };
                         else
                         {
                             object[] attrs = entry_type.GetCustomAttributes(false);
                             for (int j = 0; j < attrs.Length; j++)
                                 if (attrs[j].GetType().Name == PascalABCCompiler.TreeConverter.compiler_string_consts.global_attr_name)
                                 {
-                                    si = NetHelper.FindName(entry_type, name);
-                                    if (si != null) break;
+                                    sil = NetHelper.FindName(entry_type, name);
+                                    if (sil != null) break;
                                 }
                         }
-                        if (si == null && UnitTypes.Count > 1)
+                        if (sil == null && UnitTypes.Count > 1)
                         {
                             for (int j = 0; j < _unar.Count; j++)
                             {
                                 t = in_type_list(_unar[j].namespace_name);
                                 if (t != null)
                                 {
-                                    si = NetHelper.FindName(t, name);
-                                    if (si != null)
+                                    sil = NetHelper.FindName(t, name);
+                                    if (sil != null)
                                         break;
                                 }
                             }
@@ -206,7 +229,7 @@ namespace PascalABCCompiler.NetHelper
                     }
                 }
             }
-			return si;
+			return sil;
 		}
 
         private Type in_type_list(string name)
@@ -217,6 +240,10 @@ namespace PascalABCCompiler.NetHelper
                     return UnitTypes[i];
             }
             return null;
+        }
+        public override string ToString()
+        {
+            return Assembly.ToString();
         }
     }
 	
@@ -247,16 +274,14 @@ namespace PascalABCCompiler.NetHelper
 			}
 		}
 		
-		public override SymbolInfo Find(string name, SymbolTable.Scope CurrentScope)
-		{
-            SymbolInfo si = NetHelper.FindName(type_info,name);
-            return si;
-            //return si;
-		}
-	}
+        public override List<SymbolInfo> Find(string name, SymbolTable.Scope CurrentScope)
+        {
+            return NetHelper.FindName(type_info, name);
+        }
+    }
 	
 	public static class NetHelper {
-		private static Hashtable namespaces; 
+		private static Hashtable namespaces;
 		private static Hashtable types;
         private static Dictionary<string,FoundInfo> type_search_cache;
 		private static Hashtable compiled_pascal_types;
@@ -335,7 +360,9 @@ namespace PascalABCCompiler.NetHelper
 		{
             if (name == null) return null;
 			Assembly a = ass_name_cache[name] as Assembly;
-			if (a != null)
+            if (a == null && name.IndexOf(System.IO.Path.DirectorySeparatorChar) == -1)
+                a = ass_name_cache[System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), name)] as Assembly;
+            if (a != null)
 			{
 				if (System.IO.File.GetLastWriteTime(name) == (DateTime)file_dates[a])
 					return a;
@@ -436,29 +463,28 @@ namespace PascalABCCompiler.NetHelper
                         //if (namespaces[s] == null) ns_ht.Add(s,s);
                         ns_ht[s] = s;
                         namespaces[s] = t;
-
-                        if (pos != -1)
+                        // SSM 17.05.19 Запретил uses Reflection: https://github.com/pascalabcnet/pascalabcnet/issues/1941
+                        /*if (pos != -1)
                         {
                             string[] sub_ns_arr = s.Split('.');
                             string sub_ns_str = sub_ns_arr[sub_ns_arr.Length - 1];
                             namespaces[sub_ns_str] = t;
+                            ns_ht[sub_ns_str] = s;
                             int ind = sub_ns_arr.Length - 2;
                             while (ind != 0)
                             {
                                 sub_ns_str = sub_ns_arr[ind] + "." + sub_ns_str;
                                 ind--;
                             }
-                        }
+                        }*/
                         while (pos != -1)
                         {
                             s = s.Substring(0, pos);
                             pos = s.LastIndexOf('.');
                             //if (pos == -1)
                             if (namespaces[s] == null)
-                            { 
-                                ns_ht.Add(s, s);
                                 namespaces[s] = t;
-                            }
+                            ns_ht[s] = s;
                         }
                     }
                     TypeInfo ti = new TypeInfo(t, t.FullName);
@@ -509,6 +535,16 @@ namespace PascalABCCompiler.NetHelper
                                         {
                                             mths = new List<MethodInfo>();
                                             type_extensions.Add(tmp, mths);
+                                        }
+                                        if ((tmp.BaseType == DelegateType || tmp.BaseType == MulticastDelegateType))
+                                        {
+                                            List<MethodInfo> mths3 = null;
+                                            if (!type_extensions.TryGetValue(DelegateType, out mths3))
+                                            {
+                                                mths3 = new List<MethodInfo>();
+                                                type_extensions.Add(DelegateType, mths3);
+                                            }
+                                            mths3.Add(mi);
                                         }
                                         mths.Add(mi);
                                         if (tmp.IsArray && !generic_array_type_extensions.TryGetValue(tmp.GetArrayRank(), out mths2))
@@ -824,7 +860,8 @@ namespace PascalABCCompiler.NetHelper
        		
         	if (t != null && cur_used_assemblies.ContainsKey(t.Assembly)) return true;
         	foreach (Assembly a in namespace_assemblies.Keys)
-        		if (cur_used_assemblies.ContainsKey(a) && (namespace_assemblies[a] as Hashtable).ContainsKey(Namespace)) return true;
+        		if (cur_used_assemblies.ContainsKey(a) && (namespace_assemblies[a] as Hashtable).ContainsKey(Namespace))
+                    return true;
         	return false;
         }
 
@@ -934,7 +971,8 @@ namespace PascalABCCompiler.NetHelper
                 t = namespaces[name] as Type;
         	if (t != null && cur_used_assemblies.ContainsKey(t.Assembly)) return true;
         	foreach (Assembly a in namespace_assemblies.Keys)
-        		if (cur_used_assemblies.ContainsKey(a) && (namespace_assemblies[a] as Hashtable).ContainsKey(name)) return true;
+        		if (cur_used_assemblies != null && cur_used_assemblies.ContainsKey(a) && (namespace_assemblies[a] as Hashtable).ContainsKey(name))
+                    return true;
         	return false;
 		}
 		
@@ -1052,21 +1090,21 @@ namespace PascalABCCompiler.NetHelper
             }
             if (scope != null)
             {
-                SymbolInfo si = scope.FindOnlyInType(op_name, scope);
-                while (si != null)
-                {
-                    if (si.sym_info is common_namespace_function_node)
+                List<SymbolInfo> sil = scope.FindOnlyInType(op_name, scope);
+                if(sil != null)
+                    foreach(SymbolInfo si in sil)
                     {
-                        function_node fn = si.sym_info as function_node;
-                        if ((fn.return_value_type == to || fn.return_value_type.original_generic == to) && 
-                            fn.parameters.Count == 1 && 
-                            (fn.parameters[0].type == from || fn.parameters[0].type.original_generic == from))
+                        if (si.sym_info is common_namespace_function_node)
                         {
-                            return fn;
+                            function_node fn = si.sym_info as function_node;
+                            if ((fn.return_value_type == to || fn.return_value_type.original_generic == to) && 
+                                fn.parameters.Count == 1 && 
+                                (fn.parameters[0].type == from || fn.parameters[0].type.original_generic == from))
+                            {
+                                return fn;
+                            }
                         }
                     }
-                    si = si.Next;
-                }
             }
             return null;
         }
@@ -1350,23 +1388,20 @@ namespace PascalABCCompiler.NetHelper
             return curr_type != null && type_table.is_derived(comp_node, curr_type);
         }
 		
-        public static SymbolInfo GetConstructor(Type t)
+        public static List<SymbolInfo> GetConstructor(Type t)
         {
         	ConstructorInfo[] constrs = t.GetConstructors(BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic);
         	SymbolInfo si = null;
-        	SymbolInfo res_si = null;
-        	SymbolInfo tmp = null;
+        	List<SymbolInfo> res_si = null;
         	foreach (ConstructorInfo ci in constrs)
         	{
         		field_access_level fal = get_access_level(ci);
             	if (fal != field_access_level.fal_private && fal != field_access_level.fal_internal)
                 {
             		si = new SymbolInfo(compiled_constructor_node.get_compiled_constructor(ci));
-            		if (tmp != null)
-            			tmp.Next = si;
-            		else
-            			res_si = si;
-            		tmp = si;
+            		if (res_si == null)
+            			res_si = new List<SymbolInfo>();
+                    res_si.Add(si);
             	}
         	}
         	return res_si;
@@ -1387,7 +1422,7 @@ namespace PascalABCCompiler.NetHelper
         	return FindType(name) != null;
         }
         
-        public static SymbolInfo FindNameIncludeProtected(Type t, string name)
+        public static List<SymbolInfo> FindNameIncludeProtected(Type t, string name)
         {
         	if (name == null) return null;
 			if (name == compiler_string_consts.assign_name) return null;
@@ -1397,7 +1432,7 @@ namespace PascalABCCompiler.NetHelper
 				if (IsStandType(t)) return null;
 				name = s;
 			}
-			SymbolInfo si=null;
+			List<SymbolInfo> sil=null;
 			List<MemberInfo> mis = GetMembers(t,name);
         	
             foreach (MemberInfo mi in mis)
@@ -1428,8 +1463,9 @@ namespace PascalABCCompiler.NetHelper
                         default:
                             continue;
                     }
-                    temp.Next = si;
-                    si = temp;
+                    if (sil == null)
+                        sil = new List<SymbolInfo>();
+                    sil.Insert(0, temp);
                 }
         	}
             Type nested_t = null;
@@ -1444,27 +1480,28 @@ namespace PascalABCCompiler.NetHelper
             if (nested_t != null)
             {
             	SymbolInfo temp = new SymbolInfo(compiled_type_node.get_type_node(nested_t));
-            	temp.Next = si;
-            	si = temp;
+                if (sil == null)
+                    sil = new List<SymbolInfo>();
+                sil.Insert(0, temp);
             }
-            return si;
+            return sil;
         }
-        
-		public static SymbolInfo FindName(Type t, string name)
-		{
-			if (name == null) return null;
-			if (name == compiler_string_consts.assign_name) return null;
+
+        public static List<SymbolInfo> FindName(Type t, string name)
+        {
+            if (name == null) return null;
+            if (name == compiler_string_consts.assign_name) return null;
             string s = compiler_string_consts.GetNETOperName(name);
             string tmp_name = name;
-			if (s != null) 
-			{
-				if (IsStandType(t)) return null;
+            if (s != null)
+            {
+                if (IsStandType(t)) return null;
                 if (t != NetHelper.PABCSystemType)
-				    name = s;
-			}
-			SymbolInfo si=null;
-			
-			List<MemberInfo> mis = GetMembers(t,name);
+                    name = s;
+            }
+            List<SymbolInfo> sil = null;
+
+            List<MemberInfo> mis = GetMembers(t, name);
             //(ssyy) Изменил алгоритм.
             //У нас некоторые алгоритмы базируются на том, что возвращённые
             //сущности будут одной природы (например, все - методы). Это неверно,
@@ -1472,8 +1509,7 @@ namespace PascalABCCompiler.NetHelper
             //в список.
 
             //TODO: проанализировать и изменить алгоритмы, использующие поиск.
-            List<SymbolInfo> si_list = new List<SymbolInfo>();
-            SymbolInfo root_si = null;
+            //List<SymbolInfo> si_list = new List<SymbolInfo>();
             foreach (MemberInfo mi in mis)
             {
                 if (mi.DeclaringType != null && PABCSystemType != null && mi.DeclaringType.Assembly == PABCSystemType.Assembly && !UsePABCRtl)
@@ -1485,6 +1521,8 @@ namespace PascalABCCompiler.NetHelper
                     {
                         case MemberTypes.Method:
                             temp = new SymbolInfo(compiled_function_node.get_compiled_method(mi as MethodInfo));
+                            // SSM 2018.05.05 исправляет bug #815
+                            temp.symbol_kind = symbol_kind.sk_overload_function;
                             break;
                         case MemberTypes.Constructor:
                             temp = new SymbolInfo(compiled_constructor_node.get_compiled_constructor(mi as ConstructorInfo));
@@ -1501,26 +1539,19 @@ namespace PascalABCCompiler.NetHelper
                         default:
                             continue;
                     }
-                    if (root_si == null)
-                    {
-                        root_si = temp;
-                        si = temp;
-                    }
+                    if (sil == null)
+                        sil = new List<SymbolInfo> { temp };
                     else
-                    {
-                        si.Next = temp;
-                        si = temp;
-                    }
-                        
+                        sil.Add(temp);
+
                     //temp.Next = si;
                     //si = temp;
                 }
             }
-            si = root_si;
             Type nested_t = null;
             foreach (Type nt in t.GetNestedTypes())
             {
-                if (string.Compare(nt.Name,name, true) == 0)
+                if (string.Compare(nt.Name, name, true) == 0)
                 {
                     nested_t = nt;
                     break;
@@ -1528,12 +1559,14 @@ namespace PascalABCCompiler.NetHelper
             }
             if (nested_t != null)
             {
-            	SymbolInfo temp = new SymbolInfo(compiled_type_node.get_type_node(nested_t));
-            	temp.Next = si;
-                si = temp;
+                List<SymbolInfo> temp = new List<SymbolInfo> { new SymbolInfo(compiled_type_node.get_type_node(nested_t)) };
+                if(sil != null)
+                    temp.AddRange(sil);
+                sil = temp;
             }
-            return si;
-		}
+
+            return sil;
+        }
 
         public static SymbolInfo GetSymbolInfoForFieldNode(FieldInfo fi)
         {
@@ -1541,7 +1574,7 @@ namespace PascalABCCompiler.NetHelper
             if (fi.IsLiteral && !fi.FieldType.IsEnum)
             {
                 compiled_class_constant_definition cd = GetConstantFieldNode(fi);
-                if (cd != null) 
+                if (cd != null)
                     si = new SymbolInfo(cd);
             }
             if (si == null)
@@ -1549,7 +1582,7 @@ namespace PascalABCCompiler.NetHelper
             return si;
         }
 
-		/*
+        /*
 		public static compiled_function_node GetMethodNode(MethodInfo mi)
 		{
 			compiled_function_node cfn = (compiled_function_node)meth_nodes[mi];
@@ -1827,6 +1860,7 @@ namespace PascalABCCompiler.NetHelper
                 fi = new FoundInfo(false);
                 type_search_cache[name] = fi;
             }
+            
 			return null;
 		}
 
@@ -1913,9 +1947,10 @@ namespace PascalABCCompiler.NetHelper
             {
                 if (!fi.exists)
                     return null;
-                TypeInfo ti = fi.GetTypeByNamespaceList(_unar);
-                if (ti != null)
-                    return ti.type;
+                List<TypeInfo> ti_list = fi.GetTypesByNamespaceList(_unar);
+                foreach (TypeInfo ti in ti_list)
+                    if (cur_used_assemblies.ContainsKey(ti.type.Assembly))
+                        return ti.type;
             }
             object o = types[name];
             if (o == null)
@@ -1939,7 +1974,10 @@ namespace PascalABCCompiler.NetHelper
                         {
                             fi.type_infos.Add(new TypeNamespaceInfo(t, _unar[i]));
                         }
-                        return t.type;
+                        if (cur_used_assemblies.ContainsKey(t.type.Assembly))
+                            return t.type;
+                        else
+                            return null;
                     }
                     
                 }
@@ -1962,8 +2000,10 @@ namespace PascalABCCompiler.NetHelper
                             {
                                 fi.type_infos.Add(new TypeNamespaceInfo(t, _unar[i]));
                             }
-                            
-                            return t.type;
+                            if (cur_used_assemblies.ContainsKey(t.type.Assembly))
+                                return t.type;
+                            //else
+                            //    return null;
                         }
                     }
                 }
@@ -1983,7 +2023,7 @@ namespace PascalABCCompiler.NetHelper
                     if (cur_used_assemblies.ContainsKey(t.type.Assembly))
                         founded_types.Add(t);
                 }
-                if (founded_types.Count == 1)
+                if (founded_types.Count == 1 && cur_used_assemblies.ContainsKey(founded_types[0].type.Assembly))
                     return founded_types[0].type;
                 else
                     return null;
@@ -2065,7 +2105,11 @@ namespace PascalABCCompiler.NetHelper
 			foreach (string s in namespaces.Keys)
 			{
 				if (s != name && s.StartsWith(name, StringComparison.CurrentCultureIgnoreCase))
-					lst.Add(s.Substring(name.Length+1));
+                {
+                    if (s.Length >= name.Length + 1)
+                        lst.Add(s.Substring(name.Length + 1));
+                }
+					
 			}
 			if (lst == null) return null;
 			return lst.ToArray();
@@ -2194,8 +2238,12 @@ namespace PascalABCCompiler.NetHelper
                     return new double_const_node((double)val, null);
                 if (t == typeof(float))
                     return new double_const_node((float)val, null);
+                if (t == typeof(bool))
+                    return new bool_const_node((bool)val, null);
                 if (t.IsEnum)
                     return new enum_const_node(Convert.ToInt32(val), compiled_type_node.get_type_node(t), null);
+                if (t.FullName == "System.Reflection.Missing")
+                    return new compiled_static_field_reference_as_constant(new static_compiled_variable_reference(new compiled_variable_definition(t.GetField("Value", BindingFlags.Public | BindingFlags.Static)), null), null);
             }
             catch
             {

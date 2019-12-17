@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -38,7 +38,7 @@ namespace PascalABCCompiler.TreeRealization
         common_constructor_call_as_constant, array_initializer, record_initializer, default_operator, attribute_node,
         pinvoke_node, basic_function_call_node_as_constant, compiled_static_field_reference_as_constant,
         common_namespace_event, indefinite_definition_node, indefinite_type, indefinite_function_call, indefinite_reference,
-        wrapped_statement, wrapped_expression
+        wrapped_statement, wrapped_expression, default_operator_node_as_constant
     };
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace PascalABCCompiler.TreeRealization
 	[Serializable]
 	public abstract class definition_node : semantic_node, SemanticTree.IDefinitionNode
 	{
-		protected string doc;
+        protected string doc;
 		
 		protected attributes_list _attributes;
 		
@@ -141,6 +141,14 @@ namespace PascalABCCompiler.TreeRealization
 				return doc;
 			}
 		}
+
+        public virtual location location
+        {
+            get
+            {
+                return null;
+            }
+        }
 
         public virtual semantic_node find_by_location(int line, int col)
         {
@@ -229,7 +237,9 @@ namespace PascalABCCompiler.TreeRealization
         /// Тип выражения.
         /// </summary>
 		private type_node _tn;
-
+		
+		private type_node _conversion_tn;
+		
         /// <summary>
         /// Конструктор выражения.
         /// </summary>
@@ -257,6 +267,18 @@ namespace PascalABCCompiler.TreeRealization
             set
             {
                 _tn = value;
+            }
+		}
+		
+		public virtual type_node conversion_type
+		{
+			get
+			{
+				return _conversion_tn;
+			}
+            set
+            {
+                _conversion_tn = value;
             }
 		}
 
@@ -303,6 +325,14 @@ namespace PascalABCCompiler.TreeRealization
 				return this.type;
 			}
 		}
+		
+		SemanticTree.ITypeNode SemanticTree.IExpressionNode.conversion_type
+		{
+			get
+			{
+				return this.conversion_type;
+			}
+		}
 	}
 
     [Serializable]
@@ -332,7 +362,7 @@ namespace PascalABCCompiler.TreeRealization
         /// <summary>
         /// Конструктор адресного выражения.
         /// </summary>
-        /// <param name="tn">Тип выражжения.</param>
+        /// <param name="tn">Тип выражения.</param>
         /// <param name="loc">Расположение выражения.</param>
 		public addressed_expression(type_node tn, location loc) : base(tn,loc)
 		{

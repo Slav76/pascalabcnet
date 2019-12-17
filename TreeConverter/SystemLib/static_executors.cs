@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Интерпретатор константных выражений
 using System;
@@ -423,7 +423,7 @@ namespace PascalABCCompiler.SystemLibrary
             cnfc.parameters.AddElement(parameters[0]);
         	cnfc.parameters.AddElement(parameters[1]);
             //operationc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(parameters[1], parameters[0].type));
-            basic_function_call assignc = new basic_function_call(parameters[0].type.find_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
+            basic_function_call assignc = new basic_function_call(parameters[0].type.find_first_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
             assignc.parameters.AddElement(parameters[0]);
             assignc.parameters.AddElement(cnfc);
             //assignc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(operationc, parameters[0].type));
@@ -437,7 +437,7 @@ namespace PascalABCCompiler.SystemLibrary
         	compiled_static_method_call csmc = new compiled_static_method_call(SystemLibrary.string_add as compiled_function_node, call_location);
         	csmc.parameters.AddElement(parameters[0]);
         	csmc.parameters.AddElement(parameters[1]);
-        	basic_function_call assignc = new basic_function_call(parameters[0].type.find_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
+        	basic_function_call assignc = new basic_function_call(parameters[0].type.find_first_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
         	assignc.parameters.AddElement(parameters[0]);
             base_function_call cnfc = null;
             if (SystemLibInitializer.ClipShortStringProcedure.sym_info is common_namespace_function_node)
@@ -464,7 +464,7 @@ namespace PascalABCCompiler.SystemLibrary
             cnfc.parameters.AddElement(parameters[0]);
         	cnfc.parameters.AddElement(parameters[1]);
             //operationc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(parameters[1], parameters[0].type));
-            basic_function_call assignc = new basic_function_call(parameters[0].type.find_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
+            basic_function_call assignc = new basic_function_call(parameters[0].type.find_first_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
             assignc.parameters.AddElement(parameters[0]);
             assignc.parameters.AddElement(cnfc);
             //assignc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(operationc, parameters[0].type));
@@ -485,7 +485,7 @@ namespace PascalABCCompiler.SystemLibrary
             cnfc.parameters.AddElement(parameters[0]);
         	cnfc.parameters.AddElement(parameters[1]);
             //operationc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(parameters[1], parameters[0].type));
-            basic_function_call assignc = new basic_function_call(parameters[0].type.find_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
+            basic_function_call assignc = new basic_function_call(parameters[0].type.find_first_in_type(compiler_string_consts.assign_name).sym_info as basic_function_node, call_location);
             assignc.parameters.AddElement(parameters[0]);
             assignc.parameters.AddElement(cnfc);
             //assignc.parameters.AddElement(SystemLibrary.syn_visitor.convertion_data_and_alghoritms.convert_type(operationc, parameters[0].type));
@@ -2487,6 +2487,10 @@ namespace PascalABCCompiler.SystemLibrary
             {
                 throw new SimpleSemanticError(call_location, "ENUMENTAR_TYPE_VALUE_OVERFLOW");
             }
+            catch (System.DivideByZeroException)
+            {
+                throw new SimpleSemanticError(right.location, "DIVIDE_BY_ZERO_EXCEPTION");
+            }
             return (make_int_const(result, call_location));
         }
 
@@ -2785,7 +2789,7 @@ namespace PascalABCCompiler.SystemLibrary
             {
                 return null;
             }
-            return new byte_const_node((byte)bcn.constant_value, call_location);
+            return new int_const_node((int)bcn.constant_value, call_location);
         }
 
         private static expression_node uint_to_uint_executor(location call_location, params expression_node[] parameters)

@@ -1,7 +1,7 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
-using System.Collections;
+using System.Linq;
 using PascalABCCompiler.TreeConverter;
 using System.Collections.Generic;
 using SymbolTable;
@@ -12,17 +12,19 @@ namespace PascalABCCompiler.TreeRealization
     public abstract class BasePCUReader
     {
         public abstract definition_node CreateInterfaceMember(int offset, string name);
-        public static void RestoreSymbolsInterfaceMember(SymbolInfo si, string name)
+        public static void RestoreSymbolsInterfaceMember(List<SymbolInfo> sil, string name)
         {
-            while (si != null)
+            if (sil != null)
             {
-                if (si.sym_info!=null)
-                if (si.sym_info.semantic_node_type == PascalABCCompiler.TreeRealization.semantic_node_type.wrap_def)
+                foreach (var si in sil)
                 {
-                    PascalABCCompiler.TreeRealization.wrapped_definition_node wdn = (PascalABCCompiler.TreeRealization.wrapped_definition_node)si.sym_info;
-                    si.sym_info = wdn.PCUReader.CreateInterfaceMember(wdn.offset, name);
+                    if (si.sym_info != null)
+                        if (si.sym_info.semantic_node_type == semantic_node_type.wrap_def)
+                        {
+                            wrapped_definition_node wdn = (wrapped_definition_node)si.sym_info;
+                            si.sym_info = wdn.PCUReader.CreateInterfaceMember(wdn.offset, name);
+                        }
                 }
-                si = si.Next;
             }
         }
 
@@ -30,22 +32,40 @@ namespace PascalABCCompiler.TreeRealization
         public abstract definition_node CreateInterfaceInClassMember(int offset, string name);
         public abstract definition_node CreateImplementationMember(int offset, bool restore_code=true);
         public abstract definition_node CreateTypeSynonim(int offset, string name);
-        public static void RestoreSymbols(SymbolInfo si, string name)
+
+
+        public static void RestoreSymbol(SymbolInfo si, string name, int index = 0)
         {
-            while (si != null)
+            if (si != null)
             {
                 if (si.sym_info != null)
-                if (si.sym_info.semantic_node_type == PascalABCCompiler.TreeRealization.semantic_node_type.wrap_def)
                 {
-                    PascalABCCompiler.TreeRealization.wrapped_definition_node wdn = (PascalABCCompiler.TreeRealization.wrapped_definition_node)si.sym_info;
-                    RestoreSymbols(si, wdn, name);
+                    if (si.sym_info.semantic_node_type == semantic_node_type.wrap_def)
+                        {
+                            wrapped_definition_node wdn = (wrapped_definition_node)si.sym_info;
+                            RestoreSymbols(si, wdn, name);
+                        }
                 }
-                si = si.Next;
             }
         }
 
-       
-        static void RestoreSymbols(SymbolInfo si, PascalABCCompiler.TreeRealization.wrapped_definition_node wdn, string name)
+        public static void RestoreSymbols(List<SymbolInfo> sil, string name, int index = 0)
+        {
+            if (sil != null)
+            {
+                for (int i = index; i < sil.Count; ++i)
+                {
+                    if (sil[i].sym_info != null)
+                        if (sil[i].sym_info.semantic_node_type == semantic_node_type.wrap_def)
+                        {
+                            wrapped_definition_node wdn = (wrapped_definition_node)sil[i].sym_info;
+                            RestoreSymbols(sil[i], wdn, name);
+                        }
+                }
+            }
+        }
+
+        static void RestoreSymbols(SymbolInfo si, wrapped_definition_node wdn, string name)
         {
         	if (wdn.is_synonim)
         		si.sym_info = wdn.PCUReader.CreateTypeSynonim(wdn.offset, name);
@@ -115,11 +135,6 @@ namespace SymbolTable
 	#region SymbolTableConstants набор констант определяющих поведение таблицы символов
 	public class SymbolTableConstants
 	{
-		//стартовый размер списка областей видимости
-		public const int AreaList_StartSize=8;
-		//во сколько раз расширять список областей видимости
-		public const int AreaList_ResizeParam=2;
-
 		//стартовый размер списка информаций о символах
 		public const int InfoList_StartSize=1;
 
@@ -139,80 +154,100 @@ namespace SymbolTable
 	//при создании добавляет себя в vSymbolTable
 	public class Scope:BaseScope
 	{
-		public DSSymbolTable SymbolTable;
+        public string Name;
+        public override string ToString() => Name == ""? GetType().Name : Name;
+
+        public SymbolsDictionary Symbols;
+        public List<Scope> InternalScopes;
+
+        public DSSymbolTable SymbolTable;
         public bool CaseSensitive;
-		public int TopScopeNum;
         public bool AddStatementsToFront = false; // SSM - введено для необходимости добавлять statements не только в конец statement_list, но и в начало. Нужно для синтаксически сахарных конструкций: например, для создания объекта класса при замыканиях
-		public Scope TopScope
-		{
-			get 
-			{
-				if(TopScopeNum>=0)
-					return SymbolTable.ScopeTable[TopScopeNum];
-				else
-					return null;
-			}
-		}
-		//public Scope()
-		//{
-		//}
+        public Scope TopScope;
+
 		public int ScopeNum;
-        public Scope(DSSymbolTable vSymbolTable, Scope TopScope)
+        public Scope(DSSymbolTable vSymbolTable, Scope TopScope, string Name)
 		{
 			SymbolTable=vSymbolTable;
-			TopScopeNum=-1;
-			if (TopScope!=null) 
-				TopScopeNum=TopScope.ScopeNum;
-            ScopeNum = SymbolTable.ScopeTable.Count;
-			SymbolTable.ScopeTable.Add(this);
-            this.CaseSensitive = SemanticRules.SymbolTableCaseSensitive;
+            this.TopScope = null;
+            if (TopScope != null) {
+                this.TopScope = TopScope;
+                TopScope.InternalScopes.Add(this);
+            }
+
+            this.Name = Name;
+
+            ScopeNum = SymbolTable.GetNewScopeNum();
+            SymbolTable.ScopeTable.Add(this);
+
+            CaseSensitive = SemanticRules.SymbolTableCaseSensitive;
+
+            Symbols = new SymbolsDictionary();
+            InternalScopes = new List<Scope>();              
 		}
-        public Scope(DSSymbolTable vSymbolTable, Scope TopScope, bool CaseSensetive)
+        public Scope(DSSymbolTable vSymbolTable, Scope TopScope, bool CaseSensitive)
         {
             SymbolTable = vSymbolTable;
-            TopScopeNum = -1;
+            this.TopScope = null;
             if (TopScope != null)
-                TopScopeNum = TopScope.ScopeNum;
-            ScopeNum = SymbolTable.ScopeTable.Count;
+            {
+                this.TopScope = TopScope;
+                TopScope.InternalScopes.Add(this);
+            }
+
+            ScopeNum = SymbolTable.GetNewScopeNum();
             SymbolTable.ScopeTable.Add(this);
-            this.CaseSensitive = CaseSensetive;
+
+            this.CaseSensitive = CaseSensitive;
+
+            Symbols = new SymbolsDictionary();
+            InternalScopes = new List<Scope>();
         }
-        public virtual SymbolInfo Find(string name)
+
+        public void ClearScope()
+        {
+            foreach (var sc in InternalScopes)
+                sc.ClearScope();
+
+            Symbols.ClearTable();
+        }
+
+        public virtual List<SymbolInfo> Find(string name)
         {
             return Find(name, null);
         }
-        public virtual SymbolInfo Find(string name, Scope CurrentScope)
+        public virtual List<SymbolInfo> Find(string name, Scope CurrentScope)
+        {
+            List<SymbolInfo> sil = SymbolTable.Find(this, name, CurrentScope);
+            if (sil == null) return sil;
+            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(sil, name);
+            return sil;
+        }
+        public virtual List<SymbolInfo> FindOnlyInScopeAndBlocks(string name)
 		{
-            SymbolInfo si = SymbolTable.Find(this, name, CurrentScope);
-            if (si == null) return si;
-            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si, name);
-            return si;
+            return SymbolTable.FindOnlyInScope(this, name, true);
 		}
-		public virtual SymbolInfo FindOnlyInScopeAndBlocks(string name)
-		{
-			return SymbolTable.FindOnlyInScope(this, name, true);
-		}
-        public virtual SymbolInfo FindOnlyInScope(string name)
+        public virtual List<SymbolInfo> FindOnlyInScope(string name)
         {
             return SymbolTable.FindOnlyInScope(this, name, false);
         }
-        public virtual SymbolInfo FindOnlyInType(string name, Scope CurrentScope)
+        public virtual List<SymbolInfo> FindOnlyInType(string name, Scope CurrentScope)
+        {
+            List<SymbolInfo> sil = SymbolTable.FindOnlyInType(this, name, CurrentScope);
+            if (sil == null) return sil;
+            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(sil, name);
+            return sil;
+        }
+        public void AddSymbol(string Name, SymbolInfo Inf)
 		{
-            SymbolInfo si = SymbolTable.FindOnlyInType(this, name, CurrentScope);
-            if (si == null) return si;
-            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si, name);
-            return si;
-		}
-		public void AddSymbol(string Name,SymbolInfo Inf)
-		{
-			SymbolTable.Add(this,Name,Inf);
+			SymbolTable.Add(this, Name, Inf);
 		}
 	}
 
     public class BlockScope : Scope
     {
         public BlockScope(DSSymbolTable vSymbolTable, Scope TopScope)
-            : base(vSymbolTable, TopScope)
+            : base(vSymbolTable, TopScope, "")
 		{
         }
     }
@@ -220,7 +255,7 @@ namespace SymbolTable
 	public class LambdaScope : Scope  //lroman//
     {
         public LambdaScope(DSSymbolTable vSymbolTable, Scope TopScope)
-            : base(vSymbolTable, TopScope)
+            : base(vSymbolTable, TopScope, "")
         {
         }
     }
@@ -237,7 +272,8 @@ namespace SymbolTable
 
 	public class DotNETScope:Scope
 	{
-		public DotNETScope(DSSymbolTable vSymbolTable):base(vSymbolTable,null,false)
+        public NamespaceScope AdditionalNamespaceScope;
+        public DotNETScope(DSSymbolTable vSymbolTable):base(vSymbolTable,null,false)
 		{
 
 		}
@@ -246,101 +282,88 @@ namespace SymbolTable
 	public class UnitPartScope:Scope
 	{
 		public Scope[] TopScopeArray;
-		public UnitPartScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope[] vTopScopeArray):
-			base(vSymbolTable,TopScope)
+		public UnitPartScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope[] vTopScopeArray, string Name):
+			base(vSymbolTable,TopScope, Name)
 		{
 			TopScopeArray=vTopScopeArray;
 		}
 	}
 	public class UnitInterfaceScope:UnitPartScope
 	{
-		public UnitInterfaceScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope[] vTopScopeArray):
-			base(vSymbolTable,TopScope,vTopScopeArray)
+        
+		public UnitInterfaceScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope[] vTopScopeArray, string Name):
+			base(vSymbolTable, TopScope, vTopScopeArray, Name)
 		{
 		}
 	}
 	public class UnitImplementationScope:UnitPartScope
 	{
-        public UnitImplementationScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope[] vTopScopeArray)
+        public UnitImplementationScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope[] vTopScopeArray, string Name)
             :
-			base(vSymbolTable,TopScope,vTopScopeArray)
+			base(vSymbolTable, TopScope, vTopScopeArray, Name)
 		{}
 	}
+    public class NamespaceScope: UnitInterfaceScope
+    {
+        public NamespaceScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope[] vTopScopeArray, string Name):
+			base(vSymbolTable, TopScope, vTopScopeArray, Name)
+		{
+        }
+    }
 	public class ClassScope:Scope
 	{
-		public int BaseClassScopeNum;
         public ClassScope PartialScope;
 
-		public Scope BaseClassScope
-		{
-			get 
-			{
-				if (BaseClassScopeNum>=0) 
-					return SymbolTable.ScopeTable[BaseClassScopeNum];
-				else
-					return null;
+        public PascalABCCompiler.TreeRealization.common_type_node class_type = null; 
+        // SSM 02.04.19 - буду присваивать это поле только для создаваемых пользователем классов. Понадобилось для доступа к членам NET-класса из его потомка - обычного класса
 
-			}
-			//TODO: Kolya add this set accessor
-			//Ask for Alexander
-			set
-			{
-                if (value == null)
-                {
-                    BaseClassScopeNum = -2;
-                    return;
-                }
-			    BaseClassScopeNum=value.ScopeNum;
-            }
-		}
-		public ClassScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope BaseClassScope):
-			base(vSymbolTable,TopScope)
-		{
-			BaseClassScopeNum=-2;
-			if (BaseClassScope!=null) 
-				BaseClassScopeNum=BaseClassScope.ScopeNum;
-		}
+        public Scope BaseClassScope;
 
-        public override SymbolInfo Find(string name, Scope CurrentScope)
+        public ClassScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope BaseClassScope, string Name):
+			base(vSymbolTable,TopScope, Name)
+		{
+            this.BaseClassScope = null;
+			if (BaseClassScope != null) 
+				this.BaseClassScope = BaseClassScope;
+		}
+        public override List<SymbolInfo> Find(string name, Scope CurrentScope)
         {
-            SymbolInfo si = SymbolTable.Find(this, name, CurrentScope);
+            List<SymbolInfo> si_list = SymbolTable.Find(this, name, CurrentScope);
             if (PartialScope != null)
             {
-                if (si == null)
-                    si = SymbolTable.Find(PartialScope, name, CurrentScope);
+                if (si_list == null)
+                    si_list = SymbolTable.Find(PartialScope, name, CurrentScope);
                 else
                 {
-                    SymbolInfo tmp_si = si;
-                    while (tmp_si.Next != null)
-                        tmp_si = tmp_si.Next;
-                    tmp_si.Next = SymbolTable.Find(PartialScope, name, CurrentScope);
+                    var sil = SymbolTable.Find(PartialScope, name, CurrentScope);
+                    if(sil != null)
+                        si_list.AddRange(sil);
                 }
             }
-            if (si == null) return si;
-            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si, name);
-            return si;
+            if (si_list == null) return si_list;
+            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si_list, name);
+            return si_list;
         }
 
-        public override SymbolInfo FindOnlyInType(string name, Scope CurrentScope)
+        public override List<SymbolInfo> FindOnlyInType(string name, Scope CurrentScope)
         {
-            SymbolInfo si = SymbolTable.FindOnlyInType(this, name, CurrentScope);
+            List<SymbolInfo> sil = SymbolTable.FindOnlyInType(this, name, CurrentScope);
             if (PartialScope != null)
             {
-                if (si == null)
-                    si = SymbolTable.FindOnlyInType(PartialScope, name, CurrentScope);
+                if (sil == null)
+                    sil = SymbolTable.FindOnlyInType(PartialScope, name, CurrentScope);
                 else
                 {
-                    SymbolInfo tmp_si = si;
-                    while (tmp_si.Next != null)
-                        tmp_si = tmp_si.Next;
-                    tmp_si.Next = SymbolTable.FindOnlyInType(PartialScope, name, CurrentScope);
+                    var temp_sil = SymbolTable.FindOnlyInType(PartialScope, name, CurrentScope);
+                    if(temp_sil != null)
+                       sil.AddRange(temp_sil);
                 }
             }
-            if (si == null) return si;
-            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si, name);
-            return si;
+            if (sil == null) return sil;
+            PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(sil, name);
+            return sil;
         }
-	}
+    }
 
     /*public class GenericTypeInstanceScope : ClassScope
     {
@@ -355,22 +378,22 @@ namespace SymbolTable
             _instance_type = instance_type;
         }
 
-        public override SymbolInfo Find(string name)
+        public override SymbolInfoList Find(string name)
         {
             return _instance_type.ConvertSymbolInfo(_orig_scope.Find(name));
         }
 
-        public override SymbolInfo Find(string name, Scope CurrentScope)
+        public override SymbolInfoList Find(string name, Scope CurrentScope)
         {
             return _instance_type.ConvertSymbolInfo(_orig_scope.Find(name, CurrentScope));
         }
 
-        public override SymbolInfo FindOnlyInScope(string name)
+        public override SymbolInfoList FindOnlyInScope(string name)
         {
             return _instance_type.ConvertSymbolInfo(_orig_scope.FindOnlyInScope(name));
         }
 
-        public override SymbolInfo FindOnlyInScopeAndBlocks(string name)
+        public override SymbolInfoList FindOnlyInScopeAndBlocks(string name)
         {
             return _instance_type.ConvertSymbolInfo(_orig_scope.FindOnlyInScopeAndBlocks(name));
         }
@@ -405,107 +428,229 @@ namespace SymbolTable
             }
         }
 
-        public InterfaceScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope[] vTopInterfaceScopeArray)
+        public InterfaceScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope[] vTopInterfaceScopeArray, string Name)
             :
-            base(vSymbolTable, TopScope, null)
+            base(vSymbolTable, TopScope, null, Name)
         {
             _TopInterfaceScopeArray = vTopInterfaceScopeArray;
         }
 
-        public InterfaceScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope BaseClassScope, Scope[] vTopInterfaceScopeArray)
+        public InterfaceScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope BaseClassScope, Scope[] vTopInterfaceScopeArray, string Name)
             :
-            base(vSymbolTable, TopScope, BaseClassScope)
+            base(vSymbolTable, TopScope, BaseClassScope, Name)
         {
             _TopInterfaceScopeArray = vTopInterfaceScopeArray;
         }
     }
     //\ssyy owns
 
-	public class ClassMethodScope:Scope
+    //В ClassMethodScope TopScope должен быть классом
+    public class ClassMethodScope:Scope
 	{
-		public int MyClassNum;
-		public Scope MyClass
-		{
-			get 
-			{
-				if (MyClassNum>=0) 
-					return SymbolTable.ScopeTable[MyClassNum];
-				else
-					return null;
-			}
-		}
-		public ClassMethodScope(DSSymbolTable vSymbolTable,Scope TopScope,Scope MyClass):
-			base(vSymbolTable,TopScope)
-		{
-			MyClassNum=-2;
-			if (MyClass!=null) 
-				MyClassNum=MyClass.ScopeNum;
-		}
-	}
-	#endregion
-	
-	#region AreaListNode элемент списка областей видимости
-	public class AreaListNode
-	{
-		public int Area;
-		public List<SymbolInfo> InfoList;//для перегузки
-		public AreaListNode()
-		{
-            InfoList = new List<SymbolInfo>(SymbolTableConstants.InfoList_StartSize);
-		}
-		public AreaListNode(int ar,SymbolInfo inf)
-		{
-            InfoList = new List<SymbolInfo>(SymbolTableConstants.InfoList_StartSize);
-			Area=ar;
-			InfoList.Add(inf);
-		}
-	}
-	#endregion
-	
-	#region HashTableNode элемент хеш-таблицы
-	public class HashTableNode 
-	{
-		public string Name;
-		public AreaNodesList NumAreaList;
-		public HashTableNode(string name)
-		{
-			Name=name;
-			NumAreaList=new AreaNodesList(SymbolTableConstants.AreaList_StartSize);
-		}
-	}
-	#endregion 
-	
+        public Scope DefScope;
 
-	// Определения
-	// ОВ - область видимости
-	// ООВ - особая область видимости в стиле delphi.это:
-	//  - ОВ поцедуры
-	//  - OВ класса + ОВ предков
-	//  - ОВ модуля + ОВ интерфейсных частей всех модулей подклюценных к нему
+        // aab 26.04.19 Добавил для исправления захвата переменных в лямбде
+        // Для лямбды нужен обратный порядок поиска звхваченных переменных: сначала в месте определения, потом в классе
+        public Scope CurrentLambdaDefScope;
+
+		public ClassMethodScope(DSSymbolTable vSymbolTable, Scope TopScope, Scope DefScope, Scope CurrentLambdaDefScope, string Name):
+			base(vSymbolTable,TopScope, Name)
+		{
+            this.Name = Name;
+            this.DefScope = null;
+            if (DefScope != null)
+                this.DefScope = DefScope;
+            this.CurrentLambdaDefScope = CurrentLambdaDefScope;
+		}
+	}
+	#endregion
+
+    #region HashTableNode элемент хеш-таблицы
+    public class HashTableNode
+    {
+        public string Name;
+        public List<SymbolInfo> InfoList;
+        public HashTableNode(string name)
+        {
+            Name = name;
+            InfoList = new List<SymbolInfo>(SymbolTableConstants.InfoList_StartSize);
+        }
+        public override string ToString()
+        {
+            System.Text.StringBuilder str = new System.Text.StringBuilder();
+            foreach (var sym in InfoList)
+                str.Append(sym.ToString() + ";");
+            return str.ToString();
+        }
+    }
+    #endregion
+
+    #region Для отображения таблицы символов в отладке
+    public class LightSymbolnfo
+    {
+        public PrimaryScope inner_scope
+        {
+            get
+            {
+                if (information.sym_info is PascalABCCompiler.TreeRealization.common_function_node)
+                {
+                    var temp = information.sym_info as PascalABCCompiler.TreeRealization.common_function_node;
+                    if (temp.scope != null)
+                        return new PrimaryScope(temp.scope);
+                }
+                else if (information.sym_info is PascalABCCompiler.TreeRealization.type_node)
+                {
+                    var temp = information.sym_info as PascalABCCompiler.TreeRealization.type_node;
+                    if (temp.Scope != null)
+                        return new PrimaryScope(temp.Scope);
+                }
+                return null;
+            }
+        }
+        public SymbolInfo information;
+
+        public override string ToString() => information.ToString();
+
+        public LightSymbolnfo(SymbolInfo si)
+        {
+            information = si;
+        }
+    }
+
+    public class LightScopeNode
+    {
+        public List<LightSymbolnfo> Overloads = new List<LightSymbolnfo>();
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder str = new System.Text.StringBuilder();
+            foreach (var sym in Overloads)
+                str.Append(sym.ToString() + ";");
+            return str.ToString();
+        }
+    }
+
+    public class PrimaryScope
+    {
+        public List<PrimaryScope> SubScopes
+        {
+            get
+            {
+                var subScopes = new List<PrimaryScope>();
+                foreach (var sub_sc in real_scope.InternalScopes)
+                    subScopes.Add(new PrimaryScope(sub_sc));
+                return subScopes;
+            }
+        }
+        public List<LightScopeNode> Symbols
+        {
+            get
+            {
+                var symbols = new List<LightScopeNode>();
+                foreach (var sy in real_scope.Symbols.dict)
+                {
+                    LightScopeNode res = new LightScopeNode();
+                    foreach (var sy_overload in sy.Value.InfoList)
+                        res.Overloads.Add(new LightSymbolnfo(sy_overload));
+                    symbols.Add(res);
+                }
+                return symbols;
+            }
+        }
+
+        public string ScopeName;
+        public override string ToString() => ScopeName == "" ? GetType().Name : ScopeName;
+        private Scope real_scope;
+        public PrimaryScope(Scope sc)
+        {
+            real_scope = sc;
+            if(real_scope is BlockScope)
+            {
+                int deep = 0;
+                Scope Top = real_scope.TopScope;
+                while(Top != null && (Top is BlockScope))
+                {
+                    deep++;
+                    Top = Top.TopScope;
+                }
+                ScopeName = "Begin—End;(Deep = " + deep + ")";
+            }
+            else
+                ScopeName = sc.Name;
+            
+        }
+    }
+    #endregion
+
+    // Определения
+    // ОВ - область видимости
+    // ООВ - особая область видимости в стиле delphi.это:
+    //  - ОВ поцедуры
+    //  - OВ класса + ОВ предков
+    //  - ОВ модуля + ОВ интерфейсных частей всех модулей подклюценных к нему
     public class DSSymbolTable
 	{
 		public List<Scope> ScopeTable;
-		private DSHashTable HashTable;
-		internal bool CaseSensitive;
-		private Scope LastScope;
-		//private SymbolInfo FirstInfo;
-        private Scope CurrentScope;
 
-		#region DSSymbolTable(int hash_size,bool case_sensitive)
-		public DSSymbolTable(int hash_size,bool case_sensitive)
+        internal bool CaseSensitive;
+
+        private Scope CurrentScope;
+        private int ScopeIndex = -1;
+
+        /*public override string ToString()
+        {
+
+            var sb = new System.Text.StringBuilder();
+            var a = ScopeTable.SkipWhile(s => !(s.GetType() == typeof(UnitInterfaceScope))).Skip(1).SkipWhile(s => !(s.GetType() == typeof(UnitInterfaceScope)));
+            var globscopenum = a.First().ScopeNum;
+            var d = new Dictionary<Scope, List<Tuple<string, SymbolInfo>>>();
+            foreach (var x in a)
+            {
+                sb.Append(x.ToString() + "\n");
+                //d[x.ScopeNum] = x;
+            }
+            foreach (var x in HashTable.dict)
+            {
+                foreach (var y in x.Value.NumAreaList.data.Take(x.Value.NumAreaList.Count))
+                {
+                    foreach (var z in y.InfoList)
+                    {
+                        if (z.scope.ScopeNum >= globscopenum)
+                        {
+                            if (!d.ContainsKey(z.scope))
+                                d[z.scope] = new List<Tuple<string, SymbolInfo>>();
+                            d[z.scope].Add(new Tuple<string, SymbolInfo>(x.Key, z));
+                        }
+                    }
+                }
+            }
+            sb.Append("\n");
+
+            foreach (var x in d.OrderBy(x => x.Key.ScopeNum))
+            {
+                sb.Append(x.Key.ScopeNum + "—>" + x.Key.TopScopeNum + "\n");
+                foreach (var y in x.Value)
+                {
+                    sb.Append("  " + y.Item1 + ": " + y.Item2.sym_info.ToString() + "\n");
+                }
+            }
+            return sb.ToString();
+        }*/
+
+        #region DSSymbolTable(int hash_size,bool case_sensitive)
+        public DSSymbolTable(int hash_size,bool case_sensitive)
 		{
-			CaseSensitive=case_sensitive;
-			HashTable=new DSHashTable(hash_size);
-			Clear();
-		}
+            CaseSensitive = case_sensitive;
+            Clear();
+        }
 		#endregion
 
 		#region Clear() очистка таблицы
 		public void Clear()
 		{
-			ScopeTable=new List<Scope>();
-			HashTable.ClearTable();
-		}
+            ScopeTable = new List<Scope>();
+            ScopeIndex = -1;
+        }
 		#endregion
 			
 		#region CreateScope для различных Scope
@@ -513,281 +658,197 @@ namespace SymbolTable
         {
             return new LambdaScope(this, TopScope);
         }
-		public Scope CreateScope(Scope TopScope)
+		public Scope CreateScope(Scope TopScope, string Name = "")
 		{
-			return new Scope(this,TopScope);
+			return new Scope(this, TopScope, Name);
 		}
-		public ClassScope CreateClassScope(Scope TopScope,Scope BaseClass)
+		public ClassScope CreateClassScope(Scope TopScope,Scope BaseClass, string Name = "")
 		{
-            return new ClassScope(this, TopScope, BaseClass);	
+            return new ClassScope(this, TopScope, BaseClass, Name);	
 		}
         //ssyy
-        public InterfaceScope CreateInterfaceScope(Scope TopScope, Scope[] TopInterfaces)
+        public InterfaceScope CreateInterfaceScope(Scope TopScope, Scope[] TopInterfaces, string Name = "")
         {
-            return new InterfaceScope(this, TopScope, TopInterfaces);
+            return new InterfaceScope(this, TopScope, TopInterfaces, Name);
         }
-        public InterfaceScope CreateInterfaceScope(Scope TopScope, Scope BaseClass, Scope[] TopInterfaces)
+        public InterfaceScope CreateInterfaceScope(Scope TopScope, Scope BaseClass, Scope[] TopInterfaces, string Name = "")
         {
-            return new InterfaceScope(this, TopScope, BaseClass, TopInterfaces);
-        }
-        public ClassScope CreateInterfaceOrClassScope(bool is_interface)
-        {
-            if (is_interface)
-            {
-                return CreateInterfaceScope(null, null);
-            }
-            else
-            {
-                return CreateClassScope(null, null);
-            }
+            return new InterfaceScope(this, TopScope, BaseClass, TopInterfaces, Name);
         }
         //\ssyy
-        public UnitInterfaceScope CreateUnitInterfaceScope(Scope[] UsedUnits)
+        public UnitInterfaceScope CreateUnitInterfaceScope(Scope[] UsedUnits, string Name = "")
 		{
-			return new UnitInterfaceScope(this,null,UsedUnits);
+			return new UnitInterfaceScope(this, null, UsedUnits, Name);
 		}
-		public UnitImplementationScope CreateUnitImplementationScope(Scope InterfaceScope,Scope[] UsedUnits)
+        public NamespaceScope CreateNamespaceScope(Scope[] UsedUnits, Scope TopScope, string Name = "")
+        {
+            return new NamespaceScope(this, TopScope, UsedUnits, Name);
+        }
+        public UnitImplementationScope CreateUnitImplementationScope(Scope InterfaceScope,Scope[] UsedUnits, string Name = "")
 		{
-			return new UnitImplementationScope(this,InterfaceScope,UsedUnits);
+			return new UnitImplementationScope(this, InterfaceScope, UsedUnits, Name);
 		}
-		public ClassMethodScope CreateClassMethodScope(Scope TopScope,Scope MyClass)
+		public ClassMethodScope CreateClassMethodScope(Scope TopScope, Scope DefScope, Scope CurrentLambdaDefScope = null, string Name = "")
 		{
-			return new ClassMethodScope(this,TopScope,MyClass);
+			return new ClassMethodScope(this, TopScope, DefScope, CurrentLambdaDefScope, Name);
 		}
 		#endregion
-
-		//возвращает номер верхней области видимости относительно
-		//области Scope
-		public Scope GetTopScope(Scope scope)
-		{
-			//DEBUG
-#if (DEBUG)
-			if ((scope.TopScopeNum>=ScopeTable.Count)|(scope.TopScopeNum<0)) throw new Exception("Ошибка при взятии верхней области видимости: область с номером "+scope.ScopeNum+" не существует");
-#endif
-            return ScopeTable[scope.TopScopeNum];
-		}
-		public int GetTopScopeNum(int scope)
-		{
-			//DEBUG
-#if (DEBUG)
-			if ((scope>=ScopeTable.Count)|(scope<0)) throw new Exception("Ошибка при взятии верхней области видимости: область с номером "+scope+" не существует");
-#endif
-            return ScopeTable[scope].TopScopeNum;
-		}
 
 		//Возвращает количество уровней на которые надо поднятся начиная с Down чтобы очутиться в Up
 		//Работает только для процедур. Модуль считает за одно Scope
 		public int GetRelativeScopeDepth(Scope Up,Scope Down)
 		{
-			if (Up==Down) return 0;
-			int depth=0;
-			while(Down.TopScopeNum>=0)
+			if (Up == Down) return 0;
+			int depth = 0;
+			while(Down.TopScope != null)
 			{
-				if (Up==Down) return depth;
+				if (Up == Down) return depth;
 				if(!(Down is UnitImplementationScope))
 					depth++;
-				Down=Down.TopScope;
+				Down = Down.TopScope;
 			}
 			//throw new Exception("Can not execute st depth");
 			return -1;
 		}
 
 		//Добавление символа
-		//если такой символ в пр-ве имен уже существует то symbol_info добавляется к AreaListNode[].InfoList[]
-		public void Add(Scope InScope,string Name,SymbolInfo Inf)
-		{
-            //int.try
-           //{
-                Inf.scope = InScope;
-                if (!InScope.CaseSensitive) Name = Name.ToLower();
-                int hn = HashTable.Add(new HashTableNode(Name));//ЗДЕСь ВОЗНИКАЕТ НЕДЕТЕРМЕНИРОВАНЯ ОШИБКА
-                HashTable.hash_arr[hn].NumAreaList.Add(new AreaListNode(InScope.ScopeNum, Inf));
-            //}
-           // catch (Exception e)
-            //{
-             //  throw e;
-           // }
-		}
-		
+		//если такой символ в пр-ве имен уже существует то symbol_info добавляется к Symbols[].InfoList[]
+        public void Add(Scope InScope, string Name, SymbolInfo Inf)
+        {
+            Inf.scope = InScope;
+            if (!InScope.CaseSensitive) Name = Name.ToLower();
+            var hn = InScope.Symbols.Add(Name);//ЗДЕСЬ ВОЗНИКАЕТ НЕДЕТЕРМЕНИРОВАННАЯ ОШИБКА - SSM 07.10.17 - странный комментарий. Вроде всё нормально.
+            // SSM 07.10.17 - переделал внутреннее представление HashTable на основе Dictionary
+            if (hn == null)
+                throw new Exception("Попытка добавить уже добавленное имя " + Name + " в HashTable. Обратитесь к разработчикам");
 
-	
+            hn.Name = Name;
+            hn.InfoList.Add(Inf);
+        }
+        public void RemoveScope(Scope scope)
+        {
+#if (DEBUG)
+            if (scope == null) throw new Exception("Ошибка при взятии верхней области видимости: область с номером " + scope + " не существует");
+#endif
+            scope.ClearScope();
 
-		//Этот метод ищет ТОЛЬКО В УКАЗАННОЙ ОВ, и не смотрит есть ли имя выше.
-		//Если это ОВ типа UnitImplementationScope то имя ищется также и
-		//в верней ОВ, которая типа UnitInterfaceScope
-		public SymbolInfo FindOnlyInScope(Scope scope,string Name, bool FindInUpperBlocks)
-		{
+            foreach (var in_scope in scope.InternalScopes)
+                ScopeTable.Remove(in_scope);
+            ScopeTable.Remove(scope);
+
+            if (scope.TopScope != null)
+                scope.TopScope.InternalScopes.Remove(scope);
+        }
+
+        //Этот метод ищет ТОЛЬКО В УКАЗАННОЙ ОВ, и не смотрит есть ли имя выше.
+        //Если это ОВ типа UnitImplementationScope то имя ищется также и
+        //в верней ОВ, которая типа UnitInterfaceScope
+        public List<SymbolInfo> FindOnlyInScope(Scope scope, string Name, bool FindInUpperBlocks)
+        {
             if (!scope.CaseSensitive) Name = Name.ToLower();
             CurrentScope = null;
-			LastScope=null;
-            SymbolInfo FirstInfo = new SymbolInfo();
-			SymbolInfo info=FirstInfo;
-			int Area=scope.ScopeNum;
-			int tn=HashTable.Find(Name);		//найдем имя в хеше
-            if (tn < 0 || scope is DotNETScope)//если нет такого ищем в областях .NET
+
+            List<SymbolInfo> Result = new List<SymbolInfo>();
+
+            if (scope is DotNETScope)//если нет такого ищем в областях .NET
             {
-                Scope an;
-                an = ScopeTable[Area];
-                if (an is DotNETScope)
-                    info = AddToSymbolInfo(info, (DotNETScope)an, Name);
-                return FirstInfo.Next;
+                AddToSymbolInfo(Result, (DotNETScope)scope, Name);
+                return Result.Count() > 0 ? Result : null;
             }
-            
-            AreaNodesList AreaList=HashTable.hash_arr[tn].NumAreaList;
-			int CurrentArea=Area,ai,bs;
+
+            Scope CurrentArea = scope, bs;
+            HashTableNode tn;
             do
             {
-                if (ScopeTable[CurrentArea] is UnitPartScope) //мы очутились в модуле
+                if (CurrentArea is UnitPartScope) //мы очутились в модуле
                 {
-
                     //мы в ImplementationPart?
-                    if (ScopeTable[CurrentArea] is UnitImplementationScope)
+                    if (CurrentArea is UnitImplementationScope)
                     {
-                        ai = AreaList.IndexOf(CurrentArea);
-                        if (ai >= 0) //что-то нашли!
-                            info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                        CurrentArea = GetTopScopeNum(CurrentArea);
+                        tn = CurrentArea.Symbols.Find(Name);
+                        if (tn != null) //что-то нашли!
+                            AddToSymbolInfo(tn.InfoList, Result);
+                        CurrentArea = CurrentArea.TopScope;
                     }
                     //сейча мы в InterfacePart
-                    ai = AreaList.IndexOf(CurrentArea);
-                    if (ai >= 0) //что-то нашли!
-                        info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                    if(FirstInfo.Next!=null)
-                        return FirstInfo.Next;
+                    tn = CurrentArea.Symbols.Find(Name);
+                    if (tn != null) //что-то нашли!
+                        AddToSymbolInfo(tn.InfoList, Result);
+
+                    if (Result.Count() > 0)
+                        return Result;
                 }
-                if (ScopeTable[CurrentArea] is WithScope)//мы очутились в Width
+                if (CurrentArea is WithScope)//мы очутились в Width
                 {
-                    ai = AreaList.IndexOf(CurrentArea);
-                    if (ai >= 0) //что-то нашли!
-                        info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                    if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                        return FirstInfo.Next;
-                    info = FindAllInAreaList(info, Name, (ScopeTable[CurrentArea] as WithScope).WithScopes, AreaList, true,FirstInfo);
-                    if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                        return FirstInfo.Next;
+                    tn = CurrentArea.Symbols.Find(Name);
+                    if (tn != null) //что-то нашли!
+                        AddToSymbolInfo(tn.InfoList, Result);
+
+                    if (Result.Count() > 0) //если что-то нашли то заканчиваем
+                        return Result;
+
+                    FindAllInAreaList(Name, (CurrentArea as WithScope).WithScopes, true, true, Result);
+                    if (Result.Count() > 0) //если что-то нашли то заканчиваем
+                        return Result;
                 }
                 else
                 {
-                    ai = AreaList.IndexOf(CurrentArea);
-                    if (ai >= 0) //что-то нашли!
+                    tn = CurrentArea.Symbols.Find(Name);
+                    if (tn != null) //что-то нашли!
                     {
-                        info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                        return FirstInfo.Next;
+                        AddToSymbolInfo(tn.InfoList, Result);
+                        return Result.Count() > 0 ? Result : null;
                     }
                 }
                 bs = CurrentArea;
-                CurrentArea = GetTopScopeNum(CurrentArea);
-            } while (CurrentArea >= 0 && (FindInUpperBlocks && ScopeTable[bs] is BlockScope));
-//            } while (CurrentArea >= 0 && ScopeTable[bs] is BlockScope);
-            /*if (!CaseSensitive) Name=Name.ToLower();
-            int Area=scope.ScopeNum;
-            int tn=HashTable.Find(Name);
-            if (tn<0) return null;
-            int ai=HashTable.hash_arr[tn].NumAreaList.IndexOf(Area);
-            CurrentScope = null;
+                CurrentArea = CurrentArea.TopScope;
+            } while (CurrentArea != null && (FindInUpperBlocks && bs is BlockScope));
 
-            if (ScopeTable[Area] is UnitImplementationScope) 
-            {
-                int ai2=HashTable.hash_arr[tn].NumAreaList.IndexOf(ScopeTable[Area].TopScopeNum);
-                if ((ai < 0) && (ai2 >= 0))
-                //Kolay modified if.
-                //return HashTable.hash_arr[tn].NumAreaList[ai2].InfoList[0];
-                {
-                    SymbolInfo si_init = HashTable.hash_arr[tn].NumAreaList[ai2].InfoList[0];
-                    SymbolInfo si_next = si_init;
-                    for (int iter = 1; iter < HashTable.hash_arr[tn].NumAreaList[ai2].InfoList.Count; iter++)
-                    {
-                        si_next.Next = HashTable.hash_arr[tn].NumAreaList[ai2].InfoList[iter];
-                        si_next = si_next.Next;
-                    }
-                    return si_init;
-                }
-                if ((ai>=0)&&(ai2>=0))
-                {
-                    SymbolInfo si_int=HashTable.hash_arr[tn].NumAreaList[ai2].InfoList[0];
-                    SymbolInfo si_impl=HashTable.hash_arr[tn].NumAreaList[ai].InfoList[0];
-
-                    //Kolay modified. All methods searched.
-
-                    //SymbolInfo si_init_interface = HashTable.hash_arr[tn].NumAreaList[ai].InfoList[0];
-                    SymbolInfo si_next = si_int;
-                    for (int iter = 1; iter < HashTable.hash_arr[tn].NumAreaList[ai].InfoList.Count; iter++)
-                    {
-                        si_next.Next = HashTable.hash_arr[tn].NumAreaList[ai].InfoList[iter];
-                        si_next = si_next.Next;
-                    }
-
-                    si_next.Next=si_impl;
-                    si_next = si_next.Next;
-                    for (int iter = 1; iter < HashTable.hash_arr[tn].NumAreaList[ai2].InfoList.Count; iter++)
-                    {
-                        si_next.Next = HashTable.hash_arr[tn].NumAreaList[ai2].InfoList[iter];
-                        si_next = si_next.Next;
-                    }
-
-                    return si_int;
-
-                    
-                    //return it;
-                }
-            }
-
-            if (ai >= 0)
-            //Kolay modifeds this if.
-            //return HashTable.hash_arr[tn].NumAreaList[ai].InfoList[0];
-            {
-                SymbolInfo si_init = HashTable.hash_arr[tn].NumAreaList[ai].InfoList[0];
-                SymbolInfo si_next = si_init;
-                for (int iter = 1; iter < HashTable.hash_arr[tn].NumAreaList[ai].InfoList.Count;iter++ )
-                {
-                    si_next.Next = HashTable.hash_arr[tn].NumAreaList[ai].InfoList[iter];
-                    si_next = si_next.Next;
-                }
-                //Проверить не чиго ли это не портит!
-                PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbolsImplementationMember(si_init, Name);
-                return si_init;
-            }
-			
-			
-            * */
             return null;
-             
-		}
+        }
+        private void FindAllInClass(string name, Scope ClassArea, bool OnlyInThisClass, List<SymbolInfo> Result)
+        {
+            HashTableNode tn;
+            Scope ar = ClassArea;
 
-
-
-        private SymbolInfo FindAllInClass(SymbolInfo si, string name, int ClassArea, AreaNodesList AreaList, bool OnlyInThisClass, SymbolInfo FirstInfo)
-		{
-			int ai;
-            
-            Scope ar = ScopeTable[ClassArea];
-
-            if ((ai = AreaList.IndexOf(ClassArea)) >= 0)
-                si = AddToSymbolInfo(si, AreaList[ai].InfoList, ar, FirstInfo);
+            if ((tn = ar.Symbols.Find(name)) != null)
+                AddToSymbolInfo(tn.InfoList, Result);
 
             if (ar is DotNETScope)
             {
-                PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(si, name);
-                return AddToSymbolInfo(si, (DotNETScope)ar, name);
+                PascalABCCompiler.TreeRealization.BasePCUReader.RestoreSymbols(Result, name);
+                AddToSymbolInfo(Result, (DotNETScope)ar, name);
+                return;
             }
 
-            ClassScope cl = (ClassScope)ScopeTable[ClassArea];
+            ClassScope cl = (ClassScope)ClassArea;
 
-            if(!OnlyInThisClass)
-                while (cl.BaseClassScopeNum >= 0)
+            if (!OnlyInThisClass)
+            { 
+                while (cl.BaseClassScope != null)
                 {
-                    ai = AreaList.IndexOf(cl.BaseClassScopeNum);
-                    if (ai >= 0) si = AddToSymbolInfo(si, AreaList[ai].InfoList, cl.BaseClassScope, FirstInfo);
+                    tn = cl.BaseClassScope.Symbols.Find(name);
+                    if (tn != null)
+                        AddToSymbolInfo(tn.InfoList, Result);
 
-                    //cl=(ClassScope)ScopeTable[cl.BaseClassScopeNum];
-
-                    ar = ScopeTable[cl.BaseClassScopeNum];
+                    ar = cl.BaseClassScope;
                     if (ar is DotNETScope)
-                        return AddToSymbolInfo(si, (DotNETScope)ar, name);
-                    cl = (ClassScope)ScopeTable[cl.BaseClassScopeNum];
+                    {
+                        AddToSymbolInfo(Result, (DotNETScope)ar, name);
+                        return;
+                    }
+                    cl = (ClassScope)cl.BaseClassScope;
                 }
-			return si;
-		}
+                if (cl.BaseClassScope == null && cl.class_type.base_type is PascalABCCompiler.TreeRealization.compiled_type_node ctn)
+                {
+                    var a = ctn.find(name);
+                    if (a != null)
+                        AddToSymbolInfo(a, Result);
+                    return;
+                }
+            }
+        }
+
         private Scope FindUnitInterfaceScope(Scope scope)
         {
             while (scope!=null && !(scope is UnitInterfaceScope))
@@ -798,7 +859,7 @@ namespace SymbolTable
         {
             while (scope != null && !(scope is ClassScope))
                 if(scope is ClassMethodScope)
-                    scope = ((ClassMethodScope)scope).MyClass;
+                    scope = scope.TopScope;
                 else
                     scope = scope.TopScope;
             return scope;
@@ -808,7 +869,7 @@ namespace SymbolTable
         {
             Scope1 = FindUnitInterfaceScope(Scope1);
             Scope2 = FindUnitInterfaceScope(Scope2);
-            return (Scope1 != null) && (Scope2 != null) && (Scope1.ScopeNum == Scope2.ScopeNum);
+            return (Scope1 != null) && (Scope2 != null) && (Scope1 == Scope2);
         }
         
         private bool IsInOneOrDerivedClass(Scope IdentScope, Scope FromScope)
@@ -817,7 +878,7 @@ namespace SymbolTable
             FromScope = FindClassScope(FromScope);
             while (FromScope != null)
             {
-                if (IdentScope.ScopeNum == FromScope.ScopeNum)
+                if (IdentScope == FromScope)
                     return true;
                 if (FromScope is ClassScope)
                     FromScope = ((ClassScope)FromScope).BaseClassScope;
@@ -830,7 +891,7 @@ namespace SymbolTable
         
         private bool IsVisible(SymbolInfo ident, Scope fromScope)
         {
-            if (fromScope == null) 
+            if (fromScope == null)
                 return true;
             if (FindClassScope(ident.scope) == null)
                 return true;
@@ -846,92 +907,63 @@ namespace SymbolTable
             }
             return true;
         }
-        
-		private bool IsNormal(SymbolInfo to,SymbolInfo add)
-		{
-			return //true;
-                (to.scope == null) || ((to.scope != null) &&
-                (((to.symbol_kind==symbol_kind.sk_none)&&(add.symbol_kind==symbol_kind.sk_none))&&(to.scope==add.scope))
+
+        private bool IsNormal(SymbolInfo to, SymbolInfo add)
+        {
+            return //true;
+                (to == null) || (to.scope == null) || ((to.scope != null) && //to.scope == null не нужно?
+                (((to.symbol_kind == symbol_kind.sk_none) && (add.symbol_kind == symbol_kind.sk_none)) && (to.scope == add.scope))
                 ||
-				((to.symbol_kind==symbol_kind.sk_overload_function)&&(add.symbol_kind==symbol_kind.sk_overload_function))
+                ((to.symbol_kind == symbol_kind.sk_overload_function) && (add.symbol_kind == symbol_kind.sk_overload_function))
                 ||
                 ((to.symbol_kind == symbol_kind.sk_overload_procedure) && (add.symbol_kind == symbol_kind.sk_overload_procedure))
+                || to.sym_info != add.sym_info && to.sym_info is PascalABCCompiler.TreeRealization.function_node && add.sym_info is PascalABCCompiler.TreeRealization.function_node 
+                /*&& (to.sym_info as PascalABCCompiler.TreeRealization.function_node).is_extension_method*/ && (add.sym_info as PascalABCCompiler.TreeRealization.function_node).is_extension_method
                 );
-		}
-		
-		private bool AlreadyAdded(SymbolInfo si, SymbolInfo FirstInfo)
-		{
-			if (FirstInfo == null)
-				return false;
-			while (FirstInfo.Next != null)
-			{
-				if (FirstInfo.Next == si)
-					return true;
-				FirstInfo = FirstInfo.Next;
-			}
-			return false;
-		}
-		
-		private SymbolInfo AddToSymbolInfo(SymbolInfo to, List<SymbolInfo> from, Scope scope, SymbolInfo FirstInfo)
-		{
+        }
+
+        private void AddToSymbolInfo(List<SymbolInfo> from, List<SymbolInfo> to)
+        {
             bool CheckVisible = CurrentScope != null, NeedAdd = false;
+            SymbolInfo last_sym = to.LastOrDefault();
+
             foreach (SymbolInfo si in from)
             {
                 if (CheckVisible)
-                    NeedAdd = IsVisible(si, CurrentScope) && IsNormal(to, si);
+                    NeedAdd = IsVisible(si, CurrentScope) && IsNormal(last_sym, si);
                 else
-                    NeedAdd = IsNormal(to, si);
-                if (NeedAdd && !AlreadyAdded(si,FirstInfo))
+                    NeedAdd = IsNormal(last_sym, si);
+                if (NeedAdd && to.IndexOf(si) == -1)
                 {
-                    to.Next = si;
-                    si.Next = null;
-                    to = si;
+                    to.Add(si);
+                    last_sym = si;
                 }
             }
-			LastScope=scope;
-			return to;
-		}
-		private SymbolInfo AddToSymbolInfo(SymbolInfo to,SymbolInfo si,Scope scope)
-		{
-			if(si!=null)
-				if(IsNormal(to,si))	
-				{
-					to.Next=si;si.Next=null;
-					LastScope=scope;
-					return si;
-				}
-			LastScope=scope;
-			return to;	
-		}
-		private SymbolInfo AddToSymbolInfo(SymbolInfo sito,DotNETScope ar,string name)
-		{
-            SymbolInfo si=ar.Find(name);
-			if(si!=null)
-                if (IsNormal(sito, si))
-                {
-                    sito.Next = si;
-                    return si;
-                }
-       
-			return sito;	
-		}
-        private SymbolInfo FindAllInAreaList(SymbolInfo si, string name, Scope[] arr, AreaNodesList AreaNodes,SymbolInfo FirstInfo)
-        {
-            return FindAllInAreaList(si, name, arr, AreaNodes, false, FirstInfo);
         }
-		private SymbolInfo FindAllInAreaList(SymbolInfo si,string name,Scope[] arr,AreaNodesList AreaNodes, bool StopIfFind, SymbolInfo FirstInfo)
-		{
-			if (arr==null) return si;
-			int p;
-            SymbolInfo sib=si;
+        private void AddToSymbolInfo(List<SymbolInfo> to, DotNETScope ar, string name)
+        {
+            List<SymbolInfo> sil = ar.Find(name);
+            if (sil != null)
+                if (IsNormal(to.LastOrDefault(), sil.FirstOrDefault()))
+                    to.AddRange(sil);
+        }
+
+        private void FindAllInAreaList(string name, Scope[] arr, bool need, List<SymbolInfo> Result)
+        {
+            FindAllInAreaList(name, arr, false, need, Result);
+        }
+        public void FindAllInAreaList(string name, Scope[] arr, bool StopIfFind, bool NotOnlyInNetScopes, List<SymbolInfo> Result)
+        {
+            if (arr == null) return;
+
+            int add = Result.Count;
             HashSet<Assembly> assm_cache = new HashSet<Assembly>();
-			foreach(Scope sc in arr)
-			{
-                if (sc is DotNETScope)
+            foreach (Scope sc in arr)
+            {
+                if (sc is DotNETScope) //  /*&& name.ToLower() != "pabcsystem"*/
                 {
-                    if (sc is PascalABCCompiler.NetHelper.NetScope)
+                    if (sc is PascalABCCompiler.NetHelper.NetScope netScope)
                     {
-                        PascalABCCompiler.NetHelper.NetScope netScope = sc as PascalABCCompiler.NetHelper.NetScope;
                         if (PascalABCCompiler.NetHelper.NetHelper.PABCSystemType == null || netScope.Assembly != PascalABCCompiler.NetHelper.NetHelper.PABCSystemType.Assembly)
                         {
                             if (!assm_cache.Contains(netScope.Assembly))
@@ -940,245 +972,314 @@ namespace SymbolTable
                                 continue;
                         }
                     }
-                    si = AddToSymbolInfo(si, (DotNETScope)sc, name);
-                    if (sib.Next != null && StopIfFind)
-                        return si;
+                    var netScope1 = sc as PascalABCCompiler.NetHelper.NetScope;
+                    var IsPABCSystemAssembly = false;
+                    if (PascalABCCompiler.NetHelper.NetHelper.PABCSystemType != null && netScope1 != null && netScope1.Assembly == PascalABCCompiler.NetHelper.NetHelper.PABCSystemType.Assembly)
+                        IsPABCSystemAssembly = true;
+
+                    // не добавлять если это NetScope но не PABCSystemType.Assembly
+                    if (IsPABCSystemAssembly || name.ToLower() != "pabcsystem")
+                        AddToSymbolInfo(Result, (DotNETScope)sc, name);
+                    if (Result.Count > add && StopIfFind)
+                        return;
                 }
                 else
-                if (AreaNodes != null && sc != null)
+                if (NotOnlyInNetScopes && sc != null)
                 {
-                    p = AreaNodes.IndexOf(sc.ScopeNum);
-                    if (p >= 0)
+                    var tn = sc.Symbols.Find(name);
+                    if (tn != null)
                     {
-                        si = AddToSymbolInfo(si, AreaNodes[p].InfoList, sc, FirstInfo);
-                        if (sib.Next != null && StopIfFind)
-                            return si;
+                        AddToSymbolInfo(tn.InfoList, Result);
+                        if (Result.Count > add && StopIfFind)
+                            return;
                     }
                 }
-			}
-			return si;
-		}
-		//поиск всех имен в ООВ.
-		//  ищет наборы имен в ООВ, если находит то возвращает их список.
-		//  иначе ищет в обьемлющем ООВ.
-		//SymbolInfo возвращаются в поряде в котором они встретились при проходе областей
-		public SymbolInfo Find(Scope scope,string Name)
-		{
-            return FindAll(scope, Name, false, false,  null);
-		}
-        public SymbolInfo Find(Scope scope, string Name, Scope FromScope)
+            }
+        }
+        //поиск всех имен в ООВ.
+        //  ищет наборы имен в ООВ, если находит то возвращает их список.
+        //  иначе ищет в обьемлющем ООВ.
+        //SymbolInfo возвращаются в поряде в котором они встретились при проходе областей
+        public List<SymbolInfo> Find(Scope scope, string Name)
+        {
+           return FindAll(scope, Name, false, false, null);
+        }
+
+        public List<SymbolInfo> Find(Scope scope, string Name, Scope FromScope)
         {
             return FindAll(scope, Name, false, false, FromScope);
         }
-        public SymbolInfo FindOnlyInType(Scope scope, string Name)
-		{
-            //TODO: Почему ищет везде??? Только в типе и надтипах. А в юните он найдет?
-            return FindAll(scope, Name, true, false, null);
-		}
-        public SymbolInfo FindOnlyInType(Scope scope, string Name, Scope FromScope)
+        public List<SymbolInfo> FindOnlyInType(Scope scope, string Name)
         {
-            return FindAll(scope, Name, true, false,FromScope);
+            return FindAll(scope, Name, true, false, null);
         }
-        public SymbolInfo FindOnlyInThisClass(ClassScope scope, string Name)
+        public List<SymbolInfo> FindOnlyInType(Scope scope, string Name, Scope FromScope)
+        {
+            return FindAll(scope, Name, true, false, FromScope);
+        }
+
+        public List<SymbolInfo> FindOnlyInThisClass(ClassScope scope, string Name)
         {
             return FindAll(scope, Name, true, true, null);
         }
-        
-		private SymbolInfo FindAll(Scope scope,string Name,bool OnlyInType,bool OnlyInThisClass, Scope FromScope)
-		{
-			if(OnlyInType && !(scope is ClassScope) && !(scope is SymbolTable.DotNETScope)) return null;
-			//if (!CaseSensitive) Name=Name.ToLower();
-            if(!scope.CaseSensitive)
+        private List<SymbolInfo> FindAll(Scope scope, string Name, bool OnlyInType, bool OnlyInThisClass, Scope FromScope)
+        {
+            if (OnlyInType && !(scope is ClassScope) && !(scope is SymbolTable.DotNETScope)) return null;
+            //if (!CaseSensitive) Name=Name.ToLower();
+
+            if (!scope.CaseSensitive)
                 Name = Name.ToLower();
-            CurrentScope = FromScope; //глобальные переменные могут привести к ошибкам при поиске и поторном вызове!
-            LastScope = null;         //глобальные переменные могут привести к ошибкам при поиске и поторном вызове!
-            SymbolInfo FirstInfo = new SymbolInfo();
-			SymbolInfo info=FirstInfo;
-			int Area=scope.ScopeNum;
-			Scope[] used_units=null;
-			int tn=HashTable.Find(Name);		//найдем имя в хеше
+            CurrentScope = FromScope; //глобальные переменные могут привести к ошибкам при поиске и повторном вызове!
 
-            // SSM 21.01.16
-            if (Name.StartsWith("?"))     // это значит, надо искать в областях .NET
-                Name = Name.Substring(1); // съели ? и ищем т.к. tn<0
-            // end SSM 
+            List<SymbolInfo> Result = new List<SymbolInfo>();
 
-            if (tn<0 || scope is DotNETScope)//если нет такого ищем в областях .NET
-			{
-                //ssyy
-                int NextUnitArea = -2;
-                //\ssyy
-				Scope an;
-				while(Area>=0)
-				{
-					an=ScopeTable[Area];
-                    if (an is DotNETScope)
+            // Находим имена с ? в стандартных местах. Это прежде всего ?System. Потом будет ?PABCSystem.
+
+            if (Name.Equals("?system"))
+            {
+                Name = Name.Substring(1);
+                // Нет. Как-то найти глобальное ПИ модуля 
+                while (scope != null && !(scope is UnitInterfaceScope))
+                {
+                    if (scope is ClassMethodScope)
                     {
-                        if (tn < 0)
-                            info = AddToSymbolInfo(info, (DotNETScope)an, Name);
+                        // aab 17.05.19 begin
+                        // Поправил приоритет поиска для ?System
+                        var classMethodScope = scope as ClassMethodScope;
+                        if (classMethodScope.DefScope != null)
+                            scope = classMethodScope.DefScope;
                         else
-                            info = FindAllInClass(info, Name, Area, HashTable.hash_arr[tn].NumAreaList, false, FirstInfo);
+                            scope = classMethodScope.CurrentLambdaDefScope;
+                        // aab 17.05.19 end
                     }
-                    if (FirstInfo.Next != null) 
-                        return FirstInfo.Next;
-					if (an is UnitPartScope)
-					{
-						if (an is UnitImplementationScope)
-						{
-							info=FindAllInAreaList(info,Name,(an as UnitImplementationScope).TopScopeArray,null,FirstInfo);
-							an=ScopeTable[an.TopScopeNum];
-						}
-						info=FindAllInAreaList(info,Name,(an as UnitInterfaceScope).TopScopeArray,null,FirstInfo);
-						if (FirstInfo.Next!=null) 
-                            return FirstInfo.Next;
-					}
-                    if (an is WithScope)//мы очутились в Width
+                    else scope = scope.TopScope;
+                }
+                if (scope != null)
+                {
+                    var a = (scope as UnitInterfaceScope).TopScopeArray.Where(x => x is PascalABCCompiler.NetHelper.NetScope).ToArray();
+                    FindAllInAreaList(Name, a, true, Result);
+                }
+
+                if (Result.Count > 0)
+                    return Result;
+                else return null;
+            }
+
+            Scope Area = scope;
+            Scope[] used_units = null;
+
+            HashTableNode tn = null;
+            if (!(scope is DotNETScope))
+            {
+                Scope CurrentArea = Area;
+                while (CurrentArea != null)
+                {
+                    if (CurrentArea is UnitPartScope) //мы очутились в модуле
                     {
-                        info = FindAllInAreaList(info, Name, (an as WithScope).WithScopes, null, true,FirstInfo);
-                        if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                            return FirstInfo.Next;
+                        //мы в ImplementationPart?
+                        if (CurrentArea is UnitImplementationScope)
+                        {
+                            used_units = (CurrentArea as UnitImplementationScope).TopScopeArray;
+                            tn = CurrentArea.Symbols.Find(Name);
+                            if (tn != null) //что-то нашли!
+                                AddToSymbolInfo(tn.InfoList, Result);
+                            CurrentArea = CurrentArea.TopScope;
+                        }
+                        //сейча мы в InterfacePart
+                        tn = CurrentArea.Symbols.Find(Name);
+                        if (tn != null) //что-то нашли!
+                            AddToSymbolInfo(tn.InfoList, Result);
+                        //смотрим в модулях
+                        FindAllInAreaList(Name, used_units, true, Result);
+                        FindAllInAreaList(Name, (CurrentArea as UnitInterfaceScope).TopScopeArray, true, Result);
+
+                        return Result.Count > 0 ? Result : null;
                     }
-					if (an is ClassScope)
-					{
-						int unit_area=an.TopScopeNum;
-                        InterfaceScope IntScope = an as InterfaceScope;
-                        while (((ClassScope)an).BaseClassScopeNum >= 0)
-						{
-							an=ScopeTable[((ClassScope)an).BaseClassScopeNum];
-							if(an is DotNETScope)
-							{
-								info=AddToSymbolInfo(info,(DotNETScope)an,Name);
-                                if (FirstInfo.Next != null) // || OnlyInType) 
-                                    return FirstInfo.Next;
-								break;
-							}
-						}
-                        //В предках ничего не нашли, ищем по интерфейсам...
-                        if (IntScope != null)
+                    else
+                    if (CurrentArea is IInterfaceScope)
+                    {
+                        FindAllInClass(Name, CurrentArea, OnlyInThisClass, Result);
+
+                        if (Result.Count > 0) //если что-то нашли то заканчиваем
+                            return Result;
+
+                        //Зачем искать в интерфейсах?
+                        //(ssyy) Не понимаю вопрос. Спросившему подумать, зачем в компиляторе нужен поиск.
+                        FindAllInAreaList(Name, (CurrentArea as IInterfaceScope).TopInterfaceScopeArray, true, Result);
+
+                        if (Result.Count > 0 || OnlyInType) //если что-то нашли то заканчиваем
+                            return Result.Count > 0 ? Result : null;
+                    }
+                    else
+                    if (CurrentArea is ClassScope)//мы очутились в классе
+                    {
+                        FindAllInClass(Name, CurrentArea, OnlyInThisClass, Result);//надо сделать поиск по его предкам
+
+                        if (Result.Count > 0 || OnlyInType) //если что-то нашли то заканчиваем
+                            return Result.Count > 0 ? Result : null;
+                        //иначе ищем дальше
+                    }
+                    else
+                    if (CurrentArea is WithScope)//мы очутились в With
+                    {
+                        tn = CurrentArea.Symbols.Find(Name);
+                        if (tn != null) //что-то нашли!
+                            AddToSymbolInfo(tn.InfoList, Result);
+                        if (Result.Count > 0) //если что-то нашли то заканчиваем
+                            return Result;
+                        Scope[] wscopes = (CurrentArea as WithScope).WithScopes;
+                        if (wscopes != null)
+                            foreach (Scope wsc in wscopes)
+                            {
+                                FindAllInClass(Name, wsc, OnlyInThisClass, Result);//надо сделать поиск по его предкам                    
+
+                                if (Result.Count > 0) //если что-то нашли то заканчиваем
+                                    return Result;
+                            }
+                    }
+                    else
+                    {
+                        tn = CurrentArea.Symbols.Find(Name);
+                        if (tn != null) //что-то нашли!
                         {
-                            info = FindAllInAreaList(info, Name, IntScope.TopInterfaceScopeArray, null,FirstInfo);
-                            if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                                return FirstInfo.Next;
+                            AddToSymbolInfo(tn.InfoList, Result);
+                            return Result.Count > 0 ? Result : null;
                         }
-                        if (OnlyInType)
-                            return FirstInfo.Next;
-                        //ssyy
-                        if (NextUnitArea > -1)
+                        if (CurrentArea is ClassMethodScope)//мы очутились в методе класса
                         {
-                            Area = NextUnitArea;
-                            //NextUnitArea = -2;
-                            continue;
+                            // aab 26.04.19 begin
+                            // Сначала ищем в скоупе где была объявлена лямбда
+                            var currentLambdaDefScope = (CurrentArea as ClassMethodScope).CurrentLambdaDefScope;
+                            if (currentLambdaDefScope != null)
+                            {
+                                var defScopeRes = FindAll(currentLambdaDefScope, Name, OnlyInType, OnlyInThisClass, currentLambdaDefScope);
+
+                                if (defScopeRes != null && defScopeRes.Count > 0)
+                                {
+                                    return defScopeRes;
+                                }
+                            }
+                            // aab 26.04.19 end
+
+                            FindAllInClass(Name, (CurrentArea as ClassMethodScope).TopScope, OnlyInThisClass, Result);//надо сделать поиск по его классу
+
+
+                            if (Result.Count > 0) //если что-то нашли то заканчиваем
+                                return Result;
+
+                            var defScope = (CurrentArea as ClassMethodScope).DefScope;
+                            if (defScope != null)
+                            {
+                                CurrentArea = defScope;
+                                continue;
+                            }
                         }
-                        else
+                    }
+                    CurrentArea = CurrentArea.TopScope;//Пошли вверх
+                }
+            }
+
+            //если нет такого ищем в областях .NET
+
+            //ssyy
+            Scope NextUnitArea = null;
+            //\ssyy
+            Scope an;
+            tn = Area.Symbols.Find(Name);
+            while (Area != null)
+            {
+                an = Area;
+                if (an is DotNETScope)
+                {
+                    if (tn == null)
+                        AddToSymbolInfo(Result, (DotNETScope)an, Name);
+                    else
+                        FindAllInClass(Name, Area, false, Result);
+                }
+                if (Result.Count > 0)
+                    return Result;
+                if (an is UnitPartScope)
+                {
+                    if (an is UnitImplementationScope)
+                    {
+                        FindAllInAreaList(Name, (an as UnitImplementationScope).TopScopeArray, true, Result);
+                        an = an.TopScope;
+                    }
+
+                    FindAllInAreaList(Name, (an as UnitInterfaceScope).TopScopeArray, false, Result);
+
+                    if (Result.Count > 0)
+                        return Result;
+                }
+                if (an is WithScope)//мы очутились в Width
+                {
+                    FindAllInAreaList(Name, (an as WithScope).WithScopes, true, false, Result);
+
+                    if (Result.Count > 0) //если что-то нашли то заканчиваем
+                        return Result;
+                }
+                if (an is ClassScope)
+                {
+                    Scope unit_area = an.TopScope;
+                    InterfaceScope IntScope = an as InterfaceScope;
+                    while (((ClassScope)an).BaseClassScope != null)
+                    {
+                        an = ((ClassScope)an).BaseClassScope;
+                        if (an is DotNETScope)
+                        {
+                            AddToSymbolInfo(Result, (DotNETScope)an, Name);
+                            if (Result.Count > 0) // || OnlyInType) 
+                                return Result;
+                            break;
+                        }
+                    }
+                    //В предках ничего не нашли, ищем по интерфейсам...
+                    if (IntScope != null)
+                    {
+                        FindAllInAreaList(Name, IntScope.TopInterfaceScopeArray, false, Result);
+                        if (Result.Count > 0) //если что-то нашли то заканчиваем
+                            return Result;
+
+                    }
+                    if (OnlyInType)
+                        return Result.Count > 0 ? Result : null;
+
+                    //ssyy
+                    if (NextUnitArea != null)
+                    {
+                        Area = NextUnitArea;
+                        //NextUnitArea = null;
+                        continue;
+                    }
+                    else
                         //\ssyy
-						    an=ScopeTable[unit_area];
-					}
-					if (info.Next!=null) return FirstInfo.Next;
-	
-					if (an is ClassMethodScope)
-					{
-                        //ssyy
-                        NextUnitArea = an.TopScopeNum;
-                        //\ssyy
-						Area=(an as ClassMethodScope).MyClassNum;
-					}
-					else
-					{
-						Area=GetTopScopeNum(Area);
-					}
-
-					//Area=GetTopScopeNum(Area);
-				}
-				return null;				//если такого нет то поиск окончен
-			} 
-						
-			AreaNodesList AreaList=HashTable.hash_arr[tn].NumAreaList;
-			int CurrentArea=Area,ai;
-			while (CurrentArea>=0)
-			{
-				if (ScopeTable[CurrentArea] is UnitPartScope) //мы очутились в модуле
-				{
-					
-					//мы в ImplementationPart?
-					if (ScopeTable[CurrentArea] is UnitImplementationScope)
-					{
-						used_units=(ScopeTable[CurrentArea] as UnitImplementationScope).TopScopeArray;
-						ai=AreaList.IndexOf(CurrentArea);
-						if (ai>=0) //что-то нашли!
-							info=AddToSymbolInfo(info,AreaList[ai].InfoList,ScopeTable[CurrentArea],FirstInfo);
-						CurrentArea=GetTopScopeNum(CurrentArea);
-					}
-					//сейча мы в InterfacePart
-					ai=AreaList.IndexOf(CurrentArea);
-					if (ai>=0) //что-то нашли!
-						info=AddToSymbolInfo(info,AreaList[ai].InfoList,ScopeTable[CurrentArea],FirstInfo);
-					//смотрим в модулях
-					info=FindAllInAreaList(info,Name,used_units,AreaList,FirstInfo);
-					info=FindAllInAreaList(info,Name,(ScopeTable[CurrentArea] as UnitInterfaceScope).TopScopeArray,AreaList,FirstInfo);
-					return FirstInfo.Next;
-				}
-				else
-                if (ScopeTable[CurrentArea] is IInterfaceScope)
-                {
-                    info = FindAllInClass(info, Name, CurrentArea, AreaList,OnlyInThisClass,FirstInfo);
-                    if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                       return FirstInfo.Next; 
-                    //Зачем искать в интерфейсах?
-                    //(ssyy) Не понимаю вопрос. Спросившему подумать, зачем в компиляторе нужен поиск.
-                    info = FindAllInAreaList(info, Name, (ScopeTable[CurrentArea] as IInterfaceScope).TopInterfaceScopeArray, AreaList, FirstInfo);
-                    if (FirstInfo.Next != null || OnlyInType) //если что-то нашли то заканчиваем
-                        return FirstInfo.Next;                    
+                        an = unit_area;
                 }
-                else
-				if(ScopeTable[CurrentArea] is ClassScope)//мы очутились в классе
-				{	
-					info=FindAllInClass(info,Name,CurrentArea,AreaList,OnlyInThisClass,FirstInfo);//надо сделать поиск по его предкам
-                    if (FirstInfo.Next != null || OnlyInType) //если что-то нашли то заканчиваем
-						return FirstInfo.Next; 
-					//иначе ищем дальше
-				}
-                else
-                if (ScopeTable[CurrentArea] is WithScope)//мы очутились в With
-                {
-                    ai = AreaList.IndexOf(CurrentArea);
-                    if (ai >= 0) //что-то нашли!
-                        info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                    if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                        return FirstInfo.Next;
-                    Scope[] wscopes = (ScopeTable[CurrentArea] as WithScope).WithScopes;
-                    if(wscopes!=null)
-                        foreach (Scope wsc in wscopes)
-                        {
-                            info = FindAllInClass(info, Name, wsc.ScopeNum, AreaList, OnlyInThisClass,FirstInfo);//надо сделать поиск по его предкам                    
-                            if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                                return FirstInfo.Next;
-                        }
-                    //info = FindAllInAreaList(info, Name, (ScopeTable[CurrentArea] as WithScope).WithScopes, AreaList, true);
-                }
-                else
-                {
-                    ai = AreaList.IndexOf(CurrentArea);
-                    if (ai >= 0) //что-то нашли!
-                    {
-                        info = AddToSymbolInfo(info, AreaList[ai].InfoList, ScopeTable[CurrentArea],FirstInfo);
-                        return FirstInfo.Next;
-                    }
-                    if (ScopeTable[CurrentArea] is ClassMethodScope)//мы очутились в методе класса
-                    {
-                        info = FindAllInClass(info, Name, (ScopeTable[CurrentArea] as ClassMethodScope).MyClassNum, AreaList, OnlyInThisClass,FirstInfo);//надо сделать поиск по его классу
-                        if (FirstInfo.Next != null) //если что-то нашли то заканчиваем
-                            return FirstInfo.Next;
-                    }
-                }
-				CurrentArea=GetTopScopeNum(CurrentArea);//Пошли вверх
-				
-			}
-			return null;
-		}
+                if (Result.Count > 0)
+                    return Result;
 
 
-	}
-	public class TreeConverterSymbolTable:DSSymbolTable
+                if (an is ClassMethodScope)
+                {
+                    //ssyy
+                    NextUnitArea = (an as ClassMethodScope).DefScope;
+                    //\ssyy
+                    Area = an.TopScope;
+                }
+                else
+                    Area = Area.TopScope;
+                //Area = Area.TopScope;
+
+            }
+            return null;                //если такого нет то поиск окончен
+        }
+
+        public int GetNewScopeNum()
+        {
+            return ++ScopeIndex;
+        }
+    }
+    public class TreeConverterSymbolTable:DSSymbolTable
 	{
 		public TreeConverterSymbolTable(bool case_sensitive):base(SymbolTableConstants.HashTable_StartSize,case_sensitive){}
 		public TreeConverterSymbolTable():base(SymbolTableConstants.HashTable_StartSize,false){}

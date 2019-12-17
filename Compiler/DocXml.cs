@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.IO;
@@ -54,7 +54,7 @@ namespace PascalABCCompiler
                 xtw.WriteEndElement();
                 xtw.Flush();
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
@@ -364,7 +364,7 @@ namespace PascalABCCompiler
 		
 		private string get_delegate_name(common_type_node ctn)
 		{
-			common_method_node cmn = ctn.find_in_type(compiler_string_consts.invoke_method_name).sym_info as common_method_node;
+			common_method_node cmn = ctn.find_first_in_type(compiler_string_consts.invoke_method_name).sym_info as common_method_node;
 			StringBuilder sb = new StringBuilder();
 			if (cmn.return_value_type != null)
 				sb.Append("@function");

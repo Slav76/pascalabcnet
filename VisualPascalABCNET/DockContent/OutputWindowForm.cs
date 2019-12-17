@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -35,6 +35,18 @@ namespace VisualPascalABC
         private void OutputWindowForm_VisibleChanged(object sender, EventArgs e)
         {
             
+        }
+
+        private void OutputTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.C)
+                outputTextBox.Copy();
+        }
+
+        private void InputTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.C)
+                InputTextBox.Copy();
         }
 
         private void button1_Click(object sender, EventArgs e)

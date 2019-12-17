@@ -1,7 +1,8 @@
 //PABCNETC
 %PREFIX%=PABCNETC_
 
-ERROR_INVALID_DIRECTORY=Error: Invalid direcory
+ERROR_INVALID_DIRECTORY=Error: Invalid directory
+ERROR_DIRECTORY_NOT_FOUND=Error: Directory not found
 FULL_ERROR_LIST=Full error list:
 OK_{0}MS_{1}LINES=OK {0}ms ({1}lines)
 TOTAL{0}_FILES{1}_LINES_{2}_TIME{3}=Total: {0} files ({1}kb,{2}lines). Time: {3}ms
@@ -12,8 +13,8 @@ ERROR_PARSERS_NOT_FOUND=Error: Parsers not found!
 CONNECTED_PARSERS=Connected parsers: 
 CONNECTED_CONVERSIONS=Connected conversions: 
 STARTING=Starting...
-COMMANDLINEISABSENT=Command line is absent
-FILEISABSENT{0}=File {0} is absent
+COMMANDLINEISABSENT=Command line is empty
+FILEISABSENT{0}=File {0} not found
 COMPILEERRORS=Compile errors:
 
 HELP=16LINES

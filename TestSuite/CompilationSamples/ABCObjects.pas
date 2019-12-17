@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 
 ///Модуль реализует векторные графические объекты с возможностью масштабирования, наложения друг на друга, 
@@ -112,7 +112,7 @@ type
     property Top: integer read fy write SetY;
     /// Ширина графического объекта 
     property Width: integer read fw write SetWidth;
-    /// Высота  графического объекта
+    /// Высота графического объекта
     property Height: integer read fh write SetHeight;
     ///x-координата вектора перемещения объекта при вызове метода Move.
     ///По умолчанию установлено в 0. Для неподвижных объектов может быть использовано 
@@ -644,7 +644,7 @@ function ObjectsCount: integer;
 function ObjectUnderPoint(x,y: integer): ObjectABC;
 /// Графический объект под точкой p
 function ObjectUnderPoint(p: Point): ObjectABC;
-/// Поменять позиции графических олбъектов o1 и o2
+/// Поменять позиции графических объектов o1 и o2
 procedure SwapPositions(o1,o2: ObjectABC);
 
 /// Элемент управления ABCObject под точкой (x,y)

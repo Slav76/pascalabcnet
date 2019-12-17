@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.IO;
@@ -98,6 +98,8 @@ namespace PascalABCCompiler.DocTagsParser
         documentation_comment_section parse_section(string text)
         {
             documentation_comment_section dcs = new documentation_comment_section();
+            if (text.StartsWith("////"))
+                return dcs;
             text = Regex.Replace(text, @"\r\n(\s)*///", "\r\n", RegexOptions.Compiled);
             text = Regex.Replace(text, @"(\s)*///", "", RegexOptions.Compiled);
             /*foreach (string section_name in sectionNames)
@@ -191,7 +193,7 @@ namespace PascalABCCompiler.DocTagsParser
         {
             get
             {
-                return "Copyright © 2005-2017 by Ivan Bondarev, Stanislav Mihalkovich";
+                return "Copyright © 2005-2019 by Ivan Bondarev, Stanislav Mikhalkovich";
             }
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -33,19 +33,20 @@ namespace SyntaxVisitors
                 return;
             }
 
-            if (td.type_name.name != _className.name)
+            if (td.type_name.name.ToLower() != _className.name.ToLower())
             {
                 // Not the class we search for
                 // Yoda
                 return;
             }
-
+            if (cd.body == null)
+                return;
             var methods = cd.body.class_def_blocks.SelectMany(cm => cm.members.Select(decl1 => 
                 {
                     if (decl1 is procedure_header)
-                        return (decl1 as procedure_header).name.meth_name;
+                        return (decl1 as procedure_header).name?.meth_name;
                     else if (decl1 is procedure_definition)
-                        return (decl1 as procedure_definition).proc_header.name.meth_name;
+                        return (decl1 as procedure_definition).proc_header.name?.meth_name;
                     return null;
                 }).Where(name => (object)name != null));
 

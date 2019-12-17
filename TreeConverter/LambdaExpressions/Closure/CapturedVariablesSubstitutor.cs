@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace TreeConverter.LambdaExpressions.Closure
 {
     internal class SubstitutionKey
     {
+        public override string ToString() => _variableName;
         private readonly string _variableName;
         private readonly syntax_tree_node _syntaxTreeNodeWhereVaribleIsDeclared;
         private readonly syntax_tree_node _syntaxTreeUnderSubstitution;
@@ -94,8 +95,18 @@ namespace TreeConverter.LambdaExpressions.Closure
             _visitor = visitor;
         }
 
+        public override void visit(function_lambda_definition fld)
+        {
+            // Пробуем не обходить proc_definition - сделали её object в NodesGenerator
+            DefaultVisit(fld); // Это решило проблему с вложенными лямбдами без var a := lambda
+        }
+
         public override void visit(statement_list stmtList)
         {
+/*#if DEBUG
+            var s = stmtList.subnodes.Count + " " + stmtList.subnodes[0].ToString() + "\n";
+            System.IO.File.AppendAllText("d:\\bb3.txt", s);
+#endif*/
             _syntaxTreeNodeStack.Push(stmtList);
             base.visit(stmtList);
             _syntaxTreeNodeStack.Pop();
@@ -322,6 +333,11 @@ namespace TreeConverter.LambdaExpressions.Closure
                         }
 
                         var forNodeIndex = enclosedStatementList.subnodes.FindIndex(stmt => stmt == forNode);
+
+                        if (forNodeIndex == -1) // SSM 30.10.18 грубый fix #1443 Если for_node находится на 2 и более уровней ниже, то мы её нне найдём - пробуем вставить в начало блока
+                            forNodeIndex = 0;
+                        // Конечно, могут возникнуть проблемы что мы вставляем в начало блока, но если там нет перекрывающихся имен, то вроде и проблем нет
+
                         enclosedStatementList.subnodes.InsertRange(forNodeIndex, nodesToAdd);
 
 
@@ -332,7 +348,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                     else
                     {
                         var si = forScope.SymbolInfoLoopVar;
-                        if (!_capturedVarsTreeNodesDictionary.ContainsKey(si.scope.ScopeNum))
+                        if (si.scope == null || !_capturedVarsTreeNodesDictionary.ContainsKey(si.scope.ScopeNum))
                             return;
                         var scopeWhereVarDefined = _capturedVarsTreeNodesDictionary[si.scope.ScopeNum];
                         var idRef = scopeWhereVarDefined
@@ -387,6 +403,8 @@ namespace TreeConverter.LambdaExpressions.Closure
                     else
                     {
                         var si = forEachScope.SymbolInfoLoopVar;
+                        if (si.scope == null)
+                            return;
                         var scopeWhereVarDefined = _capturedVarsTreeNodesDictionary[si.scope.ScopeNum];
                         var idRef = scopeWhereVarDefined
                             .VariablesDefinedInScope
@@ -746,8 +764,10 @@ namespace TreeConverter.LambdaExpressions.Closure
                 {
                     nodesToAdd.Add(generatedClass.AssignNodeForUpperClassFieldInitialization);
                 }
-
-                statementList.subnodes.InsertRange(0, nodesToAdd);
+                int ind = 0;
+                if (statementList.subnodes.Count > 0 && statementList.subnodes[0] is procedure_call && (statementList.subnodes[0] as procedure_call).func_name is inherited_ident)
+                    ind = 1;
+                statementList.subnodes.InsertRange(ind, nodesToAdd);
             }
         }
 
@@ -859,7 +879,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                 {
                     var genericParameters = AllGenericParameters;
 
-                    if (_visitor.context._ctn != null && _visitor.context._ctn.generic_params != null)
+                    if (_visitor.context._ctn != null /* && _visitor.context._ctn.generic_params != null */)
                     {
                         var tr = upperField.vars_type as named_type_reference;
                         if (tr != null && tr.names != null && tr.names.Count == 1)
@@ -871,10 +891,11 @@ namespace TreeConverter.LambdaExpressions.Closure
                         }
                     }
 
-                    upperField.vars_type =
-                        new template_type_reference(
-                            (named_type_reference)upperField.vars_type,
-                            new template_param_list(genericParameters.Select(l => SyntaxTreeBuilder.BuildSimpleType(l.name)).ToList()));
+                    if (genericParameters.Count > 0)
+                        upperField.vars_type = // SSM 26/06/19 - было вне if - поставил в if -  #1947 - что-то легло. Оставил вне if
+                            new template_type_reference(
+                                (named_type_reference)upperField.vars_type,
+                                new template_param_list(genericParameters.Select(l => SyntaxTreeBuilder.BuildSimpleType(l.name)).ToList()));
                 }
 
                 if (clDecl.Value.GeneratedVarStatementForScope != null)
@@ -918,6 +939,14 @@ namespace TreeConverter.LambdaExpressions.Closure
             }
         }
 
+        private bool IsInGenericClass
+        {
+            get
+            {
+                return _visitor.context._ctn != null && _visitor.context._ctn.generic_params != null;
+
+            }
+        }
         private List<ident> AllGenericParameters
         {
             get

@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -89,7 +89,8 @@ namespace VisualPascalABC
             if (!(data as UserDefaultCompletionData).IsOnOverrideWindow)
             {
                 int ind = data.Text.IndexOf('<');
-                if (ind != -1 && data.Text.Length > ind + 1 && data.Text[ind + 1] == '>') data.Text = data.Text.Substring(0, ind);
+                if (ind != -1 && data.Text.Length > ind + 1 && data.Text[ind + 1] == '>')
+                    data.Text = data.Text.Substring(0, ind);
             }
             else
                 data.Text = data.Description;
@@ -106,9 +107,17 @@ namespace VisualPascalABC
             List<PascalABCCompiler.Parsers.Position> loc = null;
             if (VisualPABCSingleton.MainForm.VisualEnvironmentCompiler.compilerLoaded)
                 e = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetExpression("test" + System.IO.Path.GetExtension(fileName), expr, Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
-            if (e == null /*|| Errors.Count > 0*/) return loc;
+            if (e is PascalABCCompiler.SyntaxTree.bin_expr && expr.Contains("<"))
+            {
+                expr = expr.Replace("<","&<");
+                Errors.Clear();
+                e = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetExpression("test" + System.IO.Path.GetExtension(fileName), expr, Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
+            }
+            if (e == null)
+                return loc;
             CodeCompletion.DomConverter dconv = (CodeCompletion.DomConverter)CodeCompletion.CodeCompletionController.comp_modules[fileName];
-            if (dconv == null) return loc;
+            if (dconv == null)
+                return loc;
             loc = dconv.GetDefinition(e, line, column, keyword, only_check);
             return loc;
         }
@@ -142,7 +151,7 @@ namespace VisualPascalABC
             {
                 string meth = construct_header(procs[i] as CodeCompletion.ProcRealization, VisualPABCSingleton.MainForm.UserOptions.CursorTabCount);
                 sb.Append(meth);
-                sb.Append('\n');
+                //sb.Append('\n');
             }
             return sb.ToString();
         }
@@ -160,8 +169,15 @@ namespace VisualPascalABC
                 int off = textArea.Document.PositionToOffset(new TextLocation(procs[i].GetPosition().column - 1, procs[i].GetPosition().line - 1));
                 string meth = textArea.Document.GetText(off, textArea.Document.PositionToOffset(new TextLocation(procs[i].GetPosition().end_column - 1, procs[i].GetPosition().end_line - 1)) - off + 1);
                 meth = construct_header(meth, procs[i], VisualPABCSingleton.MainForm.UserOptions.CursorTabCount);
-                sb.Append(meth);
-                if (i < procs.Length - 1) sb.Append('\n');
+
+                if (i < procs.Length - 1)
+                {
+                    sb.Append(meth);
+                    sb.Append('\n');
+                }
+                else
+                    sb.Append(meth.Trim());
+
             }
             return sb.ToString();
         }
@@ -257,13 +273,6 @@ namespace VisualPascalABC
                     }
                     PascalABCCompiler.Parsers.Position p = fnd_scope.GetPosition();
                     bool need_add_def = !for_refact; // true
-                    //if (for_refact)
-                    //foreach (PascalABCCompiler.Parsers.Position pos in lst)
-                    //    if (p.file_name == pos.file_name && p.line == pos.line && p.column == pos.column && p.end_line == pos.end_line && p.end_column == pos.end_column)
-                    //    {
-                    //        need_add_def = false;
-                    //        break;
-                    //    }
                     if (p.file_name != null && need_add_def)       
                         svs_lst.Add(new SymbolsViewerSymbol(new PascalABCCompiler.SourceLocation(p.file_name, p.line, p.column, p.end_line, p.end_column), ImagesProvider.GetPictureNum(fnd_scope.SymbolInfo)));
                     foreach (PascalABCCompiler.Parsers.Position pos in lst)
@@ -398,11 +407,18 @@ namespace VisualPascalABC
                 string expr = null;
                 bool ctrl_space = charTyped == '\0' || charTyped == '_';
                 bool shift_space = charTyped == '\0';
+                bool inside_dot_pattern = false;
                 bool new_space = keyw == PascalABCCompiler.Parsers.KeywordKind.New;
                 if (ctrl_space)
                 {
                     bool is_pattern = false;
                     pattern = CodeCompletion.CodeCompletionController.CurrentParser.LanguageInformation.FindPattern(off, Text, out is_pattern);
+                    if (is_pattern && Text[off - pattern.Length - 1] == '.')
+                    {
+                        inside_dot_pattern = true;
+                        expr = FindExpression(off - pattern.Length - 1, Text, line, col);
+                    }
+                        
                 }
                 else if (new_space)
                 {
@@ -412,7 +428,8 @@ namespace VisualPascalABC
                     if (!new_space && keyw != PascalABCCompiler.Parsers.KeywordKind.Uses)
                         if (charTyped != '$')
                             expr = FindExpression(off, Text, line, col);
-                        else expr = FindExpression(off - 1, Text, line, col);
+                        else
+                            expr = FindExpression(off - 1, Text, line, col);
                 List<PascalABCCompiler.Errors.Error> Errors = new List<PascalABCCompiler.Errors.Error>();
                 PascalABCCompiler.SyntaxTree.expression e = null;
                 if (ctrl_space && !shift_space && (pattern == null || pattern == ""))
@@ -424,7 +441,7 @@ namespace VisualPascalABC
                         resultList.Add(new UserDefaultCompletionData(key, null, ImagesProvider.IconNumberKeyword, false));
                     }
                 }
-                if (!ctrl_space && expr != null)
+                if ((!ctrl_space || inside_dot_pattern) && expr != null)
                 {
                     e = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetTypeAsExpression("test" + System.IO.Path.GetExtension(FileName), expr, Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
                     if (e == null)
@@ -451,20 +468,43 @@ namespace VisualPascalABC
                     if (new_space)
                         mis = dconv.GetTypes(e, line, col, out sel_si);
                     else if (keyw == PascalABCCompiler.Parsers.KeywordKind.Uses && mis == null)
-                        mis = dconv.GetNamespaces();
+                    {
+                        if (WorkbenchServiceFactory.Workbench.UserOptions.EnableSmartIntellisense)
+                            mis = dconv.GetNamespaces();
+                        else
+                            mis = CodeCompletion.DomConverter.standard_units;
+                    }
+
                     else
                         if (!ctrl_space)
+                    {
+                        CodeCompletion.SymScope dot_sc = null;
+                        mis = dconv.GetName(e, expr, line, col, keyword, ref dot_sc);
+                        if (dot_sc != null && VisualPABCSingleton.MainForm.UserOptions.EnableSmartIntellisense)
                         {
-                            CodeCompletion.SymScope dot_sc = null;
-                            mis = dconv.GetName(e, expr, line, col, keyword, ref dot_sc);
-                            if (dot_sc != null && VisualPABCSingleton.MainForm.UserOptions.EnableSmartIntellisense)
-                            {
-                                CompletionDataDispatcher.AddMemberBeforeDot(dot_sc);
-                                last_used_member = CompletionDataDispatcher.GetRecentUsedMember(dot_sc);
-                            }
+                            CompletionDataDispatcher.AddMemberBeforeDot(dot_sc);
+                            last_used_member = CompletionDataDispatcher.GetRecentUsedMember(dot_sc);
                         }
+                    }
+                    else
+                    {
+                        CodeCompletion.SymScope dot_sc = null;
+                        if (inside_dot_pattern)
+                        {
+                            List<SymInfo> si_list = new List<SymInfo>();
+                            SymInfo[] from_list = dconv.GetName(e, expr, line, col, keyword, ref dot_sc);
+                            for (int i = 0; i< from_list.Length; i++)
+                            {
+                                if (from_list[i].name.StartsWith(pattern, StringComparison.OrdinalIgnoreCase))
+                                    si_list.Add(from_list[i]);
+                            }
+                            mis = si_list.ToArray();
+                        }
+                            
                         else
                             mis = dconv.GetNameByPattern(pattern, line, col, charTyped == '_', VisualPABCSingleton.MainForm.UserOptions.CodeCompletionNamespaceVisibleRange);
+                    }
+
                 }
                 Hashtable cache = null;
                 if (!CodeCompletion.CodeCompletionController.CurrentParser.CaseSensitive)
@@ -533,9 +573,6 @@ namespace VisualPascalABC
             string text = textArea.Document.TextContent.Substring(0, textArea.Caret.Offset);
             //controller.Compile(fileName, text /*+ ")))));end."*/);
             FileName = fileName; Text = text;
-            //System.Threading.Thread th = new System.Threading.Thread(new System.Threading.ThreadStart(CompileInThread));
-            //th.Start();
-            //while (th.ThreadState == System.Threading.ThreadState.Running) {}
             ICompletionData[] data = GetCompletionData(off, text, textArea.Caret.Line, textArea.Caret.Column, charTyped, keyw);
             CodeCompletion.AssemblyDocCache.CompleteDocumentation();
             CodeCompletion.UnitDocCache.CompleteDocumentation();
@@ -590,9 +627,6 @@ namespace VisualPascalABC
             string text = textArea.Document.TextContent.Substring(0, textArea.Caret.Offset);
             //controller.Compile(fileName, text /*+ ")))));end."*/);
             FileName = fileName; Text = text;
-            //System.Threading.Thread th = new System.Threading.Thread(new System.Threading.ThreadStart(CompileInThread));
-            //th.Start();
-            //while (th.ThreadState == System.Threading.ThreadState.Running) {}
             ICompletionData[] data = GetCompletionDataByFirst(off, text, textArea.Caret.Line, textArea.Caret.Column, charTyped, keyw);
             CodeCompletion.AssemblyDocCache.CompleteDocumentation();
             CodeCompletion.UnitDocCache.CompleteDocumentation();

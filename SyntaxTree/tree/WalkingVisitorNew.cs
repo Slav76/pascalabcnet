@@ -55,9 +55,10 @@ namespace PascalABCCompiler.SyntaxTree
 
         public void ReplaceStatementUsingParent(statement from, IEnumerable<statement> to, Desc d = Desc.DirectDescendants)
         {
-            foreach (var x in to)
-                x.Parent = from.Parent;
-            var sl = from.Parent as statement_list;
+            var fp = from.Parent; // SSM 02.10.18 - запомним, т.к. from.Parent может быть одним из x.Parent
+            //foreach (var x in to) // Это и так делается по обоим веткам!
+            //    x.Parent = fp;
+            var sl = fp as statement_list;
             if (sl != null)
             {
                 sl.ReplaceInList(from, to);
@@ -67,10 +68,10 @@ namespace PascalABCCompiler.SyntaxTree
                 var l = new statement_list();
                 l.AddMany(to);
                 l.source_context = from.source_context;
-                from.Parent.ReplaceDescendant(from, l, d);
+                fp.ReplaceDescendant(from, l, d);
+                l.Parent = fp; // на всякий случай
             }
         }
-
     }
 
 }

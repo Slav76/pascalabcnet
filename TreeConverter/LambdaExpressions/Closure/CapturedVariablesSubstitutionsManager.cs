@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System.Linq;
 using PascalABCCompiler.SyntaxTree;
@@ -31,7 +31,7 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                             foreach (var v in finder.vars)
                             {
-                                var si = _visitor.context.find(v.name);
+                                SymbolInfo si = _visitor.context.find_first(v.name);
                                 if (si == null)
                                 {
                                     continue;
@@ -55,7 +55,7 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                                 foreach (var v in finder.vars)
                                 {
-                                    var si = _visitor.context.find(v.name);
+                                    SymbolInfo si = _visitor.context.find_first(v.name);
                                     if (si == null)
                                     {
                                         continue;
@@ -80,7 +80,7 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                                 foreach (var v in finder.vars)
                                 {
-                                    var si = _visitor.context.find(v.name);
+                                    SymbolInfo si = _visitor.context.find_first(v.name);
                                     if (si == null)
                                     {
                                         continue;

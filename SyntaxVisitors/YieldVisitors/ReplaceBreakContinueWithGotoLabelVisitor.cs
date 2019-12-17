@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -41,11 +41,11 @@ namespace SyntaxVisitors
                 var pcName = pcIdent.name.ToLower();
                 if (pcName == "break")
                 {
-                    Replace(pc, this.GotoBreak);
+                    ReplaceUsingParent(pc, this.GotoBreak);
                 }
                 else if (pcName == "continue")
                 {
-                    Replace(pc, this.GotoContinue);
+                    ReplaceUsingParent(pc, this.GotoContinue);
                 }
             }
         }

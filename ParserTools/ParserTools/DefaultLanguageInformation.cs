@@ -1,7 +1,8 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Text;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using PascalABCCompiler.SyntaxTree;
@@ -16,7 +17,7 @@ namespace PascalABCCompiler.Parsers
 		protected IParser parser;
 		protected string[] type_keywords_array;
 		protected string[] keywords_array;
-		protected Hashtable keywords = new Hashtable(StringComparer.CurrentCultureIgnoreCase);
+		protected Dictionary<string, string> keywords = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 		protected Hashtable ignored_keywords = new Hashtable(StringComparer.CurrentCultureIgnoreCase);
 		protected Hashtable keyword_kinds = new Hashtable(StringComparer.CurrentCultureIgnoreCase);
 		
@@ -78,8 +79,7 @@ namespace PascalABCCompiler.Parsers
             keywords.Add("virtual", "virtual"); keys.Add("virtual");
             keywords.Add("override", "override"); keys.Add("override");
             keywords.Add("reintroduce", "reintroduce"); keys.Add("reintroduce");
-            keywords.Add("static", "static"); keys.Add("static");
-
+            keywords.Add("sealed", "sealed"); keys.Add("sealed");
             keywords.Add("case", "case"); keys.Add("case");
             keywords.Add("var", "var"); keys.Add("var"); keyword_kinds.Add("var", KeywordKind.Var);
             keywords.Add("const", "const"); keys.Add("const"); keyword_kinds.Add("const", KeywordKind.Const);
@@ -92,7 +92,48 @@ namespace PascalABCCompiler.Parsers
             keywords.Add("program", "program"); keys.Add("program"); keyword_kinds.Add("program", KeywordKind.Program);
             keywords.Add("new", "new"); keys.Add("new"); keyword_kinds.Add("new", KeywordKind.New);
             keywords.Add("nil", "nil"); keys.Add("nil");
-            keywords_array = keys.ToArray();
+            keywords.Add("loop", "loop"); keys.Add("loop");
+            keywords.Add("yield", "yield"); keys.Add("yield");
+            keywords.Add("sequence", "sequence"); keys.Add("sequence");
+            keywords.Add("extensionmethod", "extensionmethod"); keys.Add("extensionmethod");
+            keywords.Add("params", "params"); keys.Add("params");
+            keywords.Add("implicit", "implicit"); keys.Add("implicit");
+            keywords.Add("explicit", "explicit"); keys.Add("explicit");
+            keywords.Add("forward", "forward"); keys.Add("forward");
+            keywords.Add("break", "break"); keys.Add("break");
+            keywords.Add("continue", "continue"); keys.Add("continue");
+            keywords.Add("default", "default"); keys.Add("default");
+            keywords.Add("label", "label"); keys.Add("label");
+            keywords.Add("property", "property"); keys.Add("property");
+            keywords.Add("auto", "auto"); keys.Add("auto");
+            keywords.Add("external", "external"); keys.Add("external");
+            keywords.Add("lock", "lock"); keys.Add("lock");
+            keywords.Add("where", "where"); keys.Add("where");
+            keywords.Add("library", "library"); keys.Add("library");
+            keywords.Add("div", "div"); keys.Add("div");
+            keywords.Add("mod", "mod"); keys.Add("mod");
+            keywords.Add("shl", "shl"); keys.Add("shl");
+            keywords.Add("shr", "shr"); keys.Add("shr");
+            keywords.Add("not", "not"); keys.Add("not");
+            keywords.Add("as", "as"); keys.Add("as");
+            keywords.Add("is", "is"); keys.Add("is");
+            keywords.Add("on", "on"); keys.Add("on");
+            keywords.Add("goto", "goto"); keys.Add("goto");
+            keywords.Add("overload", "overload"); keys.Add("overload");
+            keywords.Add("internal", "internal"); keys.Add("internal");
+            //keywords.Add("template", "template"); keys.Add("template");
+            keywords.Add("namespace", "namespace"); keys.Add("namespace");
+            keywords.Add("exit", "exit"); keys.Add("exit");
+            keywords.Add("event", "event"); keys.Add("event");
+            keywords.Add("match", "match"); keys.Add("match");
+            keywords.Add("when", "when"); keys.Add("when");
+            keywords.Add("static", "static"); keys.Add("static");
+            //keywords.Add("typeof", "typeof"); //keys.Add("typeof");
+            //keywords.Add("sizeof", "sizeof"); //keys.Add("sizeof");
+            keywords_array = new string[keywords.Count + 2];
+            keywords_array[0] = "typeof";
+            keywords_array[1] = "sizeof";
+            keywords.Values.CopyTo(keywords_array, 2);
             type_keywords_array = type_keys.ToArray();
 		}
 
@@ -235,7 +276,7 @@ namespace PascalABCCompiler.Parsers
 		
 		public virtual string GetDescriptionForModule(IInterfaceUnitScope scope)
 		{
-			return "unit "+scope.Name;
+			return (scope.IsNamespaceUnit?"namespace ":"unit ")+scope.Name;
 		}
 		
 		public virtual string GetShortName(ICompiledTypeScope scope)
@@ -384,12 +425,12 @@ namespace PascalABCCompiler.Parsers
 			}
 			return sb.ToString();
 		}
-		
-		protected virtual string GetFullTypeName(Type ctn, bool no_alias=true)
-		{
-			TypeCode tc = Type.GetTypeCode(ctn);
-			if (ctn.FullName == null && !ctn.IsArray && !ctn.IsGenericTypeDefinition && ctn.IsGenericParameter) 
-				return ctn.Name;
+
+        protected virtual string GetFullTypeName(Type ctn, bool no_alias = true)
+        {
+            TypeCode tc = Type.GetTypeCode(ctn);
+            if (ctn.FullName == null && !ctn.IsArray && !ctn.IsGenericTypeDefinition && ctn.IsGenericParameter)
+                return ctn.Name;
             if (!ctn.IsEnum)
             {
                 switch (tc)
@@ -414,7 +455,7 @@ namespace PascalABCCompiler.Parsers
                     else
                         return "^" + GetFullTypeName(ctn.GetElementType());
             }
-            else 
+            else
                 return ctn.FullName;
             if (!no_alias)
             {
@@ -427,28 +468,33 @@ namespace PascalABCCompiler.Parsers
                 else if (ctn.Name.Contains("Tuple`"))
                     return get_tuple_string(ctn);
             }
-			if (ctn.Name.Contains("`"))
-			{
-				int len = ctn.GetGenericArguments().Length;
-				Type[] gen_ps = ctn.GetGenericArguments();
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-				sb.Append(ctn.Namespace+"."+ctn.Name.Substring(0,ctn.Name.IndexOf('`')));
-				sb.Append('<');
-				for (int i=0; i<len; i++)
-				{
-					sb.Append(gen_ps[i].Name);
-					if (i<len-1)
-					sb.Append(',');
-				}
-				sb.Append('>');
-				return sb.ToString();
-			}
-			if (ctn.IsArray) return "array of "+GetFullTypeName(ctn.GetElementType());
-			if (ctn == Type.GetType("System.Void*")) return "pointer";
-			if (ctn.IsNested) 
-				return ctn.Name;
-			return ctn.FullName;
-		}
+            if (ctn.Name.Contains("`"))
+            {
+                int len = ctn.GetGenericArguments().Length;
+                Type[] gen_ps = ctn.GetGenericArguments();
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                sb.Append(ctn.Namespace + "." + ctn.Name.Substring(0, ctn.Name.IndexOf('`')));
+                sb.Append('<');
+                for (int i = 0; i < len; i++)
+                {
+                    sb.Append(gen_ps[i].Name);
+                    if (i < len - 1)
+                        sb.Append(", ");
+                }
+                sb.Append('>');
+                return sb.ToString();
+            }
+            if (ctn.IsArray)
+            {
+                var rank = ctn.GetArrayRank();
+                var strrank = rank > 1 ? "[" + new string(',', rank - 1) + "]" : "";
+                return $"array{strrank}" + " of " + GetFullTypeName(ctn.GetElementType());
+            }
+            if (ctn == Type.GetType("System.Void*")) return "pointer";
+            if (ctn.IsNested)
+                return ctn.Name;
+            return ctn.FullName;
+        }
 
         private string get_tuple_string(ITypeScope[] generic_args)
         {
@@ -479,9 +525,35 @@ namespace PascalABCCompiler.Parsers
             return sb.ToString();
         }
 
+        private bool enum_out_of_order(FieldInfo[] fields) //возвращает true, если значения полей этого enum'а идут не по порядку или не с нуля (IDE issue #117)
+        {
+            for (int i = 0; i < fields.Length; i++)
+            {
+                if (fields[i].Name != "value__")
+                {
+                    object o = fields[i].GetRawConstantValue(); //ошибка была здесь, так как я не знал, что у констант enum'а может быть другой тип помимо int
+                    switch (o)
+                    {
+                        case byte b: if (b != i - 1) return true; break;
+                        case sbyte b: if (b != i - 1) return true; break;
+                        case short b: if (b != i - 1) return true; break;
+                        case ushort b: if (b != i - 1) return true; break;
+                        case int b: if (b != i - 1) return true; break;
+                        case uint b: return true; break;
+                        case long b: return true; break;
+                        case ulong b: return true; break;
+                    }
+                }
+            }
+            return false;
+        }
+
         private string get_enum_constants(Type t)
         {
             FieldInfo[] fields = t.GetFields(BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Instance|BindingFlags.Static);
+            bool outoforder = enum_out_of_order(fields);
+			bool is_flags = Attribute.IsDefined(t, typeof(FlagsAttribute));
+			int max_name_len = fields.Max(fi => fi.Name.Length);
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("(");
             for (int i = 0; i < fields.Length; i++)
@@ -490,6 +562,14 @@ namespace PascalABCCompiler.Parsers
                 {
                     sb.Append(' ', 4);
                     sb.Append(fields[i].Name);
+                    if (outoforder)
+                    {
+                        if (is_flags) sb.Append(' ', max_name_len - fields[i].Name.Length);
+                        sb.Append(" = ");
+                        if (is_flags)
+							sb.Append('$' + Convert.ToInt64(fields[i].GetRawConstantValue()).ToString("X")); else
+							sb.Append(fields[i].GetRawConstantValue());
+                    }
                     if (i < fields.Length - 1)
                         sb.AppendLine(",");
                     else
@@ -543,13 +623,13 @@ namespace PascalABCCompiler.Parsers
                 {
                     sb.Append(gen_args[i].Name);
                     if (i < gen_args.Length - 1)
-                        sb.Append(",");
+                        sb.Append(", ");
                 }
                 sb.Append('>');
             }
             else
                 sb.Append(prepare_member_name(t.Name));
-            sb.Append(" = " + GetClassKeyword(t));
+            sb.Append(" = " + (t.IsSealed && t.IsAbstract ? "static ":"")+GetClassKeyword(t));
             bool bracket = false;
             if (t.IsEnum)
             {
@@ -882,7 +962,7 @@ namespace PascalABCCompiler.Parsers
                     {
                         sb.Append(gen_ps[i].Name);
                         if (i < len - 1)
-                            sb.Append(',');
+                            sb.Append(", ");
                     }
                 }
 				sb.Append('>');
@@ -895,10 +975,15 @@ namespace PascalABCCompiler.Parsers
 				}
 				sb.Append('>');*/
 				return sb.ToString();
-			}
-			if (ctn.IsArray) return "array of "+GetShortTypeName(ctn.GetElementType());
-			//if (ctn == Type.GetType("System.Void*")) return PascalABCCompiler.TreeConverter.compiler_string_consts.pointer_type_name;
-			return ctn.Name;
+            }
+            if (ctn.IsArray)
+            {
+                var rank = ctn.GetArrayRank();
+                var strrank = rank > 1 ? "[" + new string(',', rank - 1) + "]" : "";
+                return $"array{strrank}" + " of " + GetShortTypeName(ctn.GetElementType());
+            }
+            //if (ctn == Type.GetType("System.Void*")) return PascalABCCompiler.TreeConverter.compiler_string_consts.pointer_type_name;
+            return ctn.Name;
 		}
 		
 		protected virtual string GetTopScopeName(IBaseScope sc)
@@ -952,7 +1037,7 @@ namespace PascalABCCompiler.Parsers
 					{
 						sb.Append(GetSimpleDescriptionWithoutNamespace(gen_insts[i]));
 						if (i < gen_insts.Length -1)
-						sb.Append(',');
+						sb.Append(", ");
 					}
 					sb.Append('>');
 					return sb.ToString();
@@ -966,10 +1051,20 @@ namespace PascalABCCompiler.Parsers
 			string template_str=GetTemplateString(scope);
 			switch(scope.ElemKind)
 			{
-				case SymbolKind.Class : 
+				case SymbolKind.Class :
+                    string mod = "";
+                    if (scope.IsStatic)
+                        mod = "static ";
+                    else
+                    {
+                        if (scope.IsAbstract)
+                            mod = "abstract ";
+                        if (scope.IsFinal)
+                            mod += "sealed ";
+                    }
 					if (scope.TopScope != null && scope.TopScope.Name != "" && !scope.TopScope.Name.Contains("$"))
-						return (scope.IsFinal?"final ":"")+"class "+scope.TopScope.Name + "." +scope.Name+template_str;
-					else return (scope.IsFinal?"final ":"")+"class "+scope.Name+template_str;
+						return mod+"class "+scope.TopScope.Name + "." +scope.Name+template_str;
+					else return mod+"class "+scope.Name+template_str;
 				case SymbolKind.Interface :
 					if (scope.TopScope != null && scope.TopScope.Name != "" && !scope.TopScope.Name.Contains("$"))
 					return "interface "+scope.TopScope.Name + "." +scope.Name+template_str;
@@ -1017,7 +1112,7 @@ namespace PascalABCCompiler.Parsers
 				{
 					sb.Append(GetSimpleDescriptionWithoutNamespace(instances[i]));
 					//sb.Append(instances[i].Name);
-					if (i < instances.Length - 1) sb.Append(',');
+					if (i < instances.Length - 1) sb.Append(", ");
 				}
 				sb.Append('>');
 				s = sb.ToString();
@@ -1025,8 +1120,18 @@ namespace PascalABCCompiler.Parsers
 			
 			switch(scope.ElemKind)
 			{
-				case SymbolKind.Class : 					
-					return (scope.IsFinal?"final ":"")+"class "+s;
+				case SymbolKind.Class :
+                    string mod = "";
+                    if (scope.IsStatic)
+                        mod = "static ";
+                    else
+                    {
+                        if (scope.IsAbstract)
+                            mod = "abstract ";
+                        if (scope.IsFinal)
+                            mod += "sealed ";
+                    }
+                    return mod+"class "+s;
 				case SymbolKind.Interface :
 					return "interface "+s;
 				case SymbolKind.Enum :
@@ -1040,34 +1145,34 @@ namespace PascalABCCompiler.Parsers
 			}
 			return s;
 		}
-		
-		
-		
-		public virtual string GetSimpleDescriptionWithoutNamespace(ITypeScope scope)
-		{
-			ICompiledTypeScope cts = scope as ICompiledTypeScope;
-			if (cts == null)
-				return GetSimpleDescription(scope);
-			string s = GetShortName(cts);
-			ITypeScope[] instances = scope.GenericInstances;
-			if (instances != null && instances.Length > 0)
-			{
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-				int ind = s.IndexOf('<');
-				if (ind != -1) sb.Append(s.Substring(0,ind));
-				else
-				sb.Append(s);
-				sb.Append('<');
-				for (int i=0; i<instances.Length; i++)
-				{
-					sb.Append(GetSimpleDescriptionWithoutNamespace(instances[i]));
-					if (i < instances.Length - 1) sb.Append(',');
-				}
-				sb.Append('>');
-				s = sb.ToString();
-			}
-			return s;
-		}
+
+
+
+        public virtual string GetSimpleDescriptionWithoutNamespace(ITypeScope scope)
+        {
+            ICompiledTypeScope cts = scope as ICompiledTypeScope;
+            if (cts == null)
+                return GetSimpleDescription(scope);
+            string s = GetShortName(cts);
+            ITypeScope[] instances = scope.GenericInstances;
+            if (instances != null && instances.Length > 0)
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                int ind = s.IndexOf('<');
+                if (ind != -1) sb.Append(s.Substring(0, ind));
+                else
+                    sb.Append(s);
+                sb.Append('<');
+                for (int i = 0; i < instances.Length; i++)
+                {
+                    sb.Append(GetSimpleDescriptionWithoutNamespace(instances[i]));
+                    if (i < instances.Length - 1) sb.Append(", ");
+                }
+                sb.Append('>');
+                s = sb.ToString();
+            }
+            return s;
+        }
 
         protected bool isIdentifier(string str)
         {
@@ -1124,7 +1229,7 @@ namespace PascalABCCompiler.Parsers
                     sb.Append(parameters[0] + "->" + parameters[1]);
                 else if (parameters.Count == 1)
                 {
-                    if (t.Name == "Predicate`1")
+                    if (t.FullName == "System.Predicate`1" || t.Name == "Predicate`1")
                         sb.Append(parameters[0] + "->boolean");
                     else
                         sb.Append("()->" + parameters[0]);
@@ -1133,7 +1238,9 @@ namespace PascalABCCompiler.Parsers
             }
             else if (parameters.Count > 0)
             {
-                if (parameters.Count > 1)
+                if (t.FullName == "System.Predicate`1" || t.Name == "Predicate`1")
+                    sb.Append(parameters[0] + "->boolean");
+                else if (parameters.Count > 1)
                     sb.Append("(" + string.Join(",", parameters.ToArray()) + ")->()");
                 else
                     sb.Append(parameters[0] + "->()");
@@ -1161,8 +1268,8 @@ namespace PascalABCCompiler.Parsers
             return getLambdaRepresentation(scope.CompiledType, has_return_value, parameters);
         }
 
-		protected virtual string GetSimpleDescriptionForCompiledType(ICompiledTypeScope scope)
-		{
+        protected string GetSimpleDescriptionForCompiledType(ICompiledTypeScope scope, bool fullName)
+        {
             if (scope.CompiledType.Name != null && scope.CompiledType.Name.Contains("Func`"))
             {
                 return getLambdaRepresentation(scope, true);
@@ -1197,7 +1304,7 @@ namespace PascalABCCompiler.Parsers
             }
             else
             {
-                string s = GetShortTypeName(scope.CompiledType);
+                string s = !fullName?GetShortTypeName(scope.CompiledType):GetFullTypeName(scope.CompiledType);
                 ITypeScope[] instances = scope.GenericInstances;
                 if (instances != null && instances.Length > 0)
                 {
@@ -1210,13 +1317,18 @@ namespace PascalABCCompiler.Parsers
                     for (int i = 0; i < instances.Length; i++)
                     {
                         sb.Append(GetSimpleDescriptionWithoutNamespace(instances[i]));
-                        if (i < instances.Length - 1) sb.Append(',');
+                        if (i < instances.Length - 1) sb.Append(", ");
                     }
                     sb.Append('>');
                     s = sb.ToString();
                 }
                 return s;
             }
+        }
+
+        protected virtual string GetSimpleDescriptionForCompiledType(ICompiledTypeScope scope)
+		{
+            return GetSimpleDescriptionForCompiledType(scope, false);
 		}
 		
 		protected virtual string GetDescriptionForArray(IArrayScope scope)
@@ -1335,7 +1447,7 @@ namespace PascalABCCompiler.Parsers
 			sb.Append('[');
 			for (int i=0; i<indexers.Length; i++)
 			{
-				sb.Append(indexers[i].Name);
+				sb.Append(GetSimpleDescription(indexers[i]));
 				if (i <indexers.Length-1)
 					sb.Append(',');
 			}
@@ -1351,54 +1463,55 @@ namespace PascalABCCompiler.Parsers
 			//if (scope.IsStatic) sb.Append("; static");
 			if (scope.IsReintroduce) sb.Append("; reintroduce");
 		}
-		
-		protected virtual string GetDescriptionForElementScope(IElementScope scope)
-		{
-			string type_name=null;
-			string s="";
-			StringBuilder sb = new StringBuilder();
-			if (scope.Type == null) type_name = "";
-			else
-				type_name = GetSimpleDescription(scope.Type);
-			if (type_name.StartsWith("$")) 
-				type_name = type_name.Substring(1,type_name.Length-1);
-			switch (scope.ElemKind)
-			{
-				case SymbolKind.Variable : sb.Append("var "+ GetTopScopeName(scope.TopScope)+scope.Name + ": "+type_name);  break;
-				case SymbolKind.Parameter : sb.Append(kind_of_param(scope) + "parameter "+scope.Name + ": "+type_name+(scope.ConstantValue!=null?(":="+scope.ConstantValue.ToString()):"")); break;
-				case SymbolKind.Constant : 
-				{
-					if (scope.ConstantValue == null)
-						sb.Append("const "+ GetTopScopeName(scope.TopScope)+scope.Name + ": "+type_name);
-					else sb.Append("const "+GetTopScopeName(scope.TopScope)+scope.Name+ ": "+ type_name + " = "+scope.ConstantValue.ToString());
-				}
-				break;
-				case SymbolKind.Event :
-					if (scope.IsStatic) sb.Append("class ");
-					sb.Append("event "+ GetTopScopeName(scope.TopScope)+scope.Name + ": "+type_name);
-					append_modifiers(sb,scope);
-					break;
-				case SymbolKind.Field :
-					if (scope.IsStatic)
-						sb.Append("class ");
-					else
-						sb.Append("var ");
-					sb.Append(GetTopScopeName(scope.TopScope)+scope.Name + ": "+type_name);
-					append_modifiers(sb,scope);
-					//if (scope.IsStatic) sb.Append("; static");
-					if (scope.IsReadOnly) sb.Append("; readonly");
-					break;
-				case SymbolKind.Property :
-					if (scope.IsStatic)
-						sb.Append("class ");
-					sb.Append("property "+ GetTopScopeName(scope.TopScope)+scope.Name + get_index_description(scope) + ": "+type_name); 
-					append_modifiers(sb,scope);
-					break;
-					
-			}
-			sb.Append(';');
-			return sb.ToString();
-		}
+
+        protected virtual string GetDescriptionForElementScope(IElementScope scope)
+        {
+            string type_name = null;
+            StringBuilder sb = new StringBuilder();
+            if (scope.Type == null) type_name = "";
+            else
+                type_name = GetSimpleDescription(scope.Type);
+            if (type_name.StartsWith("$"))
+                type_name = type_name.Substring(1, type_name.Length - 1);
+            switch (scope.ElemKind)
+            {
+                case SymbolKind.Variable: sb.Append("var " + GetTopScopeName(scope.TopScope) + scope.Name + ": " + type_name); break;
+                case SymbolKind.Parameter: sb.Append(kind_of_param(scope) + "parameter " + scope.Name + ": " + type_name + (scope.ConstantValue != null ? (":=" + scope.ConstantValue.ToString()) : "")); break;
+                case SymbolKind.Constant:
+                    {
+                        if (scope.ConstantValue == null)
+                            sb.Append("const " + GetTopScopeName(scope.TopScope) + scope.Name + ": " + type_name);
+                        else sb.Append("const " + GetTopScopeName(scope.TopScope) + scope.Name + ": " + type_name + " = " + scope.ConstantValue.ToString());
+                    }
+                    break;
+                case SymbolKind.Event:
+                    if (scope.IsStatic) sb.Append("static ");
+                    sb.Append("event " + GetTopScopeName(scope.TopScope) + scope.Name + ": " + type_name);
+                    append_modifiers(sb, scope);
+                    break;
+                case SymbolKind.Field:
+                    if (scope.IsStatic)
+                        sb.Append("static ");
+                    else
+                        sb.Append("var ");
+                    sb.Append(GetTopScopeName(scope.TopScope) + scope.Name + ": " + type_name);
+                    append_modifiers(sb, scope);
+                    //if (scope.IsStatic) sb.Append("; static");
+                    if (scope.IsReadOnly) sb.Append("; readonly");
+                    break;
+                case SymbolKind.Property:
+                    if (scope.IsStatic)
+                        sb.Append("static ");
+                    sb.Append("property " + GetTopScopeName(scope.TopScope) + scope.Name + get_index_description(scope) + ": " + type_name);
+                    if (scope.IsReadOnly)
+                        sb.Append("; readonly");
+                    append_modifiers(sb, scope);
+                    break;
+
+            }
+            sb.Append(';');
+            return sb.ToString();
+        }
 		
 		protected virtual string GetSimpleDescriptionForElementScope(IElementScope scope)
 		{
@@ -1415,7 +1528,7 @@ namespace PascalABCCompiler.Parsers
             else if (fi.IsFamily)
                 sb.Append("protected ");
             if (!fi.IsLiteral)
-                if (fi.IsStatic) sb.Append("class ");
+                if (fi.IsStatic) sb.Append("static ");
             if (!fi.IsLiteral)
             {
                 sb.Append(prepare_member_name(fi.Name));
@@ -1423,8 +1536,9 @@ namespace PascalABCCompiler.Parsers
             }
             else
             {
-                sb.Append("const " + fi.Name + " : " + GetFullTypeName(fi.FieldType));
-                sb.Append(" = " + fi.GetRawConstantValue().ToString());
+                var fitype = GetFullTypeName(fi.FieldType);
+                sb.Append("const " + fi.Name + " : " + fitype);
+                sb.Append(" = " + (fitype == "string" ? $"'{fi.GetRawConstantValue().ToString()}'" : fi.GetRawConstantValue().ToString()));
             }
             sb.Append(";");
             return sb.ToString();
@@ -1434,7 +1548,7 @@ namespace PascalABCCompiler.Parsers
 		{
 			System.Text.StringBuilder sb = new System.Text.StringBuilder();
 			if (!scope.CompiledField.IsLiteral)
-			if (scope.CompiledField.IsStatic && !scope.IsGlobal) sb.Append("class ");
+			if (scope.CompiledField.IsStatic && !scope.IsGlobal) sb.Append("static ");
 			else sb.Append("var ");
 			string inst_type = null;
 			if (scope.GenericArgs != null)
@@ -1476,7 +1590,7 @@ namespace PascalABCCompiler.Parsers
                 sb.Append("public ");
             else if (get_meth.IsFamily)
                 sb.Append("protected ");
-            if (get_meth.IsStatic) sb.Append("class ");
+            if (get_meth.IsStatic) sb.Append("static ");
             sb.Append("property " + prepare_member_name(pi.Name));
             ParameterInfo[] prms = get_meth.GetParameters();
             if (prms.Length > 0)
@@ -1493,10 +1607,8 @@ namespace PascalABCCompiler.Parsers
                 sb.Append(']');
             }
             sb.Append(" : " + GetFullTypeName(pi.PropertyType));
-            if (get_meth != null)
-                sb.Append(" read");
-            if (set_meth != null)
-                sb.Append(" write");
+            if (set_meth == null)
+                sb.Append("; readonly");
             sb.Append(";");
             return sb.ToString();
         }
@@ -1507,7 +1619,7 @@ namespace PascalABCCompiler.Parsers
 			MethodInfo acc = scope.CompiledProperty.GetGetMethod();
 			string inst_type = null;
 			if (acc != null)
-			if (acc.IsStatic) sb.Append("class ");
+			if (acc.IsStatic) sb.Append("static ");
 			if (scope.Type is ICompiledTypeScope && scope.GenericArgs != null)
 			{
 				Type t = (scope.Type as ICompiledTypeScope).CompiledType;
@@ -1602,7 +1714,7 @@ namespace PascalABCCompiler.Parsers
                     else
                         sb.Append(get_type_instance(args[i], generic_args, generic_param_args));
                     if (i < args.Length - 1)
-                        sb.Append(',');
+                        sb.Append(", ");
                 }
                 sb.Append('>');
                 return sb.ToString();
@@ -1618,7 +1730,7 @@ namespace PascalABCCompiler.Parsers
                 sb.Append("public ");
             else if (mi.IsFamily)
                 sb.Append("protected ");
-            if (mi.IsStatic) sb.Append("class ");
+            if (mi.IsStatic) sb.Append("static ");
             if (mi.ReturnType == typeof(void))
                 sb.Append("procedure ");
             else
@@ -1631,7 +1743,7 @@ namespace PascalABCCompiler.Parsers
                 for (int i = 0; i < tt.Length; i++)
                 {
                     sb.Append(tt[i].Name);
-                    if (i < tt.Length - 1) sb.Append(',');
+                    if (i < tt.Length - 1) sb.Append(", ");
                 }
                 sb.Append('>');
             }
@@ -1649,12 +1761,23 @@ namespace PascalABCCompiler.Parsers
                 if (!pis[i].ParameterType.IsByRef)
                 {
                     sb.Append(GetFullTypeName(pis[i].ParameterType));
+                    if (pis[i].IsOptional)
+                    {
+                        sb.Append(" := ");
+                        if (pis[i].DefaultValue != null)
+                        {
+                            if (pis[i].DefaultValue is string) sb.Append($"'{pis[i].DefaultValue.ToString()}'");
+                            else sb.Append(pis[i].DefaultValue.ToString());
+                        }
+                        else sb.Append("nil");
+                    }
                 }
                 else
                 {
                     Type t = pis[i].ParameterType.GetElementType();
                     sb.Append(GetFullTypeName(t));
                 }
+                
                 if (i < pis.Length - 1)
                     sb.Append("; ");
             }
@@ -1665,7 +1788,7 @@ namespace PascalABCCompiler.Parsers
                 sb.Append(": " + GetFullTypeName(mi.ReturnType));
             }
             //if (scope.CompiledMethod.IsStatic) sb.Append("; static");
-            if (mi.IsVirtual) sb.Append("; virtual");
+            if (mi.IsVirtual && !mi.IsFinal) sb.Append("; virtual");
             else if (mi.IsAbstract) sb.Append("; abstract");
             //else if (scope.CompiledMethod.IsHideBySig) sb.Append("; reintroduce");
             sb.Append(';');
@@ -1693,7 +1816,7 @@ namespace PascalABCCompiler.Parsers
                 }
             }
                 
-            if (scope.IsStatic && !scope.IsGlobal) sb.Append("class ");
+            if (scope.IsStatic && !scope.IsGlobal) sb.Append("static ");
             if (scope.ReturnType == null)
                 sb.Append("procedure ");
             else
@@ -1736,9 +1859,18 @@ namespace PascalABCCompiler.Parsers
                             if (!class_generic_table.ContainsKey(class_generic_args[i].Name))
                                 class_generic_table.Add(class_generic_args[i].Name, j);
                             if (scope.GenericArgs != null && scope.GenericArgs.Count > j)
-                                generic_param_args.Add(class_generic_args[i].Name, GetSimpleDescription(scope.DeclaringType.GenericInstances[0]));
+                            {
+                                if (scope.DeclaringType.GenericInstances.Length > 0)
+                                    generic_param_args[class_generic_args[i].Name] = GetSimpleDescription(scope.DeclaringType.GenericInstances[0]);
+                                else if (scope.DeclaringType is ICompiledTypeScope)
+                                {
+                                    Type ctn = (scope.DeclaringType as ICompiledTypeScope).CompiledType;
+                                    if (ctn.IsGenericType && !ctn.IsGenericTypeDefinition)
+                                        generic_param_args[class_generic_args[i].Name] = GetSimpleDescriptionForCompiledType((scope.DeclaringType as ICompiledTypeScope).GetCompiledGenericArguments()[0]);
+                                }
+                            }
                             else if (scope.DeclaringType.TemplateArguments != null && scope.DeclaringType.TemplateArguments.Length > j)
-                                generic_param_args.Add(class_generic_args[i].Name, scope.DeclaringType.TemplateArguments[j]);
+                                generic_param_args[class_generic_args[i].Name] = scope.DeclaringType.TemplateArguments[j];
                         }
                         break;
                     }
@@ -1746,7 +1878,7 @@ namespace PascalABCCompiler.Parsers
                 if (extensionType == null)
                     sb.Append(GetShortTypeName(scope.CompiledMethod.GetParameters()[0].ParameterType));
             }
-            if (scope.Name != "Invoke")
+            //if (scope.Name != "Invoke")
             {
                 if (extensionType == null)
                     sb.Append(".");
@@ -1763,14 +1895,28 @@ namespace PascalABCCompiler.Parsers
                         int ind = class_generic_table[tt[i].Name];
                         if (scope.GenericArgs != null && scope.GenericArgs.Count > ind)
                         {
-                            sb.Append(GetSimpleDescription(scope.DeclaringType.GenericInstances[ind]));
-                            if (!generic_param_args.ContainsKey(tt[i].Name))
-                                generic_param_args.Add(tt[i].Name, GetSimpleDescription(scope.DeclaringType.GenericInstances[ind]));
+                            if (scope.DeclaringType.GenericInstances.Length > ind)
+                            {
+                                sb.Append(GetSimpleDescription(scope.DeclaringType.GenericInstances[ind]));
+                                if (!generic_param_args.ContainsKey(tt[i].Name))
+                                    generic_param_args.Add(tt[i].Name, GetSimpleDescription(scope.DeclaringType.GenericInstances[ind]));
+                            }
+                            else if (scope.DeclaringType is ICompiledTypeScope)
+                            {
+                                Type ctn = (scope.DeclaringType as ICompiledTypeScope).CompiledType;
+                                if (ctn.IsGenericType && !ctn.IsGenericTypeDefinition)
+                                {
+                                    sb.Append(GetSimpleDescription((scope.DeclaringType as ICompiledTypeScope).GetCompiledGenericArguments()[ind]));
+                                    if (!generic_param_args.ContainsKey(tt[i].Name))
+                                        generic_param_args.Add(tt[i].Name, GetSimpleDescription((scope.DeclaringType as ICompiledTypeScope).GetCompiledGenericArguments()[ind]));
+                                }
+                            }
                         }
                     }
+                    
                     else
                         sb.Append(tt[i].Name);
-                    if (i < tt.Length - 1) sb.Append(',');
+                    if (i < tt.Length - 1) sb.Append(", ");
                 }
                 sb.Append('>');
             }
@@ -1797,6 +1943,16 @@ namespace PascalABCCompiler.Parsers
                         sb.Append(GetShortTypeName(pis[i].ParameterType, false));
                     else
                         sb.Append(inst_type);
+                    if (pis[i].IsOptional)
+                    {
+                        sb.Append(" := ");
+                        if (pis[i].DefaultValue != null)
+                        {
+                            if (pis[i].DefaultValue is string) sb.Append($"'{pis[i].DefaultValue.ToString()}'");
+                            else sb.Append(pis[i].DefaultValue.ToString());
+                        }
+                        else sb.Append("nil");
+                    }
                 }
                 else
                 {
@@ -1832,8 +1988,8 @@ namespace PascalABCCompiler.Parsers
                     sb.Append(": " + ret_inst_type);
             }
             //if (scope.CompiledMethod.IsStatic) sb.Append("; static");
-            if (scope.CompiledMethod.IsVirtual) sb.Append("; virtual");
-            else if (scope.CompiledMethod.IsAbstract) sb.Append("; abstract");
+            if (scope.IsVirtual) sb.Append("; virtual");
+            else if (scope.IsAbstract) sb.Append("; abstract");
             //else if (scope.CompiledMethod.IsHideBySig) sb.Append("; reintroduce");
             sb.Append(';');
             return sb.ToString();
@@ -1865,7 +2021,7 @@ namespace PascalABCCompiler.Parsers
                 }   
             }
               
-			if (scope.IsStatic) sb.Append("class ");
+			if (scope.IsStatic) sb.Append("static ");
 			if (scope.IsConstructor())
 				sb.Append("constructor ");
 			else
@@ -1916,7 +2072,7 @@ namespace PascalABCCompiler.Parsers
 				}
 			}
 			sb.Append(')');
-			if (scope.ReturnType != null && !scope.IsConstructor())
+			if (scope.ReturnType != null && !scope.IsConstructor() && !(scope.ReturnType is IProcType && (scope.ReturnType as IProcType).Target == scope))
 				sb.Append(": "+GetSimpleDescription(scope.ReturnType));
 			//if (scope.IsStatic) sb.Append("; static");
 			if (scope.IsVirtual) sb.Append("; virtual");
@@ -1937,7 +2093,7 @@ namespace PascalABCCompiler.Parsers
 				{
 					sb.Append(template_args[i]);
 					if (i < template_args.Length-1)
-						sb.Append(',');
+						sb.Append(", ");
 				}
 				sb.Append('>');
 			}
@@ -1980,13 +2136,13 @@ namespace PascalABCCompiler.Parsers
                 sb.Append("public ");
             else if (add_meth.IsFamily)
                 sb.Append("protected ");
-            sb.Append((add_meth.IsStatic ? "class " : "") + "event " + prepare_member_name(ei.Name) + ": " + GetFullTypeName(ei.EventHandlerType) + ";");
+            sb.Append((add_meth.IsStatic ? "static " : "") + "event " + prepare_member_name(ei.Name) + ": " + GetFullTypeName(ei.EventHandlerType) + ";");
             return sb.ToString();
         }
 
 		protected virtual string GetDescriptionForCompiledEvent(ICompiledEventScope scope)
 		{
-			return (scope.IsStatic?"class ":"")+"event "+ GetShortTypeName(scope.CompiledEvent.DeclaringType, true) +"."+ scope.CompiledEvent.Name + ": "+GetSimpleDescription(scope.Type)+ ";";
+			return (scope.IsStatic?"static ":"")+"event "+ GetShortTypeName(scope.CompiledEvent.DeclaringType, true) +"."+ scope.CompiledEvent.Name + ": "+GetSimpleDescription(scope.Type)+ ";";
 		}
 
         protected virtual string GetDescriptionForCompiledConstructor(ConstructorInfo ci)
@@ -1997,7 +2153,7 @@ namespace PascalABCCompiler.Parsers
             else if (ci.IsFamily)
                 sb.Append("protected ");
             if (ci.IsStatic)
-                sb.Append("class ");
+                sb.Append("static ");
             sb.Append("constructor ");
             //sb.Append(".");
             //sb.Append("Create");
@@ -2061,8 +2217,11 @@ namespace PascalABCCompiler.Parsers
 		}
 		
 		public string GetSynonimDescription(ITypeSynonimScope scope)
-		{ 
-			return "type "+scope.Name+GetGenericString(scope.TemplateArguments) + " = "+GetSimpleDescription(scope.ActType);
+		{
+            if (scope.ActType is ICompiledTypeScope && !(scope.ActType as ICompiledTypeScope).Aliased)
+                return "type " + scope.Name + GetGenericString(scope.TemplateArguments) + " = " + GetSimpleDescriptionForCompiledType(scope.ActType as ICompiledTypeScope, true);
+            else
+			    return "type " + scope.Name+GetGenericString(scope.TemplateArguments) + " = " + GetSimpleDescription(scope.ActType);
 		}
 		
 		public string GetSynonimDescription(IProcScope scope)
@@ -2078,22 +2237,26 @@ namespace PascalABCCompiler.Parsers
         		if ((scope as IElementScope).Indexers.Length == 0)
         		scope = (scope as IElementScope).Type;
         	if (scope is IProcScope) scope = (scope as IProcScope).ReturnType;
-			if (!(scope is IElementScope))
-        	{
-        		ITypeScope ts = scope as ITypeScope;
-        		if (ts == null) return null;
-        		if (tmp_si is ITypeScope) return null;
-        		ITypeScope[] indexers = ts.Indexers;
-        		if (indexers == null || indexers.Length == 0) return null;
-        		StringBuilder sb = new StringBuilder();
-        		sb.Append("this");
-        		sb.Append('[');
-        		for (int i=0; i<indexers.Length; i++)
-        		{
-        			sb.Append(GetSimpleDescriptionWithoutNamespace(indexers[i]));
-        			if (i < indexers.Length - 1)
-        				sb.Append(',');
-        		}
+            if (!(scope is IElementScope))
+            {
+                ITypeScope ts = scope as ITypeScope;
+                if (ts == null) return null;
+                if (tmp_si is ITypeScope) return null;
+                ITypeScope[] indexers = ts.Indexers;
+                if ((indexers == null || indexers.Length == 0) && !(ts is IArrayScope))
+                    return null;
+                StringBuilder sb = new StringBuilder();
+                sb.Append("this");
+                sb.Append('[');
+                if (indexers != null)
+                    for (int i = 0; i < indexers.Length; i++)
+                    {
+                        sb.Append(GetSimpleDescriptionWithoutNamespace(indexers[i]));
+                        if (i < indexers.Length - 1)
+                            sb.Append(',');
+                    }
+                else
+                    sb.Append("integer");
         		sb.Append("] : ");
         		sb.Append(GetSimpleDescriptionWithoutNamespace(ts.ElementType));
         		return new string[1]{sb.ToString()};
@@ -2349,8 +2512,12 @@ namespace PascalABCCompiler.Parsers
 			int i=0;
         	bool is_cnstr = false;
         	StringBuilder sb = new StringBuilder();
+            if (meth.StartsWith("static "))
+                meth = meth.Remove(0, "static ".Length);
+            else if (meth.StartsWith("class "))
+                meth = meth.Remove(0, "class ".Length);
             if (scope.IsStatic)
-                sb.Append("class ");
+                sb.Append("static ");
         	while (i < meth.Length && char.IsLetterOrDigit(meth[i]))
         	{
         		sb.Append(meth[i++]);
@@ -2425,64 +2592,100 @@ namespace PascalABCCompiler.Parsers
         	sb.AppendLine("end;");
         	return sb.ToString();
 		}
-		
-		private void TestForKeyword(string Text, int i, ref int bound, bool sym_punkt, out KeywordKind keyword)
+
+        private bool isOperator(string Text, int i, out int next)
         {
-        	StringBuilder sb = new StringBuilder();
-        	while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_'))
-        	{
-        		sb.Insert(0,Text[i]);
-        		i--;
-        	}
+            next = i;
+            if (i >= 3)
+            {
+                string op = Text.Substring(i - 2, 3).ToLower().Trim();
+                if (op == "and" || op == "div" || op == "mod" || op == "xor")
+                {
+                    if (!char.IsLetterOrDigit(Text[i - 3]) && Text[i - 3] != '_' && Text[i - 3] != '&' && !(i + 1 < Text.Length && char.IsLetterOrDigit(Text[i + 1])))
+                    {
+                        next = i - 3;
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            if (i >= 2)
+            {
+                string op = Text.Substring(i - 1, 2).ToLower().Trim();
+                if (op == "or")
+                {
+                    if (!char.IsLetterOrDigit(Text[i - 2]) && Text[i - 2] != '_' && Text[i - 2] != '&' && !(i + 1 < Text.Length && char.IsLetterOrDigit(Text[i + 1])))
+                    {
+                        next = i - 2;
+                        return true;
+                    }   
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        private void TestForKeyword(string Text, int i, ref int bound, bool sym_punkt, out KeywordKind keyword)
+        {
+            StringBuilder sb = new StringBuilder();
+            while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_'))
+            {
+                sb.Insert(0, Text[i]);
+                i--;
+            }
             while (i >= 0 && char.IsWhiteSpace(Text[i]))
             {
                 i--;
             }
             if (i >= 0 && (Text[i] == '.' || Text[i] == '&'))
                 sb.Insert(0, Text[i]);
-        	string s = sb.ToString().ToLower();
-        	if (s == "new")
-        	{
-        		bound = i+1;
-        		keyword = KeywordKind.New;
-        	}
-        	else if ((s == "procedure" || s == "function") && !sym_punkt )
-        	{
-        		keyword = KeywordKind.Function;
-        	}
-        	else if (s == "constructor" && !sym_punkt)
-        	{
-        		keyword = KeywordKind.Constructor;
-        	}
-        	else if (s == "destructor" && !sym_punkt)
-        	{
-        		keyword = KeywordKind.Destructor;
-        	}
-        	else if (s == "uses")
-        	{
-        		keyword = KeywordKind.Uses;
-        	}
-        	else if (s == "inherited")
-        	{
-        		keyword = KeywordKind.Inherited;
-        	}
-        	else if (s == "raise")
-        	{
-        		keyword = KeywordKind.Raise;
-        	}
-        	else if (keywords.ContainsKey(s))
-        	{
-        		keyword = KeywordKind.CommonKeyword;
-        	}
-        	else keyword = KeywordKind.None;
+            string s = sb.ToString().ToLower();
+            if (s == "new")
+            {
+                bound = i + 1;
+                keyword = KeywordKind.New;
+            }
+            else if ((s == "procedure" || s == "function") && !sym_punkt)
+            {
+                keyword = KeywordKind.Function;
+            }
+            else if (s == "constructor" && !sym_punkt)
+            {
+                keyword = KeywordKind.Constructor;
+            }
+            else if (s == "destructor" && !sym_punkt)
+            {
+                keyword = KeywordKind.Destructor;
+            }
+            else if (s == "uses")
+            {
+                keyword = KeywordKind.Uses;
+            }
+            else if (s == "inherited")
+            {
+                bound = i + 1;
+                keyword = KeywordKind.Inherited;
+            }
+            else if (s == "raise")
+            {
+                keyword = KeywordKind.Raise;
+            }
+            else if (keywords.ContainsKey(s))
+            {
+                keyword = KeywordKind.CommonKeyword;
+            }
+
+            else keyword = KeywordKind.None;
         }
 		
-		private bool CheckForComment(string Text, int off)
+		private bool CheckForComment(string Text, int off, out int comment_position, out bool one_line_comment)
 		{
 			int i = off;
+            one_line_comment = false;
+            comment_position = -1;
 			Stack<char> kav = new Stack<char>();
 			bool is_comm = false;
-			while (i>=0 && !is_comm && Text[i] != '\n')
+			while (i>=0 && !is_comm && Text[i] != '\n' && Text[i] != '\r')
 			{
 				if (Text[i] == '\'')
 				{
@@ -2491,7 +2694,16 @@ namespace PascalABCCompiler.Parsers
 				}
 				else if (Text[i] == '{')
 				{
-					if (kav.Count == 0) is_comm = true;
+					if (kav.Count == 0)
+                    {
+                        comment_position = i;
+                        while (i >= 0 && Text[i] != '\'')
+                            i--;
+                        if (i >= 1 && Text[i - 1] == '$')
+                            return false;
+                        is_comm = true;
+                        return is_comm;
+                    }  
 				}
 				else if (Text[i] == '}')
 				{
@@ -2499,7 +2711,12 @@ namespace PascalABCCompiler.Parsers
 				}
 				else if (Text[i] == '/')
 					if (i > 0 && Text[i-1] == '/' && kav.Count == 0)
-					is_comm = true;
+                    {
+                        is_comm = true;
+                        one_line_comment = true;
+                        comment_position = i - 1;
+                    }
+					
 				i--;
 			}
 			return is_comm;
@@ -2559,19 +2776,33 @@ namespace PascalABCCompiler.Parsers
                         {
                             bound = i + 1;
                             TestForKeyword(Text, i, ref bound, punkt_sym, out keyw);
+                            for (int j = tmp; j > bound; j--)
+                            {
+                                sb.Insert(0, Text[j]);
+                            }
+                            if (sb.ToString().Trim() == "new")
+                                return "";
+                            i = bound;
+                            continue;
                         }
                         else if (i >= 0 && Text[i] == '\'') return "";
                         i = tmp;
                     }
                     else
                         if (ch == '\'')
-                            kav.Push('\'');
+                        kav.Push('\'');
                     sb.Insert(0, ch);//.Append(Text[i]);
                 }
-                else if (ch == '.' || ch == '^' || ch == '&')
+                else if (ch == '.' || ch == '^' || ch == '&' || ch == '?' && IsPunctuation(Text, i + 1))
                 {
-                    if (ch == '.' && i >= 1 && Text[i - 1] == '.') end = true; else sb.Insert(0, ch);
-                    if (ch != '.') punkt_sym = true;
+                    if (ch == '.' && i >= 1 && Text[i - 1] == '.')
+                        end = true;
+                    else if (ch == '?' && i + 1 < Text.Length && Text[i + 1] != '.')
+                        end = true;
+                    else
+                        sb.Insert(0, ch);
+                    if (ch != '.')
+                        punkt_sym = true;
                 }
                 else if (ch == '}')
                 {
@@ -2579,7 +2810,8 @@ namespace PascalABCCompiler.Parsers
                     {
                         while (i >= 0 && Text[i] != '{')
                         {
-                            sb.Insert(0, Text[i]);
+                            if (Text[i] != '$')//skip {$
+                                sb.Insert(0, Text[i]);
                             i--;
                         }
                         if (i < 0)
@@ -2598,6 +2830,8 @@ namespace PascalABCCompiler.Parsers
                 {
                     if (kav.Count == 0)
                     {
+                        if (keyw == KeywordKind.None)
+                            return sb.ToString();
                         sb.Insert(0, ch);
                         break;
                     }
@@ -2611,7 +2845,7 @@ namespace PascalABCCompiler.Parsers
                             if (kav.Count == 0)
                             {
                                 string tmps = sb.ToString().Trim(' ', '\r', '\t', '\n');
-                                if (tmps.Length >= 1 && (char.IsLetter(tmps[0]) || tmps[0] == '_' || tmps[0] == '&'))
+                                if (tmps.Length >= 1 && (char.IsLetter(tmps[0]) || tmps[0] == '_' || tmps[0] == '&' || tmps[0] == '?') && tokens.Count == 0)
                                     end = true;
                                 else
                                     tokens.Push(ch);
@@ -2625,16 +2859,21 @@ namespace PascalABCCompiler.Parsers
                         case '>':
                             if (tokens.Count == 0)
                             {
-                                if (ugl_skobki.Count > 0 || i == off - 1 || i + 1 < Text.Length && (Text[i + 1] == '.' || Text[i + 1] == '('))
+                                int j = i + 1;
+                                
+                                while (j < Text.Length && char.IsWhiteSpace(Text[j]))
+                                    j++;
+                                
+                                if (ugl_skobki.Count > 0 || i == off - 1 || j == off && off == Text.Length || j < Text.Length && Text[i - 1] != '-' && (Text[j] == '.' || Text[j] == '('))
                                 {
                                     ugl_skobki.Push('>');
                                     sb.Insert(0, ch);
                                 }
-                                else if (i >=1 && Text[i - 1] == '-')
+                                else if (i >= 1 && Text[i - 1] == '-')
                                 {
                                     if (!(kav.Count == 0 && tokens.Count == 0))
                                         sb.Insert(0, ch);
-                                }   
+                                }
                                 else
                                     end = true;
                             }
@@ -2683,7 +2922,7 @@ namespace PascalABCCompiler.Parsers
                                                     i--;
                                             }
                                         }
-                                        if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
+                                        if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&' || Text[i] == '?' && IsPunctuation(Text, i+1)))
                                         {
                                             bound = i + 1;
                                             TestForKeyword(Text, i, ref bound, punkt_sym, out keyw);
@@ -2697,7 +2936,8 @@ namespace PascalABCCompiler.Parsers
                                         i = tmp;
                                     }
                                 }
-                                else end = true;
+                                else
+                                    end = true;
                             }
                             else sb.Insert(0, ch); punkt_sym = true;
                             break;
@@ -2713,18 +2953,33 @@ namespace PascalABCCompiler.Parsers
                                     if (ch == ',' && ugl_skobki.Count > 0)
                                         sb.Insert(0, ch);
                                     else
-                                    if (tokens.Count == 0) end = true;
-                                    else sb.Insert(0, ch);
+                                    if (tokens.Count == 0)
+                                        end = true;
+                                    else
+                                        sb.Insert(0, ch);
                                 }
-                                else sb.Insert(0, ch);
+                                else
+                                    sb.Insert(0, ch);
                             }
                             else
                             {
                                 if (Text[i] == '\n')
                                 {
-                                    if (CheckForComment(Text, i - 1))
-                                        end = true;
-                                    else sb.Insert(0, ch);
+                                    bool one_line_comment = false;
+                                    int comment_position = -1;
+                                    if (CheckForComment(Text, i - 1, out comment_position, out one_line_comment))
+                                    {
+                                        if (!one_line_comment)
+                                            end = true;
+                                        else
+                                        {
+                                            sb.Insert(0, ch);
+                                            i = comment_position;
+                                        }
+                                            
+                                    }    
+                                    else
+                                        sb.Insert(0, ch);
                                 }
                                 else
                                     sb.Insert(0, ch);
@@ -2735,7 +2990,9 @@ namespace PascalABCCompiler.Parsers
 
                 if (end)
                 {
-                    if (CheckForComment(Text, i))
+                    bool one_line_comment = false;
+                    int comment_position = -1;
+                    if (CheckForComment(Text, i, out comment_position, out one_line_comment))
                     {
                         int new_line_ind = sb.ToString().IndexOf('\n');
                         if (new_line_ind != -1) sb = sb.Remove(0, new_line_ind + 1);
@@ -2747,6 +3004,8 @@ namespace PascalABCCompiler.Parsers
             }
 
             //return RemovePossibleKeywords(sb);
+            if (sb.Length > 0 && sb[sb.Length - 1] == '?')
+                sb.Remove(sb.Length - 1, 1);
             return sb.ToString();
 
         }
@@ -2757,38 +3016,47 @@ namespace PascalABCCompiler.Parsers
             return FindExpressionFromAnyPosition(off, Text, line, col, out keyw, out expr_without_brackets);
         }
 
+        private bool IsPunctuation(string Text, int ind)
+        {
+            while (ind < Text.Length && char.IsWhiteSpace(Text[ind]))
+                ind++;
+            if (ind >= Text.Length)
+                return true;
+            return char.IsPunctuation(Text[ind]);
+        }
+
         public virtual string FindExpressionFromAnyPosition(int off, string Text, int line, int col, out KeywordKind keyw, out string expr_without_brackets)
-		{
-			int i = off-1;
-			expr_without_brackets = null;
-			keyw = KeywordKind.None;
+        {
+            int i = off - 1;
+            expr_without_brackets = null;
+            keyw = KeywordKind.None;
             if (i < 0)
                 return "";
             bool is_char = false;
-        	System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        	if (Text[i] != ' ' && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        	{
-        		//sb.Remove(0,sb.Length);
-        		while (i >= 0 && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        		{
-        			//sb.Insert(0,Text[i]);//.Append(Text[i]);
-        			i--;
-        		}
-        		is_char = true;
-        	}
-        	i = off;
-            if (i < Text.Length && Text[i] != ' ' && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        	{
-        		while (i < Text.Length && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_'))
-        		{
-        			//sb.Append(Text[i]);//.Append(Text[i]);
-        			i++;
-        		}
-        		is_char = true;
-        	}
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            if (Text[i] != ' ' && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&' || Text[i] == '?' && IsPunctuation(Text, i + 1)))
+            {
+                //sb.Remove(0,sb.Length);
+                while (i >= 0 && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&' || Text[i] == '?' && IsPunctuation(Text, i + 1)))
+                {
+                    //sb.Insert(0,Text[i]);//.Append(Text[i]);
+                    i--;
+                }
+                is_char = true;
+            }
+            i = off;
+            if (i < Text.Length && Text[i] != ' ' && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&' || Text[i] == '?' && IsPunctuation(Text, i + 1)))
+            {
+                while (i < Text.Length && (Char.IsLetterOrDigit(Text[i]) || Text[i] == '_'))
+                {
+                    //sb.Append(Text[i]);//.Append(Text[i]);
+                    i++;
+                }
+                is_char = true;
+            }
             if (is_char)
             {
-            	expr_without_brackets = FindExpression(i, Text, line, col, out keyw);
+                expr_without_brackets = FindExpression(i, Text, line, col, out keyw);
             }
             bool is_new = keyw == KeywordKind.New;
             bool meth_call = false;
@@ -2796,161 +3064,174 @@ namespace PascalABCCompiler.Parsers
             int j = i;
             bool in_comment = false;
             bool brackets = false;
-            while (j<Text.Length)
+            while (j < Text.Length)
             {
-            	char c = Text[j];
-            	
-            	if (c == '(' && !in_comment)
-            	{
-            		Stack<char> sk_stack = new Stack<char>();
-            		in_comment = false;
-            		bool in_kav = false;
-            		sk_stack.Push('(');
-            		j++;
-            		while (j<Text.Length)
-            		{
-            			c = Text[j];
-            			if (c == '(' && !in_kav)
-            				sk_stack.Push('(');
-            			else
-            			if (c == ')' && !in_kav)
-            			{
-            				if (sk_stack.Count == 0)
-            				{
-            					break;
-            				}
-            				else
-            				{
-            					sk_stack.Pop();
-            					if (sk_stack.Count == 0)
-            					{
-            						i = j+1;
-            						meth_call = true;
-            						break;
-            					}
-            				}
-            			}
-            			else if (c == '\'' && !in_comment)
-            			{
-            				in_kav = !in_kav;
-            			}
-            			else if (c == '{' && !in_kav)
-            			{
-            				in_comment = true;
-            			}
-            			else if (c == '}' && !in_kav)
-            			{
-            				in_comment = false;
-            			}
-            			else if (c == '/' && !in_kav && !in_comment)
-            			{
-            				if (j+1 < Text.Length && Text[j+1] == '/')
-            					break;
-            			}
-            			j++;
-            		}
-            		break;
-            	}
-            	else if (c == '<' && !in_comment)
-            	{
-            		Stack<char> sk_stack = new Stack<char>();
-            		sk_stack.Push('<');
-            		j++;
-            		bool generic = false;
-            		while (j<Text.Length)
-            		{
-            			c = Text[j];
-            			if (c == '>')
-            			{
-            				sk_stack.Pop();
-            				if (sk_stack.Count == 0)
-            				{
+                char c = Text[j];
+
+                if (c == '(' && !in_comment)
+                {
+                    Stack<char> sk_stack = new Stack<char>();
+                    in_comment = false;
+                    bool in_kav = false;
+                    sk_stack.Push('(');
+                    j++;
+                    while (j < Text.Length)
+                    {
+                        c = Text[j];
+                        if (c == '(' && !in_kav)
+                            sk_stack.Push('(');
+                        else
+                        if (c == ')' && !in_kav)
+                        {
+                            if (sk_stack.Count == 0)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                sk_stack.Pop();
+                                if (sk_stack.Count == 0)
+                                {
+                                    i = j + 1;
+                                    meth_call = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (c == '\'' && !in_comment)
+                        {
+                            in_kav = !in_kav;
+                        }
+                        else if (c == '{' && !in_kav)
+                        {
+                            in_comment = true;
+                        }
+                        else if (c == '}' && !in_kav)
+                        {
+                            in_comment = false;
+                        }
+                        else if (c == '/' && !in_kav && !in_comment)
+                        {
+                            if (j + 1 < Text.Length && Text[j + 1] == '/')
+                                break;
+                        }
+                        j++;
+                    }
+                    break;
+                }
+                else if (c == '<' && !in_comment)
+                {
+                    Stack<char> sk_stack = new Stack<char>();
+                    sk_stack.Push('<');
+                    j++;
+                    bool generic = false;
+                    while (j < Text.Length)
+                    {
+                        c = Text[j];
+                        if (c == '>')
+                        {
+                            sk_stack.Pop();
+                            if (sk_stack.Count == 0)
+                            {
                                 i = j + 1;
-            					generic = true;
-            					break;
-            				}
-            			}
-            			else if (c=='<')
-            			{
-            				sk_stack.Push('<');
-            				
-            			}
-            			else if (!char.IsLetterOrDigit(c) && c != '&' && c != '.' && c != ' ' && c != '\t' && c != '\n' && c != ',')
-            			{
-            				break;
-            			}
-            			j++;
-            		}
-            		if (generic)
-            		{
-            			break;
-            		}
-            	}
-            	else if (c == '[' && !in_comment)
-            	{
+                                generic = true;
+                                break;
+                            }
+                        }
+                        else if (c == '<')
+                        {
+                            sk_stack.Push('<');
+
+                        }
+                        else if (!char.IsLetterOrDigit(c) && c != '?' && c != '&' && c != '.' && c != ' ' && c != '\t' && c != '\n' && c != ',')
+                        {
+                            break;
+                        }
+                        j++;
+                    }
+                    if (generic)
+                    {
+                        //break;
+                    }
+                }
+                else if (c == '[' && !in_comment)
+                {
                     brackets = true;
                     break;
-            	}
-            	else if (c == '{')
-            	{
-            		in_comment = true;
-            	}
-            	else if (c == '}')
-            	{
-            		if (!in_comment)
-            			break;
-            		else
-            			in_comment = false;
-            	}
-            	else if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
-            	{
-            		
-            	}
-            	else
-            	{
-            		if (!in_comment)
-            			break;
-            	}
-            	j++;
+                }
+                else if (c == '{')
+                {
+                    in_comment = true;
+                }
+                else if (c == '}')
+                {
+                    if (!in_comment)
+                        break;
+                    else
+                        in_comment = false;
+                }
+                else if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+                {
+
+                }
+                else
+                {
+                    if (!in_comment)
+                        break;
+                }
+                j++;
             }
-            if (is_new && string.Compare(expr_without_brackets.Trim(' ','\n','\t','\r'),"new",true) == 0 && !meth_call)
+            if (is_new && string.Compare(expr_without_brackets.Trim(' ', '\n', '\t', '\r'), "new", true) == 0 && !meth_call)
             {
-            	expr_without_brackets = null;
-            	return null;
+                expr_without_brackets = null;
+                return null;
             }
-        	if (is_char) 
-        	{
-        		string ss = FindExpression(i, Text, line, col, out new_keyw);
+            if (is_char)
+            {
+                string ss = FindExpression(i, Text, line, col, out new_keyw);
                 if (brackets && is_new)
                 {
                     int ind = ss.ToLower().IndexOf("new");
                     if (ind != -1)
                         return ss.Substring(ind + 3);
                 }
+                if (is_new && ss != null && ss.IndexOf("new") == -1 && ss.IndexOf(":") != -1)
+                    return expr_without_brackets + "(true?"+ss;
                 return ss;
-        	}
+            }
             return null;
-		}
+        }
 
         public virtual KeywordKind TestForKeyword(string Text, int i)
         {
             StringBuilder sb = new StringBuilder();
+            int orig_i = i;
             int j = i;
             bool in_keyw = false;
             while (j >= 0 && Text[j] != '\n')
                 j--;
             Stack<char> kav_stack = new Stack<char>();
             j++;
+            bool in_format_str = false;
             while (j <= i)
             {
                 if (Text[j] == '\'')
                 {
                     if (kav_stack.Count == 0 && !in_keyw)
-                        kav_stack.Push('\'');
+                    {
+                        if (j == 0 || Text[j - 1] != '$')
+                            kav_stack.Push('\'');
+                        else
+                        {
+                            in_keyw = false;
+                            in_format_str = true;
+                        }
+                            
+                    }   
                     else if (kav_stack.Count > 0)
                         kav_stack.Pop();
                 }
-                else if (Text[j] == '{' && kav_stack.Count == 0)
+                else if (Text[j] == '{' && kav_stack.Count == 0 && !in_format_str)
                     in_keyw = true;
                 else
                     if (Text[j] == '}')
@@ -2958,7 +3239,7 @@ namespace PascalABCCompiler.Parsers
                 j++;
             }
             j = i;
-            if (kav_stack.Count != 0 || in_keyw) return PascalABCCompiler.Parsers.KeywordKind.Punkt;
+            if ((kav_stack.Count != 0 || in_keyw) && !in_format_str) return PascalABCCompiler.Parsers.KeywordKind.Punkt;
             if (j >= 0 && Text[j] == '.') return PascalABCCompiler.Parsers.KeywordKind.Punkt;
             while (j >= 0)
             {
@@ -3002,6 +3283,14 @@ namespace PascalABCCompiler.Parsers
                     i--;
                 }
             string s = sb.ToString().ToLower();
+            /*if (s == "new")
+            {
+                i = orig_i + 1;
+                while (i < Text.Length && char.IsWhiteSpace(Text[i]))
+                    i++;
+                if (i < Text.Length && Text[i] != '(')
+                    return KeywordKind.Punkt;
+            }*/
 
             return GetKeywordKind(s);
         }
@@ -3021,281 +3310,307 @@ namespace PascalABCCompiler.Parsers
         	}
         	return expr;
         }
-		
-		public virtual string FindExpressionForMethod(int off, string Text, int line, int col, char pressed_key, ref int num_param)
-		{
-			int i = off-1;
-        	string pattern = null;
-        	int bound = 0;
-        	System.Text.StringBuilder sb = new System.Text.StringBuilder();
-        	Stack<char> tokens = new Stack<char>();
-        	Stack<char> kav = new Stack<char>();
-        	Stack<char> skobki = new Stack<char>();
-        	Stack<char> ugl_skobki = new Stack<char>();
-        	bool comma_pressed = pressed_key == ',';
-        	int num_in_ident = -1;
-        	bool punkt_sym = false;
-        	KeywordKind keyw = TestForKeyword(Text,i);
-        	bool on_skobka = false;
-        	if (keyw == KeywordKind.Punkt)
-        		return "";
-        	try
-        	{
-        	while (i >= bound)
-        	{
-        		bool end = false;
-        		char ch = Text[i];
-        		if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '&')
-        		{
-        			num_in_ident = i;
-        			if (kav.Count == 0 && tokens.Count == 0)
-        			{
-        				int tmp = i;
-        				while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        				{
-        					i--;
-        				}
-        				while (i >= 0 && (Text[i] == ' ' || char.IsControl(Text[i]) || Text[i]=='}')) 
-        				{
-        					if (Text[i] != '}')
-        						i--;
-        					else
-        					{
-        						while (i>=0 && Text[i] != '{') //propusk kommentariev
-        							i--;
-        						if (i>=0)
-        							i--;
-        					}
-        				}
-        				if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        				{
-        					bound = i+1;
-        					TestForKeyword(Text,i, ref bound,punkt_sym, out keyw);
-        					if (keyw == KeywordKind.New && comma_pressed)
-        						bound = 0;
-        					if (keyw == KeywordKind.Function || keyw == KeywordKind.Constructor || keyw == KeywordKind.Destructor)
-        						return "";
-        				}
-        				else if (i >= 0 && Text[i] == '\'') return "";
-        				i = tmp;
-        			}
-        			sb.Insert(0, ch);//.Append(Text[i]);
-        		}
-        		else if (ch == '.') sb.Insert(0,ch);
-        		else if (ch == '}')
-        		{
-        			if (kav.Count == 0)
-        			{
-        				while (i >= 0 && Text[i] != '{') 
-        				{
-        					sb.Insert(0,Text[i]);
-        					i--;
-        				}
-        				if (i < 0) 
-        				{
-        					break;
-        				}
-        				else if (Text[i] == '{')
-        				{
-        					sb.Insert(0,'{');
-        				}
-        			}
-        			else
-        				sb.Insert(0,ch);
-        		}
-        		else if (ch == '{')
-        		{
-        			if (kav.Count == 0)
-        			{
-        				sb.Insert(0,ch);
-        				break;
-        			}
-        			else sb.Insert(0,ch);
-        		}
-        		else 
-        		switch (ch)
-        		{
-        			case ')':
-        			case ']':
-        			case '>': 
-        			if (kav.Count == 0)
-        			{
-        				if (ch != '>')
-        				tokens.Push(ch);
-        				if (ch == ')')
-        				skobki.Push(ch);
-        				if (tokens.Count > 0 || pressed_key == ',')
-        					sb.Insert(0,ch);
-        				else if (i == off-1 || ugl_skobki.Count > 0 || i+1 < Text.Length && (Text[i+1]=='.' || Text[i+1] == '('))
-        				{
-        					tokens.Push(ch);
-        					ugl_skobki.Push(ch);
-        					sb.Insert(0,ch);
-        				}
-        				else
-        					end = true;
-        			}
-        			else
-        			sb.Insert(0,ch); break;
-        			case '[':
-        			case '<':
-        			case '(': 
-        				if (kav.Count == 0)//esli ne v kavychkah
-        				{
-        					if (ch == '(')
-        						if (skobki.Count > 0)
-        						skobki.Pop();
-        					else skobki.Push('(');
-        					//esli byli zakryvaushie tokeny (polagaem, chto skobki korrektny, esli net, to parser v lubom sluchae ne proparsit
-        					if (tokens.Count > 0)
-        					{
-        						if (ch != '<')
-        						tokens.Pop();
-        						else if (ugl_skobki.Count > 0)
-        						{
-        							tokens.Pop();
-        							ugl_skobki.Pop();
-        						}
-        						sb.Insert(0,ch);//dobavljaem k stroke
-        						if (ch == '(')
-        						{
-        							int tmp = i--;
-        							/*while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        							{
-        								i--;
-        							}*/
-        							while (i >= 0 && (Text[i] == ' ' || char.IsControl(Text[i]) || Text[i]=='}')) 
-        							{
-        								if (Text[i] != '}')
-        								{
-        									i--;
-        								}
-        								else
-        								{
-        									while (i>=0 && Text[i] != '{')
-        									{
-        										//propusk kommentariev
-        										i--;
-        									}
-        									if (i>=0)
-        										i--;
-        								}
-        							}
-        								        								
-        							if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
-        							{
-        								bound = i+1;
-        								TestForKeyword(Text,i, ref bound,punkt_sym, out keyw);
-        								if (keyw == KeywordKind.New)
-        									bound = 0;
-        								else
-        								if (keyw != KeywordKind.None)
-        									end = true;
-        								else
-        									bound = 0;
-        							}
-        							else if (i >= 0 && Text[i] == '\'') return "";
-        							i = tmp;
-        						}
-        					}
-        					else if (ch == '<' || ch == '>')
-        					{
-        						if (tokens.Count > 0 || pressed_key == ',')
-        							sb.Insert(0,ch);
-        						else
-        							end = true;
-        					}
-        					else 
-        					if (!comma_pressed) //esli my ne v parametrah
-        						end = true; //zakonchili, tak kak doshli do pervoj skobki
-        					else
-        					{
-        						sb.Remove(0,sb.Length);//doshli do skobki, byla nazhata zapjataja, poetomu udaljaem vse parametry
-        						if (ch == '(')
-        							on_skobka = true;
-        						//on_skobka = true;
-        						comma_pressed = false;
-        					}
-        				} 
-        				else sb.Insert(0,ch);
-        				break;
-        			case '\'': 
-        				if (kav.Count == 0) 
-        					kav.Push(ch); 
-        				else 
-        					kav.Pop();
-        				sb.Insert(0,ch); 
-        				break;
-        			default:
-        				if (!(ch == ' ' || char.IsControl(ch)))
-        				{
-        					if (ch == '^')
-        						sb.Insert(0,ch);
-        					else
-        					if (kav.Count == 0)//ne v kavychkah
-        					{
-        						if (tokens.Count == 0) 
-        						{
-        							if (ch != ',' && !comma_pressed)
-        								end = true;//esli ne na zapjatoj i ne v parametrah, to finish
-        							else if (ch == ',' && !comma_pressed)
-        								end = true;
-        							else if (ch == ',' && (pressed_key == '('||pressed_key == '['))
-        								end = true;
-        							else 
-        								sb.Insert(0,ch);//prodolzhaem
-        						}
-        						else
-        							sb.Insert(0,ch);//esli est skobki, prodolzhaem
-        						if (!end && ch == ',')
-        						{
-        							if (tokens.Count == 0) 
-        								num_param++;//esli na zapjatoj, uvelichivaem nomer parametra
-        						}
-        					}
-        					else 
-        						sb.Insert(0,ch);//prodolzhaem
-        					
-        				}
-        				else 
-        				if (Text[i] == '\n')
-        				{
-        					if (CheckForComment(Text,i-1)) //proverjaem, net li kommenta ne predydushej stroke
-        						end = true;//esli est to finish
-        					else 
-        						sb.Insert(0,ch);//a inache vyrazhenie na neskolkih strokah
-        				}
-        				else
-        				sb.Insert(0,ch);
-        				break;
-        		}
-        		
-        		if (end) 
-        		{
-        			if (comma_pressed && !on_skobka)
-        				return "";
-        			if (CheckForComment(Text,i))//proverka na kommentarii
-        			{
-        				int new_line_ind = sb.ToString().IndexOf('\n');
-        				if (new_line_ind != -1) sb = sb.Remove(0,new_line_ind+1);
-        				else sb = sb.Remove(0,sb.Length);
-        			}
-        			break;
-        		}
-        		i--;
-        	}
-        	if (pressed_key == ',') 
-        		num_param++;
-        	}
-        	catch(Exception e)
-        	{
-        		
-        	}
-        	if (pressed_key == ',' && (!on_skobka || skobki.Count == 0))
-        		return "";
-        	//return RemovePossibleKeywords(sb);
-        	return sb.ToString();
-		}
+
+        public virtual string FindExpressionForMethod(int off, string Text, int line, int col, char pressed_key, ref int num_param)
+        {
+            int i = off - 1;
+            string pattern = null;
+            int bound = 0;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            Stack<char> tokens = new Stack<char>();
+            Stack<char> kav = new Stack<char>();
+            Stack<char> skobki = new Stack<char>();
+            Stack<char> ugl_skobki = new Stack<char>();
+            bool comma_pressed = pressed_key == ',';
+            int num_in_ident = -1;
+            bool punkt_sym = false;
+            int next;
+            KeywordKind keyw = TestForKeyword(Text, i);
+            bool on_brace = false;
+            if (keyw == KeywordKind.Punkt)
+                return "";
+            try
+            {
+                while (i >= bound)
+                {
+                    bool end = false;
+                    char ch = Text[i];
+                    if ((char.IsLetterOrDigit(ch) || ch == '_' || ch == '&') && !isOperator(Text, i, out next))
+                    {
+                        num_in_ident = i;
+                        if (kav.Count == 0 && tokens.Count == 0)
+                        {
+                            int tmp = i;
+                            while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&') && !isOperator(Text, i, out next))
+                            {
+                                i--;
+                            }
+                            while (i >= 0 && (Text[i] == ' ' || char.IsControl(Text[i]) || Text[i] == '}'))
+                            {
+                                if (Text[i] != '}')
+                                    i--;
+                                else
+                                {
+                                    while (i >= 0 && Text[i] != '{') //propusk kommentariev
+                                        i--;
+                                    if (i >= 0)
+                                        i--;
+                                }
+                            }
+                            if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&') && !isOperator(Text, i, out next))
+                            {
+                                bound = i + 1;
+                                TestForKeyword(Text, i, ref bound, punkt_sym, out keyw);
+                                if (keyw == KeywordKind.New && comma_pressed)
+                                    bound = 0;
+                                if (keyw == KeywordKind.Function || keyw == KeywordKind.Constructor || keyw == KeywordKind.Destructor)
+                                    return "";
+                            }
+                            else if (i >= 0 && Text[i] == '\'') return "";
+                            i = tmp;
+                        }
+                        sb.Insert(0, ch);//.Append(Text[i]);
+                    }
+                    else if (ch == '.') sb.Insert(0, ch);
+                    else if (ch == '}')
+                    {
+                        if (kav.Count == 0)
+                        {
+                            while (i >= 0 && Text[i] != '{')
+                            {
+                                sb.Insert(0, Text[i]);
+                                i--;
+                            }
+                            if (i < 0)
+                            {
+                                break;
+                            }
+                            else if (Text[i] == '{')
+                            {
+                                sb.Insert(0, '{');
+                            }
+                        }
+                        else
+                            sb.Insert(0, ch);
+                    }
+                    else if (ch == '{')
+                    {
+                        if (kav.Count == 0)
+                        {
+                            sb.Insert(0, ch);
+                            break;
+                        }
+                        else sb.Insert(0, ch);
+                    }
+                    else
+                        switch (ch)
+                        {
+                            case ')':
+                            case ']':
+                            case '>':
+                                if (kav.Count == 0)
+                                {
+                                    int j = i + 1;
+
+                                    while (j < Text.Length && char.IsWhiteSpace(Text[j]))
+                                        j++;
+                                    if (ch != '>')
+                                        tokens.Push(ch);
+                                    if (ch == ')')
+                                        skobki.Push(ch);
+                                    if (tokens.Count > 0 || pressed_key == ',')
+                                        sb.Insert(0, ch);
+                                    else if (i == off - 1 || j == off && off == Text.Length || ugl_skobki.Count > 0 || j < Text.Length && Text[i-1] != '-' && (Text[j] == '.' || Text[j] == '('))
+                                    {
+                                        tokens.Push(ch);
+                                        ugl_skobki.Push(ch);
+                                        sb.Insert(0, ch);
+                                    }
+                                    else
+                                        end = true;
+                                }
+                                else
+                                    sb.Insert(0, ch); break;
+                            case '[':
+                            case '<':
+                            case '(':
+                                if (kav.Count == 0)//esli ne v kavychkah
+                                {
+                                    if (ch == '(')
+                                        if (skobki.Count > 0)
+                                            skobki.Pop();
+                                        else skobki.Push('(');
+                                    //esli byli zakryvaushie tokeny (polagaem, chto skobki korrektny, esli net, to parser v lubom sluchae ne proparsit
+                                    if (tokens.Count > 0)
+                                    {
+                                        if (ch != '<')
+                                            tokens.Pop();
+                                        else if (ugl_skobki.Count > 0)
+                                        {
+                                            tokens.Pop();
+                                            ugl_skobki.Pop();
+                                        }
+                                        sb.Insert(0, ch);//dobavljaem k stroke
+                                        if (ch == '(')
+                                        {
+                                            int tmp = i--;
+                                            /*while (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
+                                            {
+                                                i--;
+                                            }*/
+                                            while (i >= 0 && (Text[i] == ' ' || char.IsControl(Text[i]) || Text[i] == '}'))
+                                            {
+                                                if (Text[i] != '}')
+                                                {
+                                                    i--;
+                                                }
+                                                else
+                                                {
+                                                    while (i >= 0 && Text[i] != '{')
+                                                    {
+                                                        //propusk kommentariev
+                                                        i--;
+                                                    }
+                                                    if (i >= 0)
+                                                        i--;
+                                                }
+                                            }
+
+                                            if (i >= 0 && (char.IsLetterOrDigit(Text[i]) || Text[i] == '_' || Text[i] == '&'))
+                                            {
+                                                bound = i + 1;
+                                                TestForKeyword(Text, i, ref bound, punkt_sym, out keyw);
+                                                if (keyw == KeywordKind.New)
+                                                    bound = 0;
+                                                else
+                                                if (keyw != KeywordKind.None && tokens.Count == 0)
+                                                    end = true;
+                                                else
+                                                    bound = 0;
+                                            }
+                                            else if (i >= 0 && Text[i] == '\'') return "";
+                                            i = tmp;
+                                        }
+                                    }
+                                    else if (ch == '<' || ch == '>')
+                                    {
+                                        if (tokens.Count > 0 || pressed_key == ',')
+                                            sb.Insert(0, ch);
+                                        else
+                                            end = true;
+                                    }
+                                    else
+                                    if (!comma_pressed) //esli my ne v parametrah
+                                        end = true; //zakonchili, tak kak doshli do pervoj skobki
+                                    else
+                                    {
+                                        sb.Remove(0, sb.Length);//doshli do skobki, byla nazhata zapjataja, poetomu udaljaem vse parametry
+                                        if (ch == '(')
+                                            on_brace = true;
+                                        //on_skobka = true;
+                                        comma_pressed = false;
+                                    }
+                                }
+                                else sb.Insert(0, ch);
+                                break;
+                            case '\'':
+                                if (kav.Count == 0)
+                                    kav.Push(ch);
+                                else
+                                    kav.Pop();
+                                sb.Insert(0, ch);
+                                break;
+                            default:
+                                if (!(ch == ' ' || char.IsControl(ch)))
+                                {
+                                    if (ch == '^')
+                                        sb.Insert(0, ch);
+                                    else
+                                    if (kav.Count == 0)//ne v kavychkah
+                                    {
+                                        if (tokens.Count == 0)
+                                        {
+                                            if (ch != ',' && !comma_pressed)
+                                                end = true;//esli ne na zapjatoj i ne v parametrah, to finish
+                                            else if (ch == ',' && !comma_pressed)
+                                                end = true;
+                                            else if (ch == ',' && (pressed_key == '(' || pressed_key == '['))
+                                                end = true;
+                                            else
+                                            {
+                                                sb.Insert(0, ch);//prodolzhaem
+                                                if (isOperator(Text, i, out next))
+                                                {
+                                                    i = next;
+                                                    continue;
+                                                }
+                                            }
+                                                
+                                        }
+                                        else
+                                            sb.Insert(0, ch);//esli est skobki, prodolzhaem
+                                        if (!end && ch == ',')
+                                        {
+                                            if (tokens.Count == 0)
+                                                num_param++;//esli na zapjatoj, uvelichivaem nomer parametra
+                                        }
+                                    }
+                                    else
+                                        sb.Insert(0, ch);//prodolzhaem
+
+                                }
+                                else
+                                if (Text[i] == '\n')
+                                {
+                                    bool one_line_comment = false;
+                                    int comment_position = -1;
+                                    if (CheckForComment(Text, i - 1, out comment_position, out one_line_comment)) //proverjaem, net li kommenta ne predydushej stroke
+                                    {
+                                        if (!one_line_comment)
+                                            end = true;
+                                        else
+                                        {
+                                            sb.Insert(0, ch);
+                                            i = comment_position;
+                                        }
+                                            
+                                    }
+                                    else
+                                        sb.Insert(0, ch);//a inache vyrazhenie na neskolkih strokah
+                                }
+                                else
+                                    sb.Insert(0, ch);
+                                break;
+                        }
+
+                    if (end)
+                    {
+                        if (comma_pressed && !on_brace)
+                            return "";
+                        bool one_line_comment = false;
+                        int comment_position = -1;
+                        if (CheckForComment(Text, i, out comment_position, out one_line_comment))//proverka na kommentarii
+                        {
+                            int new_line_ind = sb.ToString().IndexOf('\n');
+                            if (new_line_ind != -1) sb = sb.Remove(0, new_line_ind + 1);
+                            else sb = sb.Remove(0, sb.Length);
+                        }
+                        break;
+                    }
+                    i--;
+                }
+                if (pressed_key == ',')
+                    num_param++;
+            }
+            catch (Exception e)
+            {
+
+            }
+            if (pressed_key == ',' && (!on_brace || skobki.Count == 0))
+                return "";
+            //return RemovePossibleKeywords(sb);
+            return sb.ToString();
+        }
 		
 		public virtual string FindOnlyIdentifier(int off, string Text, int line, int col, ref string name)
 		{
@@ -3565,8 +3880,8 @@ namespace PascalABCCompiler.Parsers
 			{
 				case SymbolKind.Class : 
 					if (scope.TopScope != null && scope.TopScope.Name != "")
-						return (scope.IsFinal?"sealed ":"")+"class "+scope.TopScope.Name + "::" +scope.Name+template_str;
-					else return (scope.IsFinal?"sealed ":"")+"class "+scope.Name+template_str;
+						return (scope.IsAbstract ? "abstract " : "") + (scope.IsFinal?"sealed ":"")+"class "+scope.TopScope.Name + "::" +scope.Name+template_str;
+					else return (scope.IsAbstract ? "abstract " : "") + (scope.IsFinal?"sealed ":"")+"class "+scope.Name+template_str;
 				case SymbolKind.Interface :
 					if (scope.TopScope != null && scope.TopScope.Name != "")
 					return "interface class"+scope.TopScope.Name + "::" +scope.Name+template_str;

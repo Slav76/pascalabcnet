@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.IO;
@@ -824,7 +824,7 @@ namespace PascalABCCompiler.Parsers
             throw new NotImplementedException();
         }
 
-        public override void visit(class_body _class_body)
+        public override void visit(class_body_list _class_body)
         {
             throw new NotImplementedException();
         }
@@ -1021,7 +1021,7 @@ namespace PascalABCCompiler.Parsers
             _diapason_expr.right.visit(this);
         }
 
-        public void visit(var_def_list_for_record _var_def_list)
+        public override void visit(var_def_list_for_record _var_def_list)
         {
             throw new NotImplementedException();
         }

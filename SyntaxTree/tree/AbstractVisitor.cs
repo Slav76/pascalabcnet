@@ -8,14 +8,14 @@ namespace PascalABCCompiler.SyntaxTree
 		{
 		}
 
-		public virtual void visit(syntax_tree_node _syntax_tree_node)
-		{
-			DefaultVisit(_syntax_tree_node);
-		}
-
 		public virtual void visit(expression _expression)
 		{
 			DefaultVisit(_expression);
+		}
+
+		public virtual void visit(syntax_tree_node _syntax_tree_node)
+		{
+			DefaultVisit(_syntax_tree_node);
 		}
 
 		public virtual void visit(statement _statement)
@@ -398,9 +398,9 @@ namespace PascalABCCompiler.SyntaxTree
 			DefaultVisit(_access_modifer_node);
 		}
 
-		public virtual void visit(class_body _class_body)
+		public virtual void visit(class_body_list _class_body_list)
 		{
-			DefaultVisit(_class_body);
+			DefaultVisit(_class_body_list);
 		}
 
 		public virtual void visit(class_definition _class_definition)
@@ -1111,6 +1111,146 @@ namespace PascalABCCompiler.SyntaxTree
 		public virtual void visit(sugared_addressed_value _sugared_addressed_value)
 		{
 			DefaultVisit(_sugared_addressed_value);
+		}
+
+		public virtual void visit(double_question_node _double_question_node)
+		{
+			DefaultVisit(_double_question_node);
+		}
+
+		public virtual void visit(pattern_node _pattern_node)
+		{
+			DefaultVisit(_pattern_node);
+		}
+
+		public virtual void visit(type_pattern _type_pattern)
+		{
+			DefaultVisit(_type_pattern);
+		}
+
+		public virtual void visit(is_pattern_expr _is_pattern_expr)
+		{
+			DefaultVisit(_is_pattern_expr);
+		}
+
+		public virtual void visit(match_with _match_with)
+		{
+			DefaultVisit(_match_with);
+		}
+
+		public virtual void visit(pattern_case _pattern_case)
+		{
+			DefaultVisit(_pattern_case);
+		}
+
+		public virtual void visit(pattern_cases _pattern_cases)
+		{
+			DefaultVisit(_pattern_cases);
+		}
+
+		public virtual void visit(deconstructor_pattern _deconstructor_pattern)
+		{
+			DefaultVisit(_deconstructor_pattern);
+		}
+
+		public virtual void visit(pattern_parameter _pattern_parameter)
+		{
+			DefaultVisit(_pattern_parameter);
+		}
+
+		public virtual void visit(desugared_deconstruction _desugared_deconstruction)
+		{
+			DefaultVisit(_desugared_deconstruction);
+		}
+
+		public virtual void visit(var_deconstructor_parameter _var_deconstructor_parameter)
+		{
+			DefaultVisit(_var_deconstructor_parameter);
+		}
+
+		public virtual void visit(recursive_deconstructor_parameter _recursive_deconstructor_parameter)
+		{
+			DefaultVisit(_recursive_deconstructor_parameter);
+		}
+
+		public virtual void visit(deconstruction_variables_definition _deconstruction_variables_definition)
+		{
+			DefaultVisit(_deconstruction_variables_definition);
+		}
+
+		public virtual void visit(var_tuple_def_statement _var_tuple_def_statement)
+		{
+			DefaultVisit(_var_tuple_def_statement);
+		}
+
+		public virtual void visit(semantic_check_sugared_var_def_statement_node _semantic_check_sugared_var_def_statement_node)
+		{
+			DefaultVisit(_semantic_check_sugared_var_def_statement_node);
+		}
+
+		public virtual void visit(const_pattern _const_pattern)
+		{
+			DefaultVisit(_const_pattern);
+		}
+
+		public virtual void visit(tuple_pattern_wild_card _tuple_pattern_wild_card)
+		{
+			DefaultVisit(_tuple_pattern_wild_card);
+		}
+
+		public virtual void visit(const_pattern_parameter _const_pattern_parameter)
+		{
+			DefaultVisit(_const_pattern_parameter);
+		}
+
+		public virtual void visit(wild_card_deconstructor_parameter _wild_card_deconstructor_parameter)
+		{
+			DefaultVisit(_wild_card_deconstructor_parameter);
+		}
+
+		public virtual void visit(collection_pattern _collection_pattern)
+		{
+			DefaultVisit(_collection_pattern);
+		}
+
+		public virtual void visit(collection_pattern_gap_parameter _collection_pattern_gap_parameter)
+		{
+			DefaultVisit(_collection_pattern_gap_parameter);
+		}
+
+		public virtual void visit(collection_pattern_wild_card _collection_pattern_wild_card)
+		{
+			DefaultVisit(_collection_pattern_wild_card);
+		}
+
+		public virtual void visit(collection_pattern_var_parameter _collection_pattern_var_parameter)
+		{
+			DefaultVisit(_collection_pattern_var_parameter);
+		}
+
+		public virtual void visit(recursive_collection_parameter _recursive_collection_parameter)
+		{
+			DefaultVisit(_recursive_collection_parameter);
+		}
+
+		public virtual void visit(recursive_pattern_parameter _recursive_pattern_parameter)
+		{
+			DefaultVisit(_recursive_pattern_parameter);
+		}
+
+		public virtual void visit(tuple_pattern _tuple_pattern)
+		{
+			DefaultVisit(_tuple_pattern);
+		}
+
+		public virtual void visit(tuple_pattern_var_parameter _tuple_pattern_var_parameter)
+		{
+			DefaultVisit(_tuple_pattern_var_parameter);
+		}
+
+		public virtual void visit(recursive_tuple_parameter _recursive_tuple_parameter)
+		{
+			DefaultVisit(_recursive_tuple_parameter);
 		}
 	}
 

@@ -1,7 +1,8 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Все типы семантических ошибок компилятора.
 using System;
+using System.Collections.Generic;
 
 using PascalABCCompiler.SemanticTree;
 
@@ -164,11 +165,11 @@ namespace PascalABCCompiler.TreeConverter
         }
     }
 
-    public class SaveAssemblyError : CompilationError
+    public class SaveAssemblyError : CompilationErrorWithLocation
     {
         private string _text;
 
-        public SaveAssemblyError(string text)
+        public SaveAssemblyError(string text, location loc): base(loc)
         {
             _text = text;
         }
@@ -222,7 +223,7 @@ namespace PascalABCCompiler.TreeConverter
         {
             //return ("Possible two type convertions\n"+_en.location.ToString());
             return (string.Format(StringResources.Get("TWO_TYPE_CONVERTIONS_POSSIBLE_FIRST_TYPE_{0}_SECOND_TYE_{1}"),
-                _first.to.PrintableName, _second.to.PrintableName));
+                _first.to?.PrintableName??"null", _second.to?.PrintableName??"null"));
         }
 
         public override ILocation Location
@@ -331,6 +332,8 @@ namespace PascalABCCompiler.TreeConverter
             */
            if (_from == null_type_node.get_type_node())
            	return StringResources.Get("NIL_WITH_VALUE_TYPES_NOT_ALLOWED");
+            if (_from is delegated_methods && (_from as delegated_methods).empty_param_method != null && (_from as delegated_methods).empty_param_method.simple_function_node.return_value_type is undefined_type)
+                return string.Format(StringResources.Get("RETURN_TYPE_UNDEFINED_{0}"), (_from as delegated_methods).empty_param_method.simple_function_node.name);
             return (string.Format(StringResources.Get("CAN_NOT_CONVERT_TYPES_FROM_{0}_TO_{1}"), _from.PrintableName, _to.PrintableName));
         }
 
@@ -388,6 +391,8 @@ namespace PascalABCCompiler.TreeConverter
         {
             _is_alone = is_alone;
             this.first_function = first_function;
+            if (first_function is compiled_constructor_node || first_function is common_method_node && (first_function as common_method_node).is_constructor)
+                is_constructor = true;
         }
 
         public bool is_alone_function_defined
@@ -467,9 +472,9 @@ namespace PascalABCCompiler.TreeConverter
     public class SeveralFunctionsCanBeCalled : CompilationError
     {
         private readonly ILocation _loc;
-        private readonly function_node_list _possible_functions;
+        private readonly List<function_node> _possible_functions;
 
-        public SeveralFunctionsCanBeCalled(ILocation loc, function_node_list set_of_possible_functions)
+        public SeveralFunctionsCanBeCalled(ILocation loc, List<function_node> set_of_possible_functions)
         {
             _loc = loc;
             _possible_functions = set_of_possible_functions;
@@ -483,7 +488,7 @@ namespace PascalABCCompiler.TreeConverter
             }
         }
 
-        public function_node_list set_of_possible_functions
+        public List<function_node> set_of_possible_functions
         {
             get
             {
@@ -2931,7 +2936,7 @@ namespace PascalABCCompiler.TreeConverter
         public ThisTypeOfVariablesCannotBeCaptured(location loc)
             : base(loc)
         {
-
+            
         }
 
         public override string ToString()
@@ -3079,6 +3084,27 @@ namespace PascalABCCompiler.TreeConverter
             return StringResources.Get("USING_CAPTURED_PARAMETERS_IS_NOT_ALLOWED_IN_INITIALIZERS");
         }
     }
+
+
+    public class FunctionPredefinitionWithoutDefinition : CompilationErrorWithLocation
+    {
+        private common_function_node cfn;
+
+        public FunctionPredefinitionWithoutDefinition(common_function_node cfn, location loc): base(loc)
+        {
+            this.cfn = cfn;
+        }
+
+        public override string ToString()
+        {
+            if (cfn is common_method_node && (cfn as common_method_node).is_constructor)
+                return StringResources.Get("CONSTRUCTOR_PREDEFINITION_WITHOUT_DEFINITION");
+            if (cfn.return_value_type == null)
+                return StringResources.Get("PROCEDURE_PREDEFINITION_WITHOUT_DEFINITION");
+            return StringResources.Get("FUNCTION_PREDEFINITION_WITHOUT_DEFINITION");
+        }
+    }
+
 
     public class FailedWhileTryingToCompileLambdaBodyWithGivenParametersException : Exception
     {

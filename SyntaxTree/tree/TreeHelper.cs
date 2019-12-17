@@ -2,6 +2,7 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PascalABCCompiler.SyntaxTree
 {
@@ -32,8 +33,11 @@ namespace PascalABCCompiler.SyntaxTree
         DirectDescendants
     }
 
+    public enum SemanticCheckType { MatchedExpression, MatchedExpressionAndType, MatchedExpressionAndExpression, MatchedTuple }
+
     public partial class syntax_tree_node
     {
+
         public syntax_tree_node Parent;
         public int FindIndex(syntax_tree_node node, Desc d = Desc.All)
         {
@@ -66,6 +70,13 @@ namespace PascalABCCompiler.SyntaxTree
             to.Parent = from.Parent;
         }
 
+        public void ReplaceDescendantUnsafe(syntax_tree_node from, syntax_tree_node to, Desc d = Desc.All)
+        {
+            var ind = FindIndex(from, d);
+            this[ind] = to;
+            to.Parent = from.Parent;
+        }
+
         /// <summary>
         /// Находит последнего потомка, удовлетворяющего условию. Возвращает null, если такой не найден.
         /// </summary>
@@ -80,6 +91,24 @@ namespace PascalABCCompiler.SyntaxTree
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Получает коллекцию предков текущего узла
+        /// </summary>
+        /// <param name="includeSelf">Включить в список текущий узел</param>
+        /// <returns>Коллекция предков узла</returns>
+        public IEnumerable<syntax_tree_node> AscendantNodes(bool includeSelf = false)
+        {
+            if (includeSelf)
+                yield return this;
+
+            var parentNode = Parent;
+            while (parentNode != null)
+            {
+                yield return parentNode;
+                parentNode = parentNode.Parent;
+            }
         }
 
         /// <summary>
@@ -273,6 +302,7 @@ namespace PascalABCCompiler.SyntaxTree
 
     public partial class statement_list 
     {
+
         public statement_list(IEnumerable<statement> sts)
         {
             AddMany(sts);
@@ -293,11 +323,19 @@ namespace PascalABCCompiler.SyntaxTree
         public void AddMany(IEnumerable<statement> els)
         {
             list.AddRange(els);
+            foreach (var elem in els)
+                if (elem != null)
+                    elem.Parent = this;
         }
 
         public static statement_list Empty
         {
             get { return new statement_list(); }
+        }
+
+        public override string ToString()
+        {
+            return "begin " + list.Select(st=>st is empty_statement ? "" : st.ToString()+"; ").Aggregate((s,x)=>s+x)+ "end";
         }
         //-- List members end
     }
@@ -342,9 +380,27 @@ namespace PascalABCCompiler.SyntaxTree
         {
             return new bin_expr(left, right, Operators.Greater);
         }
+        public static bin_expr GreaterEqual(expression left, expression right)
+        {
+            return new bin_expr(left, right, Operators.GreaterEqual);
+        }
         public static bin_expr Less(expression left, expression right)
         {
             return new bin_expr(left, right, Operators.Less);
+        }
+        public static bin_expr LessEqual(expression left, expression right)
+        {
+            return new bin_expr(left, right, Operators.LessEqual);
+        }
+
+        public static bin_expr LogicalAnd(expression left, expression right)
+        {
+            return new bin_expr(left, right, Operators.LogicalAND);
+        }
+
+        public static bin_expr LogicalOr(expression left, expression right)
+        {
+            return new bin_expr(left, right, Operators.LogicalOR);
         }
 
         public override string ToString()
@@ -387,7 +443,7 @@ namespace PascalABCCompiler.SyntaxTree
     {
         public override string ToString()
         {
-            return val.ToString();
+            return val.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 
@@ -419,6 +475,8 @@ namespace PascalABCCompiler.SyntaxTree
         {
             get { return names[0]; }
         }
+
+        public static named_type_reference Boolean => new named_type_reference("boolean");
     }
 
     public partial class template_type_reference
@@ -459,6 +517,9 @@ namespace PascalABCCompiler.SyntaxTree
 
         public override string ToString()
         {
+            if (idents.Count == 0)
+                return "";
+
             var sb = new System.Text.StringBuilder();
             sb.Append(idents[0].ToString());
             for (int i = 1; i < idents.Count; i++)
@@ -476,19 +537,19 @@ namespace PascalABCCompiler.SyntaxTree
 
     public partial class var_def_statement
     {
-        public var_def_statement(ident_list vars, type_definition vars_type) : this(vars, vars_type, null, definition_attribute.None, false)
+        public var_def_statement(ident_list vars, type_definition vars_type, SourceContext sc = null) : this(vars, vars_type, null, definition_attribute.None, false, sc)
         { }
 
-        public var_def_statement(ident_list vars, type_definition vars_type, expression iv) : this(vars, vars_type, iv, definition_attribute.None, false)
+        public var_def_statement(ident_list vars, type_definition vars_type, expression iv, SourceContext sc = null) : this(vars, vars_type, iv, definition_attribute.None, false, sc)
         { }
 
-        public var_def_statement(ident id, type_definition type) : this(new ident_list(id), type)
+        public var_def_statement(ident id, type_definition type, SourceContext sc = null) : this(new ident_list(id), type, sc)
         { }
 
-        public var_def_statement(ident id, type_definition type, expression iv) : this(new ident_list(id), type, iv)
+        public var_def_statement(ident id, type_definition type, expression iv, SourceContext sc = null) : this(new ident_list(id), type, iv,sc)
         { }
 
-        public var_def_statement(ident id, expression iv) : this(new ident_list(id), null, iv)
+        public var_def_statement(ident id, expression iv, SourceContext sc = null) : this(new ident_list(id), null, iv, sc)
         { }
 
         public var_def_statement(ident id, string type) : this(new ident_list(id), new named_type_reference(type))
@@ -508,9 +569,15 @@ namespace PascalABCCompiler.SyntaxTree
                 sb.Append(" := ");
                 sb.Append(inital_value.ToString());
             }
-            sb.Append("; ");
+            //sb.Append("; ");
             return sb.ToString();
         }
+    }
+
+    public partial class var_tuple_def_statement
+    {
+        public var_tuple_def_statement(ident_list vars, expression iv, SourceContext sc = null) : this(vars, null, iv, definition_attribute.None, false, sc)
+        { }
     }
 
     public partial class declarations
@@ -699,19 +766,30 @@ namespace PascalABCCompiler.SyntaxTree
             if (name != null)
                 sb.Append(name.ToString());
             else
-                sb.Append("NONAME");
+                sb.Append("");
 
             if (template_args != null)
                 sb.Append("<" + template_args.ToString() + ">");
 
             if (parameters != null)
                 sb.Append("(" + parameters.ToString() + ")");
-            sb.Append(";");
+            if (name != null)
+                sb.Append(";");
+            if (this.proc_attributes != null)
+                foreach (var pa in this.proc_attributes.proc_attributes)
+                    sb.Append(" " + pa.ToString() + " ");
             return sb.ToString();
+        }
+
+        public bool is_extension()
+        {
+            if (proc_attributes?.proc_attributes != null)
+                return proc_attributes.proc_attributes.FindIndex(attr => attr.attribute_type == proc_attribute.attr_extension) >= 0;
+            else return false;
         }
     }
 
-    public partial class function_header
+    public partial class function_header                                                                     
     {
         public function_header(formal_parameters _parameters, procedure_attributes_list _proc_attributes, method_name _name, where_definition_list _where_defs, type_definition _return_type, SourceContext sc)
             : base(_parameters, _proc_attributes, _name, _where_defs, sc)
@@ -751,14 +829,13 @@ namespace PascalABCCompiler.SyntaxTree
     public partial class procedure_definition
     {
         public bool has_yield = false;
-        
-
         public procedure_definition(procedure_header proc_header, proc_block proc_body, SourceContext sc)
         {
             this.proc_header = proc_header;
             this.proc_body = proc_body;
             source_context = sc;
             is_short_definition = false;
+            FillParentsInDirectChilds();
         }
         public procedure_definition(procedure_header proc_header, proc_block proc_body)
         {
@@ -766,6 +843,7 @@ namespace PascalABCCompiler.SyntaxTree
             this.proc_body = proc_body;
             source_context = null;
             is_short_definition = false;
+            FillParentsInDirectChilds();
         }
 
         public static procedure_definition EmptyDefaultConstructor
@@ -1020,14 +1098,14 @@ namespace PascalABCCompiler.SyntaxTree
     public partial class property_accessors
     {
         public property_accessors(ident read_accessor, ident write_accessor, SourceContext sc = null) 
-            : this(new read_accessor_name(read_accessor), new write_accessor_name(write_accessor),sc)
+            : this(new read_accessor_name(read_accessor, null, null), new write_accessor_name(write_accessor, null, null),sc)
         { }
     }
 
     public partial class simple_property
     {
-        public simple_property(ident name, type_definition type, property_accessors accessors, SourceContext sc = null) 
-            : this(name, type, null, accessors, null, null, definition_attribute.None,sc)
+        public simple_property(ident name, type_definition type, property_accessors accessors, SourceContext sc = null)
+            : this(name, type, null, accessors, null, null, definition_attribute.None, proc_attribute.attr_none, false, null, sc)
         { }
     }
 
@@ -1055,17 +1133,22 @@ namespace PascalABCCompiler.SyntaxTree
         }
     }
 
-    public partial class class_body
+    public partial class class_body_list
     {
 
     }
 
     public partial class class_definition
     {
-        public class_definition(named_type_reference_list parents, class_body body, SourceContext sc = null) : this(parents, body, class_keyword.Class, null, null, class_attribute.None, false, sc)
+        public class_definition(named_type_reference_list parents, class_body_list body, SourceContext sc = null) : this(parents, body, class_keyword.Class, null, null, class_attribute.None, false, sc)
         { is_auto = false; }
-        public class_definition(class_body body, SourceContext sc = null) : this(null, body, sc)
+        public class_definition(class_body_list body, SourceContext sc = null) : this(null, body, sc)
         { is_auto = false; }
+
+        public bool IsAutoClass()
+        {
+            return (attribute & class_attribute.Auto) == class_attribute.Auto;
+        }
 
     }
 
@@ -1091,6 +1174,8 @@ namespace PascalABCCompiler.SyntaxTree
 
     public partial class procedure_call
     {
+        public procedure_call(addressed_value _func_name, SourceContext sc=null) : this(_func_name, false, sc) { }
+
         public procedure_call(ident name)
         {
             this._func_name = name;
@@ -1244,40 +1329,32 @@ namespace PascalABCCompiler.SyntaxTree
 
     public partial class var_statement
     {
-        public var_statement(ident_list vars, type_definition type, expression iv)
+        public var_statement(ident_list vars, type_definition type, expression iv) : this(new var_def_statement(vars, type, iv))
         {
-            var_def = new var_def_statement(vars, type, iv);
         }
 
-        public var_statement(ident_list vars, type_definition type)
+        public var_statement(ident_list vars, type_definition type): this(new var_def_statement(vars, type))
         {
-            var_def = new var_def_statement(vars, type);
         }
 
-        public var_statement(ident id, type_definition type, expression iv)
+        public var_statement(ident id, type_definition type, expression iv) : this(new var_def_statement(new ident_list(id), type, iv))
         {
-            var_def = new var_def_statement(new ident_list(id), type, iv);
         }
 
-        public var_statement(ident id, type_definition type)
+        public var_statement(ident id, type_definition type) : this(new var_def_statement(new ident_list(id), type))
         {
-            var_def = new var_def_statement(new ident_list(id), type);
         }
 
-        public var_statement(ident id, string type)
+        public var_statement(ident id, string type) : this(new var_def_statement(new ident_list(id), new named_type_reference(type)))
         {
-            var_def = new var_def_statement(new ident_list(id), new named_type_reference(type));
         }
 
-        public var_statement(ident id, expression iv)
+        public var_statement(ident id, expression iv) :this(new var_def_statement(new ident_list(id), null, iv))
         {
-            var_def = new var_def_statement(new ident_list(id), null, iv);
         }
 
-        public var_statement(ident id, expression iv,SourceContext sc)
+        public var_statement(ident id, expression iv,SourceContext sc) : this(new var_def_statement(new ident_list(id), null, iv, sc))
         {
-            var_def = new var_def_statement(new ident_list(id), null, iv);
-            var_def.source_context = sc;
         }
 
         public override string ToString()
@@ -1522,6 +1599,11 @@ namespace PascalABCCompiler.SyntaxTree
             this._IsYieldInStaticMethod = isYieldInStaticMethod;
             source_context = sc;
         }
+        public override string ToString()
+        {
+            return /*""+this.ClassName+" "+this.name+" "+*/this.UnknownID.ToString();
+        }
+
     }
 
     public partial class yield_unknown_foreach_type : type_definition
@@ -1593,7 +1675,11 @@ namespace PascalABCCompiler.SyntaxTree
     {
         public override string ToString()
         {
-            return "" + this._ident_list.ToString() + " -> lambda_body";
+            var s = this._ident_list.ToString();
+            if (_ident_list.Count != 1)
+                s = "(" + s + ")";
+            var b = this.proc_body.ToString();
+            return "" + s + " -> "+b;
         }
     }
 
@@ -1610,14 +1696,6 @@ namespace PascalABCCompiler.SyntaxTree
         public override string ToString()
         {
             return this.access_level.ToString().Replace("_modifier","");
-        }
-    }
-
-	public partial class yield_unknown_ident
-    {
-        public override string ToString()
-        {
-            return this.UnknownID.ToString();
         }
     }
 
@@ -1642,10 +1720,15 @@ namespace PascalABCCompiler.SyntaxTree
         {
             return new SyntaxTree.dot_node(this, id, sc);
         }
+        /// <summary>
+        /// Сервисное поле для реализации механизма ?. Оно - типа question_colon_expression
+        /// </summary>
+        public object ExprToQCE = null;
     }
 
     public partial class expression
     {
+        //public object semantic_ex; 
         public expression Plus(expression e)
         {
             return new bin_expr(this, e, Operators.Plus);
@@ -1698,5 +1781,182 @@ namespace PascalABCCompiler.SyntaxTree
         public override string ToString() => left.ToString() + "?." + right.ToString();
     }
 
+    public partial class for_node
+    {
+        public for_node(ident loop_variable, expression init_value, expression finish_value, statement stmt, SourceContext sc):
+            this(loop_variable, init_value, finish_value,stmt,for_cycle_type.to, null,null,true)
+        {
+
+        }
+        public override string ToString() => "for var " + this.loop_variable.ToString() + " := " + this.initial_value.ToString() + " to " + this.finish_value.ToString()+" do \n"+this.statements.ToString();
+    }
+
+    public partial class loop_stmt
+    {
+        public override string ToString() => "loop " + this.count.ToString() + " do \n" + this.stmt.ToString();
+    }
+
+    public partial class lambda_inferred_type
+    {
+        public override string ToString() => "lam_inferred";
+    }
+
+    public partial class desugared_deconstruction
+    {
+        public bool HasAllExplicitTypes => variables.definitions.All(x => x.vars_type != null);
+
+        public desugared_deconstruction(List<var_def_statement> variables, expression target, SourceContext context = null) 
+            : this(new deconstruction_variables_definition(variables), target, context)
+        { }
+
+        public var_statement[] WithTypes(type_definition[] types)
+        {
+            var_statement[] result = new var_statement[types.Length]; 
+            Debug.Assert(types.Length == variables.definitions.Count, "Inconsistent types count");
+
+            for (int i = 0; i < variables.definitions.Count; i++)
+            {
+                variables.definitions[i].vars_type = types[i];
+                result[i] = new var_statement(variables.definitions[i]);
+            }
+
+            return result;
+        }
+
+        public override string ToString() => $"var {string.Join(", ", variables.definitions)}";
+    }
+
+    public partial class is_pattern_expr
+    {
+        public override string ToString() => $"{left} is {right}";
+    }
+
+    public partial class deconstructor_pattern
+    {
+        public override string ToString() => $"{type}({string.Join(", ", parameters.Select(x => x.ToString()))})";
+    }
+
+    public partial class pattern_node
+    {
+        public bool IsRecursive => parameters.Any(x => x is recursive_pattern_parameter);
+    }
+
+    public partial class typecast_node
+    {
+        public override string ToString()
+        {
+            return "" + this.expr + " " + this.cast_op + " " + this.type_def;
+        }
+    }
+
+    public partial class semantic_check_sugared_statement_node
+    {
+        public bool visited = false;
+    }
+
+    public partial class var_deconstructor_parameter
+    {
+        public override string ToString() => identifier.ToString() + (type == null ? "" : $": {type}");
+    }
+
+    public partial class recursive_deconstructor_parameter
+    {
+        public override string ToString() => pattern.ToString();
+    }
+
+    public partial class tuple_pattern_wild_card
+    {
+        ///<summary>
+        ///Конструктор c параметрами
+        ///</summary>
+        public tuple_pattern_wild_card(SourceContext sc)
+        {
+            this.source_context = sc;
+        }
+    }
+
+    public partial class collection_pattern_wild_card
+    {
+        ///<summary>
+        ///Конструктор c параметрами
+        ///</summary>
+        public collection_pattern_wild_card(SourceContext sc)
+        {
+            this.source_context = sc;
+        }
+    }
+
+    public partial class collection_pattern_gap_parameter
+    {
+        ///<summary>
+        ///Конструктор c параметрами
+        ///</summary>
+        public collection_pattern_gap_parameter(SourceContext sc)
+        {
+            this.source_context = sc;
+        }
+    }
+
+    public partial class wild_card_deconstructor_parameter
+    {
+        ///<summary>
+        ///Конструктор c параметрами
+        ///</summary>
+        public wild_card_deconstructor_parameter(SourceContext sc)
+        {
+            this.source_context = sc;
+        }
+    }
+
+    public partial class const_pattern
+    {
+        ///<summary>
+        ///Конструктор c параметрами
+        ///</summary>
+        public const_pattern(List<syntax_tree_node> pattern_nodes, SourceContext sc)
+        {
+            source_context = sc;
+            pattern_expressions = new expression_list();
+            pattern_expressions.source_context = sc;
+
+            foreach (var elem in pattern_nodes)
+            {
+                if (elem is named_type_reference type)
+                {
+                    expression pattern_expr = null;
+                    if (type.names.Count == 1)
+                    {
+                        pattern_expr = type.names[0];
+                    }
+                    else
+                    {
+                        pattern_expr = new dot_node(null, type.names[type.names.Count - 1], sc);
+                        var curr_dot_node = pattern_expr as dot_node;
+
+                        for (var i = type.names.Count - 2; i >= 1; --i)
+                        {
+                            curr_dot_node.left = new dot_node(null, type.names[i], sc);
+                            curr_dot_node = curr_dot_node.left as dot_node;
+                        }
+                        curr_dot_node.left = type.names[0];
+                    }
+                    pattern_expressions.Add(pattern_expr, type.source_context);
+                } 
+                else if (elem is expression expr)
+                {
+                    pattern_expressions.Add(expr, elem.source_context);
+                }
+            }
+        }
+    }
+
+    public partial class empty_statement
+    {
+        public override string ToString() => "<>";
+    }
+    public partial class modern_proc_type
+    {
+        public override string ToString() => "<proc_type>";
+    }
 }
 

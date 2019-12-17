@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -54,7 +54,7 @@ namespace CodeCompletion
                     if (desc == null)
                         desc = "";
                     desc = desc.Split(new string[] { "\n"},StringSplitOptions.None)[0].Trim();
-                    assert(desc == should_desc, FileName+", should: "+should_desc+", is: "+desc);
+                    assert(desc.Replace(", ", ",") == should_desc.Replace(", ",","), FileName+", should: "+should_desc+", is: "+desc);
                     tmp = tmp.Remove(ind, tmp.IndexOf("@}") + 2 - ind);
                     ind = tmp.IndexOf("{@");
                 }
@@ -369,8 +369,43 @@ namespace CodeCompletion
     		off = test_str.Length;
     		s = parser.LanguageInformation.FindExpression(off,test_str,line,col,out keyw);
     		assert(s.Trim('\n',' ','\t')==test_str);
-    		
-    		int num_param = 0;
+
+            test_str = "()->(obj as string).Trim";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == "(obj as string).Trim");
+
+            test_str = "Seq(0)\n.f1//комментарий\n.Print";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == "Seq(0)\n.f1\n.Print");
+
+            test_str = "$'is {a}'";
+            off = test_str.Length-2;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == "a");
+
+            test_str = "seq1.Where(i ->(i = 1) or (i = 2)).JoinIntoString";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == "seq1.Where(i ->(i = 1) or (i = 2)).JoinIntoString");
+
+            test_str = "$'{f1(s0)}'";
+            off = test_str.Length - 3;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == "s0");
+
+            test_str = "f1&<byte>\n.ToString";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == test_str);
+            
+            test_str = "a[2:]";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpression(off, test_str, line, col, out keyw);
+            assert(s.Trim('\n', ' ', '\t') == test_str);
+
+            int num_param = 0;
     		//testirovanie nazhatija skobki
     		test_str = "writeln";
     		off = test_str.Length;
@@ -460,8 +495,14 @@ namespace CodeCompletion
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,'(',ref num_param);
     		assert(s == test_str);
     		assert(num_param==0);
-    		
-    		test_str = "test; \n  sin";
+
+            test_str = "()->(obj as string).Trim";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s == "(obj as string).Trim");
+            assert(num_param == 0);
+
+            test_str = "test; \n  sin";
     		off = test_str.Length;
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,'(',ref num_param);
     		assert(s.Trim(' ','\n','\t') == "sin");
@@ -525,14 +566,45 @@ namespace CodeCompletion
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,'(',ref num_param);
     		assert(s.Trim(' ','\n','\t') == "Console.WriteLine");
     		assert(num_param==0);
-    		
-    		test_str = "&var.&uses.&procedure";
+
+            test_str = "System.Math.DivRem";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s.Trim(' ', '\n', '\t') == "System.Math.DivRem");
+            assert(num_param == 0);
+
+            test_str = "seq1.Where(i ->(i = 1) or (i = 2)).JoinIntoString";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s.Trim('\n', ' ', '\t') == "seq1.Where(i ->(i = 1) or (i = 2)).JoinIntoString");
+
+            test_str = "f1&<array of byte>";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s.Trim('\n', ' ', '\t') == "f1&<array of byte>");
+
+            test_str = "f1&<sequence of byte>";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s.Trim('\n', ' ', '\t') == "f1&<sequence of byte>");
+
+            test_str = "&var.&uses.&procedure";
     		off = test_str.Length;
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,'(',ref num_param);
     		assert(s == test_str);
-    		
-    		//testirovanie nazhatija zapjatoj
-    		test_str = ";test(3,aa.bb";
+
+            test_str = "s.OrderBy";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s == test_str);
+
+            test_str = "f1&<byte>\n.ToString";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, '(', ref num_param);
+            assert(s.Trim('\n', ' ', '\t') == "f1&<byte>\n.ToString");
+
+            //testirovanie nazhatija zapjatoj
+            test_str = ";test(3,aa.bb";
     		off = test_str.Length;
     		num_param = 1;
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,',',ref num_param);
@@ -653,8 +725,17 @@ namespace CodeCompletion
     		s = parser.LanguageInformation.FindExpressionForMethod(off,test_str,line,col,',',ref num_param);
     		assert(s.Trim(' ','\n','\t') == "new RGB");
     		assert(num_param == 2);
-    		
-    		string str = null;
+
+            test_str = "Power(10 div 2";
+            off = test_str.Length;
+            num_param = 1;
+            s = parser.LanguageInformation.FindExpressionForMethod(off, test_str, line, col, ',', ref num_param);
+            assert(s.Trim(' ', '\n', '\t') == "Power");
+            assert(num_param == 2);
+
+            
+
+            string str = null;
     		//mouse hover
     		test_str = "sin(2)";
     		off = 1;
@@ -711,6 +792,21 @@ namespace CodeCompletion
     		s = parser.LanguageInformation.FindExpressionFromAnyPosition(off,test_str,line,col,out keyw,out str);
     		assert(s.Trim('\n',' ','\t')==test_str);
 
+            test_str = "new t1<byte>(2)";
+            off = 5;
+            s = parser.LanguageInformation.FindExpressionFromAnyPosition(off, test_str, line, col, out keyw, out str);
+            assert(s.Trim('\n', ' ', '\t') == "new t1<byte>(2)");
+
+            test_str = "new t1<List<byte>>(2)";
+            off = 5;
+            s = parser.LanguageInformation.FindExpressionFromAnyPosition(off, test_str, line, col, out keyw, out str);
+            assert(s.Trim('\n', ' ', '\t') == "new t1<List<byte>>(2)");
+
+            test_str = "t1&<byte>.x";
+            off = test_str.Length;
+            s = parser.LanguageInformation.FindExpressionFromAnyPosition(off, test_str, line, col, out keyw, out str);
+            assert(s.Trim('\n', ' ', '\t') == "t1&<byte>.x");
+
             //----
             Type[] types = typeof(int).Assembly.GetExportedTypes();
             int i = 0;
@@ -746,7 +842,6 @@ namespace CodeCompletion
             {
                 sw.WriteLine(parser.LanguageInformation.GetCompiledTypeRepresentation(t, t, ref i, ref j));
             }
-
             sw.Close();
     	}
     }
@@ -792,23 +887,63 @@ namespace CodeCompletion
                         {
                             stc.Compare(cu, cu2);
                         }
+                        catch(SyntaxNodesNotEqual ex)
+                        {
+                            log.WriteLine("SyntaxTreeNotEquals " + s + " " + ex.left?.ToString() + " and " + ex.right?.ToString() + Environment.NewLine);
+                        }
                         catch (Exception ex)
                         {
-                            log.WriteLine("SyntaxTreeNotEquals " + s + Environment.NewLine);
+                            log.WriteLine("SyntaxTreeNotEquals " + ex.Message  + " " + s + Environment.NewLine);
                         }
                 }
             }
             files = Directory.GetFiles(test_dir+@"\output", "*.pas");
             foreach (string s in files)
             {
-                string Text = new StreamReader(s, System.Text.Encoding.GetEncoding(1251)).ReadToEnd();
+                var sr = new StreamReader(s, System.Text.Encoding.GetEncoding(1251));
+                string Text = sr.ReadToEnd();
+                sr.Close();
                 List<Error> Errors = new List<Error>();
                 List<CompilerWarning> Warnings = new List<CompilerWarning>();
                 compilation_unit cu = CodeCompletionController.ParsersController.GetCompilationUnitForFormatter(s, Text, Errors, Warnings);
                 CodeFormatters.CodeFormatter cf = new CodeFormatters.CodeFormatter(2);
                 string Text2 = cf.FormatTree(Text, cu, 1, 1);
                 if (Text != Text2)
-                    log.WriteLine("Inavlid formatting of File " + s);
+                {
+                    int line = 1;
+                    for (int i = 0; i < Math.Min(Text.Length, Text2.Length); i++)
+                    {
+                        if (Text[i] != Text2[i])
+                        {
+                            log.WriteLine("Invalid formatting of File " + s + ", line "+line);
+                            break;
+                        }
+                        else if (Text[i] == '\n')
+                        {
+                            line++;
+                        }
+                    }  
+                }
+                
+                string shouldFileName = Path.Combine(test_dir + @"\should",Path.GetFileName(s));
+                if (File.Exists(shouldFileName))
+                {
+                    sr = new StreamReader(shouldFileName, System.Text.Encoding.GetEncoding(1251));
+                    string shouldText = sr.ReadToEnd();
+                    sr.Close();
+                    if (Text != shouldText)
+                    {
+                        sr = new StreamReader(s, System.Text.Encoding.UTF8);
+                        Text = sr.ReadToEnd();
+                        sr.Close();
+                        sr = new StreamReader(shouldFileName, System.Text.Encoding.UTF8);
+                        shouldText = sr.ReadToEnd();
+                        sr.Close();
+                    }
+                        
+                    if (Text != shouldText)
+                        log.WriteLine("Invalid formatting of File (text not equal) " + s);
+                }
             }
             log.Close();
         }

@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -47,6 +47,7 @@ namespace PascalABCCompiler.NETGenerator
         public static Type GCHandleType = typeof(GCHandle);
         public static Type MarshalType = typeof(Marshal);
         public static Type TypeType =   typeof(Type);
+        public static Type ValueType = typeof(ValueType);
         public static Type IEnumerableType = typeof(System.Collections.IEnumerable);
         public static Type IEnumeratorType = typeof(System.Collections.IEnumerator);
         public static Type IEnumerableGenericType = typeof(System.Collections.Generic.IEnumerable<>);
@@ -55,6 +56,7 @@ namespace PascalABCCompiler.NETGenerator
         private static Hashtable types;
         private static Hashtable sizes;
         public static MethodInfo ArrayCopyMethod;
+        public static MethodInfo GetTypeFromHandleMethod;
 		public static MethodInfo ResizeMethod;
         public static MethodInfo GCHandleFreeMethod;
 		public static MethodInfo StringNullOrEmptyMethod;
@@ -109,6 +111,7 @@ namespace PascalABCCompiler.NETGenerator
             sizes[UInt64Type] = sizeof(UInt64);
             sizes[SingleType] = sizeof(Single);
             sizes[DoubleType] = sizeof(Double);
+            //sizes[UIntPtr] = sizeof(UIntPtr);
             
             //types[TypeType] = TypeType;
             ArrayCopyMethod = typeof(Array).GetMethod("Copy", new Type[3] { typeof(Array), typeof(Array), typeof(int) });
@@ -120,6 +123,7 @@ namespace PascalABCCompiler.NETGenerator
             IndexOutOfRangeConstructor = typeof(IndexOutOfRangeException).GetConstructor(Type.EmptyTypes);
             ParamArrayAttributeConstructor = typeof(ParamArrayAttribute).GetConstructor(Type.EmptyTypes);
             GCHandleFreeMethod = typeof(GCHandle).GetMethod("Free");
+            GetTypeFromHandleMethod = typeof(Type).GetMethod("GetTypeFromHandle");
         }
 
         public static bool IsStandType(Type t)
@@ -421,7 +425,7 @@ namespace PascalABCCompiler.NETGenerator
 
         public static void PushCast(ILGenerator il, Type tp, Type from_value_type)
         {
-            if (IsPointer(tp))  //INTPTR TODO Здесть проблема с Unbox_Any
+            if (IsPointer(tp))
                 return;
             //(ssyy) Вставил 15.05.08
             if (from_value_type != null)
@@ -521,7 +525,6 @@ namespace PascalABCCompiler.NETGenerator
         {
             ILGenerator il = clone_meth.GetILGenerator();
             il.Emit(OpCodes.Ldloca_S, (byte)0);
-            //il.Emit(OpCodes.Ldarga_S,(byte)0);
             il.Emit(OpCodes.Ldarg_0);
             if (ti.clone_meth != null)
             {
@@ -541,8 +544,6 @@ namespace PascalABCCompiler.NETGenerator
         public static void AssignField(MethodBuilder ass_meth, FieldBuilder fb, TypeInfo ti)
         {
             ILGenerator il = ass_meth.GetILGenerator();
-            //il.Emit(OpCodes.Ldarga_S, (byte)0);
-            //il.Emit(OpCodes.Ldarga_S, (byte)1);
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldarga_S, (byte)1);
             if (ti.clone_meth != null)
@@ -563,8 +564,7 @@ namespace PascalABCCompiler.NETGenerator
         public static void PushTypeOf(ILGenerator il, Type tp)
         {
             il.Emit(OpCodes.Ldtoken, tp);
-            //TODO это надо ускорить хештаблицей!
-            il.EmitCall(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle"), null);
+            il.EmitCall(OpCodes.Call, TypeFactory.GetTypeFromHandleMethod, null);
         }
         
         public static bool IsPointer(Type tp)

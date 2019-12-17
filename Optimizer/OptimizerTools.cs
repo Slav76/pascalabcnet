@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -43,7 +43,8 @@ namespace PascalABCCompiler
         public void AddVariable(var_definition_node vdn)
         {
             VarInfo vi = new VarInfo();
-            ht[vdn] = vi;
+            if (ht[vdn] == null)
+                ht[vdn] = vi;
         }
 
         public VarInfo GetVariable(var_definition_node vdn)

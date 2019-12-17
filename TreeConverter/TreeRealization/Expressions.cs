@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -273,6 +273,10 @@ namespace PascalABCCompiler.TreeRealization
             this._condition = condition;
             this._ret_if_true = ret_if_true;
             this._ret_if_false = ret_if_false;
+            /*if (ret_if_true is null_const_node)
+                this.conversion_type = ret_if_false.conversion_type;
+            else
+                this.conversion_type = ret_if_true.conversion_type;*/
         }
 
         public expression_node internal_condition

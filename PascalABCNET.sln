@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VisualPascalABCNET", "VisualPascalABCNET", "{26843C5D-9D7E-4C2C-AC14-2D227FA5592E}"
 EndProject
@@ -40,8 +40,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxTreeVisualisator", "V
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PT4Provider", "VisualPlugins\PT4Provider\PT4Provider.csproj", "{4A9AC1AA-698E-49C2-B1ED-15B5E4AB963D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCharpLanguageConverter", "VisualPlugins\SCharpLanguageConverter\SCharpLanguageConverter.csproj", "{8F44EF8C-C487-4D23-B028-55935466DC36}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelpBuilder", "VisualPlugins\HelpBuilder\HelpBuilder.csproj", "{FFF73A7C-22E5-4BB6-B7AA-6A0DC970DFDF}"
 EndProject
@@ -98,6 +96,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YieldHelpers", "Yield\YieldHelpers\YieldHelpers.csproj", "{CE5C55C2-A11C-4E94-A9FA-3FC6CA3E4C09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxVisitors", "SyntaxVisitors\SyntaxVisitors.csproj", "{A9AB4282-83B4-41A7-86C3-E5BF6A45E7E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeTemplatesPlugin", "VisualPlugins\CodeTemplatesPlugin\CodeTemplatesPlugin.csproj", "{3AA92A45-7142-4C59-B12F-56DAE32A40E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -199,16 +199,6 @@ Global
 		{4A9AC1AA-698E-49C2-B1ED-15B5E4AB963D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4A9AC1AA-698E-49C2-B1ED-15B5E4AB963D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4A9AC1AA-698E-49C2-B1ED-15B5E4AB963D}.Release|x86.ActiveCfg = Release|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{8F44EF8C-C487-4D23-B028-55935466DC36}.Release|x86.ActiveCfg = Release|Any CPU
 		{FFF73A7C-22E5-4BB6-B7AA-6A0DC970DFDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FFF73A7C-22E5-4BB6-B7AA-6A0DC970DFDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFF73A7C-22E5-4BB6-B7AA-6A0DC970DFDF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -441,6 +431,18 @@ Global
 		{A9AB4282-83B4-41A7-86C3-E5BF6A45E7E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A9AB4282-83B4-41A7-86C3-E5BF6A45E7E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A9AB4282-83B4-41A7-86C3-E5BF6A45E7E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Debug|x86.Build.0 = Debug|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -456,7 +458,6 @@ Global
 		{A36031B7-D3D1-4372-B478-07621069602E} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
 		{1437FD01-0741-4912-8035-6BDFEAA45626} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
 		{4A9AC1AA-698E-49C2-B1ED-15B5E4AB963D} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
-		{8F44EF8C-C487-4D23-B028-55935466DC36} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
 		{FFF73A7C-22E5-4BB6-B7AA-6A0DC970DFDF} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
 		{1E42361A-EDA3-4872-88AF-A3AAF600D36D} = {F8CE2712-826B-450B-A72F-D32D80C99858}
 		{A25D26FB-3043-4BCF-833E-E3F4C3BE795E} = {F8CE2712-826B-450B-A72F-D32D80C99858}
@@ -482,5 +483,9 @@ Global
 		{F10A5330-DCF4-4533-877C-7B1B1BE23884} = {F8CE2712-826B-450B-A72F-D32D80C99858}
 		{CE5C55C2-A11C-4E94-A9FA-3FC6CA3E4C09} = {F8CE2712-826B-450B-A72F-D32D80C99858}
 		{A9AB4282-83B4-41A7-86C3-E5BF6A45E7E2} = {F8CE2712-826B-450B-A72F-D32D80C99858}
+		{3AA92A45-7142-4C59-B12F-56DAE32A40E3} = {EC68A3D8-6D63-4A79-ABA6-BF8E9D7756D7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68E993E6-EE86-4DDF-B0A1-4FE884F8AC39}
 	EndGlobalSection
 EndGlobal

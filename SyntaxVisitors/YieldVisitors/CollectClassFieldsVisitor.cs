@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -34,13 +34,15 @@ namespace SyntaxVisitors
                 return;
             }
 
-            if (td.type_name.name != _className.name)
+            if (td.type_name.name.ToLower() != _className.name.ToLower())
             {
                 // Not the class we search for
                 // Yoda
                 return;
             }
 
+            if (cd.body == null)
+                return;
             var fields = cd.body.class_def_blocks.SelectMany(cm => cm.members.Where(decl => decl is var_def_statement)
                                                                 .Select(decl1 => (decl1 as var_def_statement).vars.idents)
                                                                 .SelectMany(ids => ids.Select(id => id)));

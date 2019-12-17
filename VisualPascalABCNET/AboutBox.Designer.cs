@@ -168,7 +168,7 @@
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(311, 13);
             this.label12.TabIndex = 17;
-            this.label12.Text = "Copyright (c) 2005, 2017   Ivan Bondarev, Stanislav Mihalkovich";
+            this.label12.Text = "Copyright (c) 2005, 2019   Ivan Bondarev, Stanislav Mikhalkovich";
             this.label12.Click += new System.EventHandler(this.label12_Click);
             // 
             // label9
@@ -364,7 +364,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutBox";
-            this.Padding = new System.Windows.Forms.Padding(9);
+            this.Padding = new System.Windows.Forms.Padding(9, 9, 9, 9);
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -410,7 +410,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label label13;
         public System.Windows.Forms.ListView dgvModules;
         private System.Windows.Forms.ColumnHeader chType;
         private System.Windows.Forms.ColumnHeader chName;
@@ -418,6 +417,6 @@
         private System.Windows.Forms.ColumnHeader chCopyright;
         private System.Windows.Forms.LinkLabel linkLabel3;
         private System.Windows.Forms.Label label6;
-
+        private System.Windows.Forms.Label label13;
     }
 }

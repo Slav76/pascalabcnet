@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -170,8 +170,12 @@ namespace TreeConverter.LambdaExpressions.Closure
         private void VisitCapturedVar(CapturedVariablesTreeNode scope, CapturedVariablesTreeNode.CapturedSymbolInfo symbolInfo)
         {
             var varName = ((IVAriableDefinitionNode)symbolInfo.SymbolInfo.sym_info).name.ToLower();
+            var ff = symbolInfo.SymbolInfo.sym_info.GetType();
             var isSelfWordInClass = scope is CapturedVariablesTreeNodeClassScope && varName == compiler_string_consts.self_word;
-
+            SourceContext sourceCtxt = null;
+            if (symbolInfo.SymbolInfo.sym_info.location != null)
+                sourceCtxt = new SourceContext(symbolInfo.SymbolInfo.sym_info.location.begin_line_num, symbolInfo.SymbolInfo.sym_info.location.begin_column_num,
+                    symbolInfo.SymbolInfo.sym_info.location.end_line_num, symbolInfo.SymbolInfo.sym_info.location.end_column_num);
             foreach (var referencingLambda in symbolInfo.ReferencingLambdas.OrderByDescending(rl => rl.ScopeIndex))
             {
                 if (scope != referencingLambda.ParentNode)
@@ -195,16 +199,22 @@ namespace TreeConverter.LambdaExpressions.Closure
                     var upperScopeWhereVarsAreCaptured = scope;
                     var upperScopeWhereVarsAreCapturedClass =
                         _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex].ClassDeclaration;
+                    var ClassName = upperScopeWhereVarsAreCapturedClass.type_name;
+                    var ClassField = symbolInfo.SymbolInfo.sym_info as class_field;
 
                     var substKey = new SubstitutionKey(varName, symbolInfo.SyntaxTreeNodeWithVarDeclaration,
                                                        scope.CorrespondingSyntaxTreeNode);
                     if (!_substitutions.ContainsKey(substKey))
                     {
+                        // SSM 22.10.17 Тут ошибка в случае захвата классовых полей - первый параметр должен быть не self, а имя класса
+                        if (ClassField != null && ClassField.IsStatic)
+                            _substitutions.Add(substKey, new dot_node(ClassName, new ident(varName)));// sc не заполнен, что плохо!
+                        else
                         _substitutions.Add(substKey,
                                            new dot_node(
                                                new ident(
                                                    _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                                       .GeneratedSubstitutingFieldName), new ident(varName)));
+                                                       .GeneratedSubstitutingFieldName, sourceCtxt), new ident(varName, sourceCtxt), sourceCtxt));
                     }
 
                     while (upperScopesStack.Count != 0)
@@ -239,10 +249,10 @@ namespace TreeConverter.LambdaExpressions.Closure
                                         new dot_node(
                                             new ident(
                                                 _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                                    .GeneratedSubstitutingFieldName),
+                                                    .GeneratedSubstitutingFieldName, sourceCtxt),
                                             new ident(
                                                 _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                                    .GeneratedUpperClassFieldName));
+                                                    .GeneratedUpperClassFieldName, sourceCtxt), sourceCtxt);
 
                                     var nodeForDotNodeCalc = upperScopeWhereVarsAreCaptured.ParentNode;
                                     while (nodeForDotNodeCalc != scope)
@@ -262,7 +272,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                                     }
                                     if (!isSelfWordInClass)
                                     {
-                                        dotnode = new dot_node(dotnode, new ident(varName));
+                                        dotnode = new dot_node(dotnode, new ident(varName, sourceCtxt), sourceCtxt);
                                     }
                                 }
                                 else
@@ -270,8 +280,8 @@ namespace TreeConverter.LambdaExpressions.Closure
                                     dotnode = new dot_node(new ident(
                                                                _capturedVarsClassDefs[
                                                                    upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                                                   .GeneratedSubstitutingFieldName),
-                                                           new ident(varName));
+                                                                   .GeneratedSubstitutingFieldName, sourceCtxt),
+                                                           new ident(varName, sourceCtxt), sourceCtxt);
                                 }
 
                                 if (!_substitutions.ContainsKey(substKey))
@@ -302,7 +312,7 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                             if (
                                 _capturedVarsClassDefs[nextNodeWhereVarsAreCaptured.ScopeIndex]
-                                    .AssignNodeForUpperClassFieldInitialization == null)
+                                    .AssignNodeForUpperClassFieldInitialization == null && !(ClassField != null && ClassField.IsStatic))
                             {
                                 var fieldType =
                                     SyntaxTreeBuilder.BuildSimpleType(upperScopeWhereVarsAreCapturedClass.type_name.name);
@@ -312,7 +322,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                                             {
                                                 new ident(
                                             _capturedVarsClassDefs[nextNodeWhereVarsAreCaptured.ScopeIndex]
-                                                .GeneratedUpperClassFieldName)
+                                                .GeneratedUpperClassFieldName, sourceCtxt)
                                             },
                                         new List<type_definition> {fieldType});
 
@@ -324,13 +334,14 @@ namespace TreeConverter.LambdaExpressions.Closure
                                         new dot_node(
                                             new ident(
                                                 _capturedVarsClassDefs[nextNodeWhereVarsAreCaptured.ScopeIndex]
-                                                    .GeneratedSubstitutingFieldName),
+                                                    .GeneratedSubstitutingFieldName, sourceCtxt),
                                             new ident(
                                                 _capturedVarsClassDefs[nextNodeWhereVarsAreCaptured.ScopeIndex]
-                                                    .GeneratedUpperClassFieldName)),
+                                                    .GeneratedUpperClassFieldName), sourceCtxt),
                                         new ident(
                                             _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                                .GeneratedSubstitutingFieldName));
+                                                .GeneratedSubstitutingFieldName, sourceCtxt), 
+                                                sourceCtxt);
                             }
 
                             substKey = new SubstitutionKey(varName, symbolInfo.SyntaxTreeNodeWithVarDeclaration,
@@ -355,7 +366,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                                     dot = new dot_node(dot,
                                                        new ident(
                                                            _capturedVarsClassDefs[nodeForDotNodeCalculation.ScopeIndex]
-                                                               .GeneratedUpperClassFieldName));
+                                                               .GeneratedUpperClassFieldName, sourceCtxt), sourceCtxt);
                                 }
 
                                 nodeForDotNodeCalculation = nodeForDotNodeCalculation.ParentNode;
@@ -363,12 +374,15 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                             if (!isSelfWordInClass)
                             {
-                                dot = new dot_node(dot, new ident(varName));
+                                dot = new dot_node(dot, new ident(varName, sourceCtxt), sourceCtxt);
                             }
 
                             if (!_substitutions.ContainsKey(substKey))
                             {
-                                _substitutions.Add(substKey, dot);
+                                if (ClassField != null && ClassField.IsStatic)
+                                    _substitutions.Add(substKey, new dot_node(ClassName, new ident(varName, sourceCtxt), sourceCtxt));// sc не заполнен, что плохо!
+                                else
+                                    _substitutions.Add(substKey, dot);
                             }
 
                             upperScopeWhereVarsAreCaptured = nextNodeWhereVarsAreCaptured;
@@ -382,11 +396,15 @@ namespace TreeConverter.LambdaExpressions.Closure
                     {
                         if (upperScopeWhereVarsAreCaptured != scope)
                         {
-                            var dotnode1 = new dot_node(
-                                new ident(compiler_string_consts.self_word),
+                            dot_node dotnode1 = null;
+                            if (ClassField != null && ClassField.IsStatic)
+                                dotnode1 = new dot_node(ClassName, new ident(varName));
+                            else
+                                dotnode1 = new dot_node(
+                                new ident(compiler_string_consts.self_word, sourceCtxt),
                                 new ident(
                                     _capturedVarsClassDefs[upperScopeWhereVarsAreCaptured.ScopeIndex]
-                                        .GeneratedUpperClassFieldName));
+                                        .GeneratedUpperClassFieldName, sourceCtxt), sourceCtxt);
 
                             if (upperScopeWhereVarsAreCaptured != scope)
                             {
@@ -400,7 +418,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                                         dotnode1 = new dot_node(dotnode1,
                                                                 new ident(
                                                                     _capturedVarsClassDefs[nodeForDotNodeCalc.ScopeIndex]
-                                                                        .GeneratedUpperClassFieldName));
+                                                                        .GeneratedUpperClassFieldName, sourceCtxt), sourceCtxt);
                                     }
 
                                     nodeForDotNodeCalc = nodeForDotNodeCalc.ParentNode;
@@ -415,16 +433,17 @@ namespace TreeConverter.LambdaExpressions.Closure
                                     Tuple<string, class_field, semantic_node> publicProperty;
                                     if (classScope.NonPublicMembersNamesMapping.TryGetValue(varName, out publicProperty))
                                     {
-                                        dotnode1 = new dot_node(dotnode1, new ident(publicProperty.Item1));
+                                        dotnode1 = new dot_node(dotnode1.left, new ident(publicProperty.Item1, sourceCtxt), sourceCtxt); // SSM #869 добавил .left - была ошибка
                                     }
                                     else
                                     {
-                                        dotnode1 = new dot_node(dotnode1, new ident(varName));
+                                        if (!(ClassField != null && ClassField.IsStatic))
+                                            dotnode1 = new dot_node(dotnode1, new ident(varName, sourceCtxt), sourceCtxt); // ?? dotnode1.left ??
                                     }
                                 }
                                 else
                                 {
-                                    dotnode1 = new dot_node(dotnode1, new ident(varName));
+                                    dotnode1 = new dot_node(dotnode1, new ident(varName, sourceCtxt), sourceCtxt); // ?? dotnode1.left ??
                                 }
                             }
                             _lambdaIdReferences.Add(new LambdaReferencesSubstitutionInfo
@@ -438,8 +457,8 @@ namespace TreeConverter.LambdaExpressions.Closure
                         else
                         {
                             var dotnode1 = new dot_node(
-                                new ident(compiler_string_consts.self_word),
-                                new ident(varName));
+                                new ident(compiler_string_consts.self_word, sourceCtxt),
+                                new ident(varName, sourceCtxt), sourceCtxt);
 
                             _lambdaIdReferences.Add(new LambdaReferencesSubstitutionInfo
                             {
@@ -493,13 +512,13 @@ namespace TreeConverter.LambdaExpressions.Closure
                                                new dot_node(
                                                    new ident(
                                                        _capturedVarsClassDefs[scope.ScopeIndex]
-                                                           .GeneratedSubstitutingFieldName), new ident(propertyName ?? varName)));
+                                                           .GeneratedSubstitutingFieldName, sourceCtxt), new ident(propertyName ?? varName, sourceCtxt), sourceCtxt));
                         }
                     }
 
                     var dotnode1 = new dot_node(
-                                new ident(compiler_string_consts.self_word),
-                                new ident(varName));
+                                new ident(compiler_string_consts.self_word, sourceCtxt),
+                                new ident(varName, sourceCtxt), sourceCtxt);
 
                     _lambdaIdReferences.Add(new LambdaReferencesSubstitutionInfo
                     {
@@ -525,6 +544,14 @@ namespace TreeConverter.LambdaExpressions.Closure
 
         private void AddReferencesToIdentInLambda(type_declaration upperScopeWhereVarsAreCapturedClass, CapturedVariablesTreeNode scope, string varName, syntax_tree_node syntaxTreeNodeWithVarDeclaration, dot_node substDotNode, bool nestedLambda)
         {
+/*#if DEBUG
+            var pp = scope.ToString().IndexOf("TreeNode");
+            var ss = scope.ToString().Remove(0, pp + 8).Replace("Scope"," ");
+            var cn = "";
+            if (scope.ChildNodes.Count>0)
+                cn = "Childs: "+ scope.ChildNodes.Aggregate("",(s, x) => s + x.ScopeIndex.ToString() + " ");
+            System.IO.File.AppendAllText("d:\\w.txt", "AddR enter: " + ss + scope.ScopeIndex + " " + cn + "" +scope.CorrespondingSyntaxTreeNode + "\n");
+#endif*/
             for (var i = 0; i < scope.ChildNodes.Count; i++)
             {
                 if (!(scope.ChildNodes[i] is CapturedVariablesTreeNodeLambdaScope))
@@ -560,6 +587,10 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                     if (!_substitutions.ContainsKey(substKey))
                     {
+/*#if DEBUG
+                        System.IO.File.AppendAllText("d:\\w.txt", "1 substitutions.Add: " + substKey + " " + substDotNode + "\n");
+#endif*/
+
                         _substitutions.Add(substKey, substDotNode);
                     }
 
@@ -615,19 +646,26 @@ namespace TreeConverter.LambdaExpressions.Closure
                                                        scope.ChildNodes[0].CorrespondingSyntaxTreeNode);
                         if (!_substitutions.ContainsKey(substKey))
                         {
+/*#if DEBUG
+                            System.IO.File.AppendAllText("d:\\w.txt", "2 substitutions.Add: " + substKey + " " + substDotNode + "\n");
+#endif*/
+
                             _substitutions.Add(substKey, substDotNode1);
                         }
-
                         AddReferencesToIdentInLambda(_capturedVarsClassDefs[scopeAsLambda.ScopeIndexOfClassWhereLambdaWillBeAddedAsMethod.Value].ClassDeclaration, scopeAsLambda.ChildNodes[0], varName, syntaxTreeNodeWithVarDeclaration, substDotNode1, true);
                     }
                     else
                     {
-                        AddReferencesToIdentInLambda(upperScopeWhereVarsAreCapturedClass, scope.ChildNodes[0], varName, syntaxTreeNodeWithVarDeclaration, substDotNode, nestedLambda);
+                        // SSM 25.06.19 fix #1988 - заменил ошибочное scope.ChildNodes[0] на scope.ChildNodes[i]
+                        AddReferencesToIdentInLambda(upperScopeWhereVarsAreCapturedClass, scope.ChildNodes[i], varName, syntaxTreeNodeWithVarDeclaration, substDotNode, nestedLambda);
                     }
                 }
             }
+/*#if DEBUG
+            System.IO.File.AppendAllText("d:\\w.txt", "AddR exit: " + scope.ScopeIndex+"\n");
+#endif*/
         }
-        
+
         private void VisitTreeAndBuildClassDefinitions(CapturedVariablesTreeNode currentNode)
         {
             var variablesFromThisScopeWhichWereCaptured = currentNode

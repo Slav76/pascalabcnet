@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Text;
@@ -358,6 +358,18 @@ namespace PascalABCCompiler.Parsers
             this.description = description;
         }
 
+        public SymInfo(SymInfo si)
+        {
+            this.name = si.name;
+            this.addit_name = si.addit_name;
+            this.description = si.description;
+            this.kind = si.kind;
+            this.IsUnitNamespace = si.IsUnitNamespace;
+            this.acc_mod = si.acc_mod;
+            this.has_doc = si.has_doc;
+            this.not_include = si.not_include;
+        }
+
         public string Name
         {
             get
@@ -642,12 +654,23 @@ namespace PascalABCCompiler.Parsers
     	{
     		get;
     	}
-    	
-    	string[] TemplateArguments
+
+        bool IsAbstract
+        {
+            get;
+        }
+
+        bool IsStatic
+        {
+            get;
+        }
+
+        string[] TemplateArguments
     	{
     		get;
     	}
 
+        IProcScope FindExtensionMethod(string name);
         IProcScope GetConstructor();
     }
     
@@ -657,6 +680,8 @@ namespace PascalABCCompiler.Parsers
     	{
     		get;
     	}
+
+        ICompiledTypeScope[] GetCompiledGenericArguments();
     }
     
     public interface ICompiledMethodScope : IProcScope
@@ -798,6 +823,11 @@ namespace PascalABCCompiler.Parsers
     public interface IInterfaceUnitScope : IBaseScope
     {
         IImplementationUnitScope ImplementationUnitScope
+        {
+            get;
+        }
+
+        bool IsNamespaceUnit
         {
             get;
         }

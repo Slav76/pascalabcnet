@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Diagnostics;
@@ -223,7 +223,7 @@ namespace VisualPascalABC.Utils
                 //process.StartInfo.UseShellExecute = false;
                 process.StartInfo.FileName = BatFile;
                 process.StartInfo.WorkingDirectory = workingDirectory;
-                process.StartInfo.Arguments = command.Replace(" ","\" \"") + " " + arguments;
+                process.StartInfo.Arguments = command.Replace(" ","\" \"") + " " + PascalABCCompiler.StringResourcesLanguage.CurrentLCID + " " + arguments;
             }
             else
             {
@@ -268,7 +268,7 @@ namespace VisualPascalABC.Utils
             //\ssyy
             if (attachDebugger)
             {
-            	WorkbenchServiceFactory.DebuggerManager.Attach((uint)process.Id,command,!fictive_attach,false);
+                WorkbenchServiceFactory.DebuggerManager.Attach((uint)process.Id,command,!fictive_attach,false);
             }
             if (redirectIO)
             process.StandardInput.WriteLine("GO");

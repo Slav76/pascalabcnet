@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Здесь описана реализация generic-типов
 //Файлом владеет ssyy.
@@ -129,6 +129,7 @@ namespace PascalABCCompiler.TreeRealization
                 return new VoidNotValid(loc);
             }*/
             SystemLibrary.SystemLibrary.syn_visitor.check_for_type_allowed(tn,loc);
+            SystemLibrary.SystemLibrary.syn_visitor.check_using_static_class(tn, loc);
             internal_interface ii = tn.get_internal_interface(internal_interface_kind.bounded_array_interface);
             if (ii != null)
             {
@@ -140,15 +141,17 @@ namespace PascalABCCompiler.TreeRealization
         public static CompilationErrorWithLocation check_type_list(List<type_node> tparams, List<generic_parameter_eliminations> gpe_list, bool method_param_types, out int i)
         {
             int count = tparams.Count;
+            
             for (i = 0; i < count; i++)
             {
                 generic_parameter_eliminations gpe = gpe_list[i];
                 type_node tn = tparams[i];
-                if (gpe.is_class && !tn.is_class)
+                
+                if (gpe.is_class && !tn.is_class && !(tn.is_generic_parameter && tn.base_type != null && tn.base_type.is_class))
                 {
                     return new SimpleSemanticError(null, "PARAMETER_{0}_MUST_BE_REFERENCE_TYPE", tn.PrintableName);
                 }
-                if (gpe.is_value && !tn.is_value && !tn.is_generic_parameter)
+                if (gpe.is_value && (!tn.is_value || tn.BaseFullName != null && tn.BaseFullName.StartsWith("System.Nullable")) && !tn.is_generic_parameter)
                 {
                     return new SimpleSemanticError(null, "PARAMETER_{0}_MUST_BE_VALUE_TYPE", tn.PrintableName);
                 }
@@ -170,9 +173,11 @@ namespace PascalABCCompiler.TreeRealization
                         return new SimpleSemanticError(null, "PARAMETER_{0}_MUST_IMPLEMENT_INTERFACE_{1}", tn.PrintableName, di.name);
                     }
                 }
+                if (tn.IsStatic)
+                    return new SimpleSemanticError(null, "USING_STATIC_CLASS_NOT_VALID");
                 if (gpe.has_default_ctor)
                 {
-                    if (tn.IsAbstract || !tn.is_value && !generic_convertions.type_has_default_ctor(tn, false))
+                    if (tn.IsAbstract || tn.IsStatic || !tn.is_value && !generic_convertions.type_has_default_ctor(tn, false))
                     {
                         return new SimpleSemanticError(null, "PARAMETER_{0}_MUST_HAVE_DEFAULT_CONSTRUCTOR", tn.PrintableName);
                     }
@@ -649,13 +654,13 @@ namespace PascalABCCompiler.TreeRealization
             var result = true;
             exception_on_body_compilation = null;
 
-            if (lambda_syntax_node.formal_parameters == null
+            /*if (lambda_syntax_node.formal_parameters == null
                 || lambda_syntax_node.formal_parameters.params_list == null
                 || lambda_syntax_node.formal_parameters.params_list.Count == 0)
             {
                 return false;
-            }
-            
+            }*/
+            if (lambda_syntax_node.formal_parameters != null)
             foreach (var t in lambda_syntax_node.formal_parameters.params_list)
             {
                 var lambdaInfType = t.vars_type as lambda_inferred_type;
@@ -726,7 +731,7 @@ namespace PascalABCCompiler.TreeRealization
                                                      (type_node)((lambda_inferred_type)lambda_syntax_node.return_type).real_type,
                                                      deduced, nils)) //Выводим дженерик-параметры после того как вычислили тип возвращаемого значения
                             {
-                                result = false;
+                                result = false; 
                             }
                         }
                     }
@@ -735,7 +740,7 @@ namespace PascalABCCompiler.TreeRealization
             return result;
         }
 
-        public static function_node DeduceFunction(function_node func, expressions_list fact, bool alone, location loc, List<SyntaxTree.expression> syntax_nodes_parameters = null)
+        public static function_node DeduceFunction(function_node func, expressions_list fact, bool alone, compilation_context context, location loc, List<SyntaxTree.expression> syntax_nodes_parameters = null)
         {
             parameter_list formal = func.parameters;
             int formal_count = formal.Count;
@@ -793,7 +798,12 @@ namespace PascalABCCompiler.TreeRealization
                             //Проверяем фактические, попадающие под params...
                             if (!DeduceInstanceTypes(last_params_type, fact[i].type, deduced, nils))
                             {
-                                if (alone)
+                                if (alone && fact[i].type is delegated_methods && (fact[i].type as delegated_methods).empty_param_method != null)
+                                {
+                                    if (DeduceInstanceTypes(last_params_type, (fact[i].type as delegated_methods).empty_param_method.type, deduced, nils))
+                                        continue;
+                                }
+                                else if (alone)
                                     throw new SimpleSemanticError(loc, "GENERIC_FUNCTION_{0}_CAN_NOT_BE_CALLED_WITH_THESE_PARAMETERS", func.name);
                                 return null;
                             }
@@ -832,7 +842,7 @@ namespace PascalABCCompiler.TreeRealization
             }
 
             var continue_trying_to_infer_types = true; 
-            Dictionary<string, delegate_internal_interface> formal_delegates = null; 
+            Dictionary<string, delegate_internal_interface> formal_delegates = null;
 
             while (continue_trying_to_infer_types) //Продолжаем пытаться вычислить типы до тех пор пока состояние о выведенных типах не будет отличаться от состояния на предыдущей итерации
             {
@@ -885,14 +895,15 @@ namespace PascalABCCompiler.TreeRealization
                     }
 
                     foreach (var formal_delegate in formal_delegates)
-                        //Перебираем все полученные формальные параемтры, соотвтетсвующие фактическим лямбдам
+                    // Перебираем все полученные формальные параметры, соответствующие фактическим лямбдам
                     {
                         var lambda_syntax_node = lambda_syntax_nodes[formal_delegate.Key];
                         Exception on_lambda_body_compile_exception;
-                            // Исключение которое может возникунть в результате компиляции тела лямбды если мы выберем неправильные типы параметров
-                        if (!TryToDeduceTypesInLambda(lambda_syntax_node, formal_delegate.Value, deduced, nils,
-                                                      out on_lambda_body_compile_exception))
-                            //Пробуем вычислить типы из лямбд
+                        // Исключение которое может возникнуть в результате компиляции тела лямбды если мы выберем неправильные типы параметров
+                        var b = TryToDeduceTypesInLambda(lambda_syntax_node, formal_delegate.Value, deduced, nils,
+                                                      out on_lambda_body_compile_exception);
+                        if (!b)
+                            // Пробуем вычислить типы из лямбд
                         {
                             RestoreLambdasStates(lambda_syntax_nodes.Values.ToList(), saved_lambdas_states);
 
@@ -915,6 +926,7 @@ namespace PascalABCCompiler.TreeRealization
                         }
                     }
                 }
+                
                 var current_deduce_state = deduced               //текущее состояние выведенных типов
                     .Select((t, ii) => new {Type = t, Index = ii})
                     .Where(t => t.Type != null)
@@ -1132,9 +1144,18 @@ namespace PascalABCCompiler.TreeRealization
                 {
                     delegate_internal_interface dii = formal_type.get_internal_interface(internal_interface_kind.delegate_interface) as delegate_internal_interface;
                     delegated_methods dm = fact_type as delegated_methods;
+                    function_node fact_func = null;
                     if (dm != null && dm.proper_methods.Count == 1)
+                        fact_func = dm.proper_methods[0].simple_function_node;
+                    else if (fact_type.IsDelegate)
                     {
-                        function_node fact_func = dm.proper_methods[0].simple_function_node;
+                        var sil = fact_type.find_in_type("Invoke");
+                        if (sil != null && sil.Count > 0)
+                            fact_func = sil[0].sym_info as function_node;
+                    }
+                        
+                    if (fact_func != null)
+                    {
                         if (fact_func.parameters.Count != dii.parameters.Count)
                         {
                             goto eq_cmp;
@@ -1182,9 +1203,19 @@ namespace PascalABCCompiler.TreeRealization
                 type_node fact_type_converted; //Сюда будет записан фактический тип или интерфейс, к которому он приводится
                 if (!fact_type.is_generic_type_instance || formal_type.original_generic != fact_type.original_generic)
                 {
-                    if (!formal_type.IsInterface) goto eq_cmp;
+                    //if (!formal_type.IsInterface) goto eq_cmp;
                     fact_type_converted = null;
-                    if (fact_type.ImplementingInterfaces != null)
+                    type_node base_type = fact_type.base_type;
+                    while (base_type != null)
+                    {
+                        if (base_type.original_generic == formal_type.original_generic)
+                        {
+                            fact_type_converted = base_type;
+                            break;
+                        }
+                        base_type = base_type.base_type;
+                    }
+                    if (fact_type.ImplementingInterfaces != null && fact_type_converted == null)
                     foreach (type_node ti in fact_type.ImplementingInterfaces)
                     {
                         if (ti.original_generic == formal_type.original_generic)
@@ -1254,25 +1285,29 @@ namespace PascalABCCompiler.TreeRealization
 
         public static bool type_has_default_ctor(type_node tn, bool find_protected_ctors)
         {
-            SymbolInfo si = tn.find_in_type(compiler_string_consts.default_constructor_name, tn.Scope);
-            while (si != null)
+            if (tn.is_generic_parameter && tn.base_type != null && tn.base_type.IsAbstract)
+                return false;
+            List<SymbolInfo> sil = tn.find_in_type(compiler_string_consts.default_constructor_name, tn.Scope);
+            if (sil != null)
             {
-                function_node fn = si.sym_info as function_node;
-                if (find_protected_ctors ||
-                    fn.field_access_level == PascalABCCompiler.SemanticTree.field_access_level.fal_public)
+                foreach (SymbolInfo si in sil)
                 {
-                    compiled_constructor_node pconstr = fn as compiled_constructor_node;
-                    common_method_node mconstr = fn as common_method_node;
-                    if ((pconstr != null ||
-                        mconstr != null && mconstr.is_constructor) &&
-                        (fn.parameters.Count == 0 || fn.parameters[0].default_value != null)
-                        )
+                    function_node fn = si.sym_info as function_node;
+                    if (find_protected_ctors ||
+                        fn.field_access_level == PascalABCCompiler.SemanticTree.field_access_level.fal_public)
                     {
-                        //Нашли конструктор по умолчанию у предка
-                        return true;
+                        compiled_constructor_node pconstr = fn as compiled_constructor_node;
+                        common_method_node mconstr = fn as common_method_node;
+                        if ((pconstr != null ||
+                            mconstr != null && mconstr.is_constructor) &&
+                            (fn.parameters.Count == 0 || fn.parameters[0].default_value != null)
+                            )
+                        {
+                            //Нашли конструктор по умолчанию у предка
+                            return true;
+                        }
                     }
                 }
-                si = si.Next;
             }
             return false;
         }
@@ -1346,13 +1381,11 @@ namespace PascalABCCompiler.TreeRealization
 
         protected type_node _original_generic;
 
-        //public SymbolTable.GenericTypeInstanceScope _scope;
-
         public override SymbolTable.Scope Scope
         {
             get
             {
-                return original_generic.Scope;//_scope;
+                return _original_generic.Scope;
             }
         }
 
@@ -1414,8 +1447,51 @@ namespace PascalABCCompiler.TreeRealization
 
         protected void AddMember(object original, object converted)
         {
-            _members.Add(original, converted);
-            _member_definitions.Add(converted, original);
+            var cf = original as class_field;
+#if DEBUG
+            /*if (cf != null && cf.name == "XYZW")
+            {
+                cf = cf;
+            } */
+#endif         
+            // Этот код дает перекрестные ошибки далее поэтому эта идея неправильна. Комментирую
+            /*if (cf != null) // значит это поле и заменять original на соответствующее поле оригинального класса
+            {
+                var or = this.original_generic as common_type_node;
+                original = or.fields.First(f => f.name == cf.name);
+                if (original==null)
+                {
+                    original = original;
+                }
+            } */
+            if (!_members.ContainsValue(original))  // SSM 30.12.18 bug fix #907
+            {
+                // Если это поле и T1->Anything, то как-то надо находить оригинальный класс Base и заменять на T->Anything
+                // Вторая версия - делать это в GetMember - там доступны все _members
+                // Закомментировал всё кроме того что было - изменение вместо добавления срабатывает только если мы в предыдущем коде меняли original, а именно эта идея признана ошибочной
+                //if (!_members.ContainsKey(original))
+                //{ 
+                _members.Add(original, converted);
+                _member_definitions.Add(converted, original);
+                //}
+                /*else
+                { 
+                    _members[original] = converted;
+                    _member_definitions[original] = converted;
+                } */
+            }
+            else // SSM 30.12.18 bug fix #907 
+            {
+                object kk = null;
+                foreach (System.Collections.DictionaryEntry x in _members)
+                {
+                    if (x.Value == original)
+                        kk = x.Key;
+                }
+                _members[kk] = converted;
+                _member_definitions.Remove(original);
+                _member_definitions[converted] = kk;
+            }
         }
 
         protected parameter_list make_parameters(parameter_list orig_pl, common_function_node fn)
@@ -1506,9 +1582,15 @@ namespace PascalABCCompiler.TreeRealization
             cmn.is_constructor = (compiled_orig != null ||
                 (common_orig != null && common_orig.is_constructor));
             cmn.return_value_type = generic_convertions.determine_type(orig_fn.return_value_type, _instance_params, false);
+            if (common_orig != null)
+                cmn.overrided_method = common_orig.overrided_method;
             if (orig_fn.is_generic_function)
             {
                 cmn.return_value_type = generic_convertions.determine_type(cmn.return_value_type, meth_inst_pars, true);
+            }
+            if (orig_fn is common_function_node)
+            {
+                cmn.return_variable = (orig_fn as common_function_node)?.return_variable;
             }
             return cmn;
         }
@@ -1549,6 +1631,28 @@ namespace PascalABCCompiler.TreeRealization
                     ConvertMember(pn.set_function);
                 }
             }
+        }
+
+        protected common_event make_event(event_node orig_event, location loc)
+        {
+            common_event cme = orig_event as common_event;
+            compiled_event ce = orig_event as compiled_event;
+            if (_members[orig_event.add_method] == null)
+                ConvertMember(orig_event.add_method);
+            if (_members[orig_event.remove_method] == null)
+                ConvertMember(orig_event.remove_method);
+            if (orig_event.raise_method != null && _members[orig_event.raise_method] == null)
+                ConvertMember(orig_event.raise_method);
+            common_event evnt = new common_event(orig_event.name, generic_convertions.determine_type(
+                orig_event.delegate_type, _instance_params, false), this,
+                _members[orig_event.add_method] as common_method_node,
+                _members[orig_event.remove_method] as common_method_node,
+                orig_event.raise_method != null ? _members[orig_event.raise_method] as common_method_node : null,
+                cme != null ? cme.field_access_level : SemanticTree.field_access_level.fal_public,
+                orig_event.is_static ? SemanticTree.polymorphic_state.ps_static : SemanticTree.polymorphic_state.ps_common,
+                loc
+                );
+            return evnt;
         }
 
         protected common_property_node make_property(property_node orig_pn, location loc)
@@ -1642,12 +1746,29 @@ namespace PascalABCCompiler.TreeRealization
                                 (inst_type != cct && inst_type.original_generic != cct));
 
 
-                            MethodInfo[] meths = cct._compiled_type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                            /*MethodInfo[] meths = cct._compiled_type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
                                 BindingFlags.Static | BindingFlags.Instance);
                             int num = System.Array.IndexOf(meths, cfn.method_info);
 
-                            MethodInfo mi = ((compiled_type_node)inst_type)._compiled_type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
-                                BindingFlags.Static | BindingFlags.Instance)[num];
+                            //!!! прикольно, но индексы в meths и instmeths не совпадают!!!
+
+                            MethodInfo[] instmeths = ((compiled_type_node)inst_type)._compiled_type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                                BindingFlags.Static | BindingFlags.Instance);
+
+                            //var mt1 = meths.Select(m => m.MetadataToken).OrderBy(x => x);
+                            //var mt2 = instmeths.Select(m => m.MetadataToken).OrderBy(x => x);
+
+
+                            MethodInfo mi = instmeths[num];*/
+
+                            // SSM 2018.05.05 bug fix #664 
+                            var mdtok = cfn.method_info.MetadataToken;
+                            MethodInfo[] instmeths = ((compiled_type_node)inst_type)._compiled_type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
+                                BindingFlags.Static | BindingFlags.Instance);
+
+                            MethodInfo mi = System.Array.Find(instmeths, m => m.MetadataToken == mdtok);
+                            // SSM 2018.05.05 end bug fix #664 
+
                             return compiled_function_node.get_compiled_method(mi);
                         }
                         else
@@ -1655,6 +1776,15 @@ namespace PascalABCCompiler.TreeRealization
                     }
                     else if (orig_member.comperehensive_type.is_generic_type_instance)
                     {
+                        /*
+                        // SSM 29/04/18 - проба - как достать IndexOf из MyList<integer> - наследника List<integer> 
+                        // Это поздно - надо как-то раньше
+                          if (tn is compiled_type_node)
+                          tn = generic_convertions.determine_type((tn as compiled_type_node).compiled_type, instance_params,false);
+
+                        var tn1 = tn as compiled_type_node;
+                        var ff = tn1.find_in_type("IndexOf");*/
+
                         generic_instance_type_node compr_type = find_instance_type_from(tn);
                         if (compr_type == null)
                         {
@@ -1715,69 +1845,103 @@ namespace PascalABCCompiler.TreeRealization
                         break;
                     case general_node_type.event_node:
                         //(ssyy) Не знаю, что тут делать
-                        rez_node = orig_node;
+                        event_node orig_event = (event_node)orig_node;
+                        rez_node = make_event(orig_event, loc);
                         break;
                     default:
                         throw new CompilerInternalError("Unexpected definition_node.");
                 }
+                /*if (orig_node is class_field cf)
+                {
+                    if (cf.type.name == "T1")
+                        orig_node = orig_node;
+                    else AddMember(orig_node, rez_node);
+                }
+                else*/
                 AddMember(orig_node, rez_node);
             }
             return rez_node;
         }
 
-        public SymbolInfo ConvertSymbolInfo(SymbolInfo start)
+        public List<SymbolInfo> ConvertSymbolInfo(List<SymbolInfo> start)
         {
-            SymbolInfo si = start;
-            SymbolInfo rez_start = null;
+            List<SymbolInfo> rez_start = null;
             SymbolInfo rez_si = null;
-            SymbolInfo rez_prev = null;
-            while (si != null)
+            if (start != null)
             {
-                definition_node dnode = ConvertMember(si.sym_info);
-                rez_si = new SymbolInfo(dnode, si.access_level, si.symbol_kind);
-                //Дополняем список SymbolInfo преобразованным значением
-                if (rez_start == null)
+                foreach (SymbolInfo si in start)
                 {
-                    rez_start = rez_si;
+                    // Бурмистров Артем 13.06.19 begin
+                    // Поправил странное поведение для локальных переменных, у которых не generic тип
+                    // Исправление для #1993
+                    if (si.sym_info is /*var_definition_node*/ local_block_variable vdn && !vdn.type.is_generic_parameter)
+                    {
+                        rez_si = si;
+                    }
+                    else
+                    {
+                        definition_node dnode = ConvertMember(si.sym_info);
+                        rez_si = new SymbolInfo(dnode, si.access_level, si.symbol_kind);
+                        rez_si.scope = si.scope;
+                    }
+                    // aab 13.06.19 end
+                    //Дополняем список SymbolInfo преобразованным значением
+                    if (rez_start == null)
+                    {
+                        rez_start = new List<SymbolInfo>();
+                        rez_start.Add(rez_si);
+                    }
+                    else
+                    {
+                        rez_start.Add(rez_si);
+                    }
                 }
-                else
-                {
-                    rez_prev.Next = rez_si;
-                }
-                rez_prev = rez_si;
-                si = si.Next;
-            }
-            if (rez_si != null)
-            {
-                rez_si.Next = null;
             }
             return rez_start;
         }
 
-        public override SymbolInfo find(string name, bool no_search_in_extension_methods = false)
+        public override List<SymbolInfo> find(string name, bool no_search_in_extension_methods = false)
         {
-            SymbolInfo si = _original_generic.find(name);
-            si = ConvertSymbolInfo(si);
-            return si;
+            List<SymbolInfo> si = _original_generic.find(name);
+            return ConvertSymbolInfo(si);//delete
         }
 
-        public override SymbolInfo find_in_type(string name, bool no_search_in_extension_methods = false)
+        public override List<SymbolInfo> find_in_type(string name, bool no_search_in_extension_methods = false)
         {
-            SymbolInfo si = _original_generic.find_in_type(name);
-            si = ConvertSymbolInfo(si);
-            return si;
+            List<SymbolInfo> sil = _original_generic.find_in_type(name);
+            sil = ConvertSymbolInfo(sil);
+            return sil;
         }
 
-        public override SymbolInfo find_in_type(string name, SymbolTable.Scope CurrentScope, bool no_search_in_extension_methods = false)
+        public override List<SymbolInfo> find_in_type(string name, SymbolTable.Scope CurrentScope, type_node orig_generic_or_null = null, bool no_search_in_extension_methods = false)
         {
-            SymbolInfo si = _original_generic.find_in_type(name, CurrentScope);
-            si = ConvertSymbolInfo(si);
-            return si;
+            //var or = generic_convertions.determine_type(_original_generic,this.instance_params,false); // циклится
+            List<SymbolInfo> sil = null;
+            /*var ctn = base_type as compiled_type_node;
+            if (ctn != null && ctn.is_generic_type_instance)
+            {
+                sil = ctn.find_in_type(name, CurrentScope, no_search_in_extension_methods);
+                var sil1 = _original_generic.find_in_type(name, CurrentScope);
+                sil1 = ConvertSymbolInfo(sil1);
+                if (sil!=null)
+                    sil1.InsertRange(0,sil);
+                return sil1;
+            }*/
+#if DEBUG
+            /*if (name == "XYZW")
+            {
+                var y = name;
+            } */
+#endif
+            sil = _original_generic.find_in_type(name, CurrentScope, _original_generic); // передача _original_generic - это костыль для устранения бага #1674. 
+            // параметр _original_generic - фиктивный: если он не null (это только здесь), то в common_type_node выполнение в одном месте идет по другой ветке
+            sil = ConvertSymbolInfo(sil);
+            return sil;
         }
 
         private void conform_basic_function(string name, int base_func_num)
         {
-            SymbolInfo si1 = _original_generic.find_in_type(name);
+            SymbolInfo si1 = _original_generic.find_first_in_type(name, true);
             AddMember(si1.sym_info, temp_names[base_func_num].sym_info);
         }
 
@@ -2096,7 +2260,6 @@ namespace PascalABCCompiler.TreeRealization
             this.is_final = original_generic_function.is_final;
             this.is_overload = true;
             this.polymorphic_state = original_generic_function.polymorphic_state;
-
             this.return_value_type = generic_convertions.determine_type(original_generic_function.return_value_type, instance_parameters, true);
 
             foreach (parameter par in original_generic_function.parameters)

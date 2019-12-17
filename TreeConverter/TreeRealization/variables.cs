@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -10,7 +10,9 @@ namespace PascalABCCompiler.TreeRealization
 	[Serializable]
 	public abstract class var_definition_node : definition_node, SemanticTree.IVAriableDefinitionNode
 	{
-		private string _name;
+        public override string ToString() => "var " + name + ": "+ type.ToString();
+
+        private string _name;
 		private type_node _type;
         private expression_node _inital_value;
         private bool _is_ret_value;
@@ -193,7 +195,15 @@ namespace PascalABCCompiler.TreeRealization
 			}
 		}
 
-		public bool is_used_as_unlocal
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
+
+        public bool is_used_as_unlocal
 		{
 			get
 			{
@@ -249,7 +259,7 @@ namespace PascalABCCompiler.TreeRealization
 			visitor.visit(this);
 		}
 
-		SemanticTree.ICommonFunctionNode SemanticTree.IFunctionMemberNode.function
+        SemanticTree.ICommonFunctionNode SemanticTree.IFunctionMemberNode.function
 		{
 			get
 			{
@@ -290,7 +300,13 @@ namespace PascalABCCompiler.TreeRealization
             }
         }
 
-        
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
 
         public SemanticTree.ILocation Location
         {
@@ -376,7 +392,15 @@ namespace PascalABCCompiler.TreeRealization
             }
 		}
 
-		public SemanticTree.ILocation Location
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
+
+        public SemanticTree.ILocation Location
 		{
 			get
 			{
@@ -419,7 +443,7 @@ namespace PascalABCCompiler.TreeRealization
 			visitor.visit(this);
 		}
 
-		public SemanticTree.ICommonNamespaceNode comprehensive_namespace
+        public SemanticTree.ICommonNamespaceNode comprehensive_namespace
 		{
 			get
 			{
@@ -472,7 +496,15 @@ namespace PascalABCCompiler.TreeRealization
 			}
 		}
 
-		public SemanticTree.ILocation Location
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
+
+        public SemanticTree.ILocation Location
 		{
 			get
 			{
@@ -547,7 +579,7 @@ namespace PascalABCCompiler.TreeRealization
 			visitor.visit(this);
 		}
 
-		public SemanticTree.ICommonTypeNode common_comprehensive_type
+        public SemanticTree.ICommonTypeNode common_comprehensive_type
 		{
 			get
 			{
@@ -889,7 +921,15 @@ namespace PascalABCCompiler.TreeRealization
 			}
 		}
 
-		public SemanticTree.ILocation Location
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
+
+        public SemanticTree.ILocation Location
 		{
 			get
 			{
@@ -940,7 +980,7 @@ namespace PascalABCCompiler.TreeRealization
 			visitor.visit(this);
 		}
 
-		SemanticTree.ICommonFunctionNode SemanticTree.ICommonParameterNode.common_function
+        SemanticTree.ICommonFunctionNode SemanticTree.ICommonParameterNode.common_function
 		{
 			get
 			{
@@ -1040,9 +1080,12 @@ namespace PascalABCCompiler.TreeRealization
         {
             get
             {
-                if (_par.IsOptional && _par.DefaultValue != null && _default_value == null)
+                if (_par.IsOptional && _default_value == null)
                 {
-                    _default_value = constant_node.make_constant(_par.DefaultValue);
+                    if (_par.DefaultValue == null)
+                        _default_value = new null_const_node(type, null);
+                    else
+                        _default_value = constant_node.make_constant(_par.DefaultValue);
                 }
                 return _default_value;
             }

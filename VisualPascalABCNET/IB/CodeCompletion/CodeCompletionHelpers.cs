@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -79,7 +79,7 @@ namespace VisualPascalABC
     	{
     		if (!dict.ContainsKey(si))
     		    dict[si] = data;
-            if (!dict2.ContainsKey(si.description))
+            if (!string.IsNullOrEmpty(si.description) && !dict2.ContainsKey(si.description))
                 dict2[si.description] = data;
     	}
 

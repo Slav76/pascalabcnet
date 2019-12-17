@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -92,6 +92,7 @@ namespace GPPGParserScanner
             keywords.Add(Convert("interface"), (int)Tokens.tkInterface);
             keywords.Add(Convert("label"), (int)Tokens.tkLabel);
             keywords.Add(Convert("lock"), (int)Tokens.tkLock);
+            keywords.Add(Convert("loop"), (int)Tokens.tkLoop);
             keywords.Add(Convert("nil"), (int)Tokens.tkNil);
             keywords.Add(Convert("procedure"), (int)Tokens.tkProcedure);
             keywords.Add(Convert("of"), (int)Tokens.tkOf);
@@ -140,6 +141,10 @@ namespace GPPGParserScanner
             keywords.Add(Convert("auto"), (int)Tokens.tkAuto);
             keywords.Add(Convert("sequence"), (int)Tokens.tkSequence);
             keywords.Add(Convert("yield"), (int)Tokens.tkYield);
+            keywords.Add(Convert("match"), (int)Tokens.tkMatch);
+            keywords.Add(Convert("when"), (int)Tokens.tkWhen);
+            keywords.Add(Convert("namespace"), (int)Tokens.tkNamespace);
+            keywords.Add(Convert("static"), (int)Tokens.tkStatic);
         }
 
         static Keywords()

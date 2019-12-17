@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- syntaxdefinition for PascalABC.NET (c) DarkStar 2006 -->
+<!-- syntaxdefinition for PascalABC.NET (c) Ivan Bondarev, Stanislav Mikhalkovich -->
 
 <SyntaxDefinition name = "PascalABC.NET" extensions = ".pas;.paspart_">
 	
@@ -11,8 +11,10 @@
 
 	<RuleSets>
 		<RuleSet ignorecase="true">
-			<Delimiters>&amp;&lt;&gt;~!%^*()-+=|\#/{}[]:;"' ,	.?</Delimiters>
-		
+			<Delimiters>&lt;&gt;~!%^*()-+=|\#/{}[]:;"' ,	.?</Delimiters>
+            <Span name = "LineBigComment" rule = "CommentMarkerSet" bold = "false" italic = "false" color = "Green" stopateol = "true">
+			   	<Begin>////</Begin>
+		  	</Span>
 		  	<Span name = "LineComment" rule = "CommentMarkerSet" bold = "false" italic = "false" color = "Green" stopateol = "true">
 			   	<Begin>//@!/@</Begin>
 		  	</Span>
@@ -20,7 +22,7 @@
 		  	<Span name = "LineComment" bold = "false" italic = "false" color = "Gray" stopateol = "true">
 			   	<Begin>///@!/@</Begin>
 		  	</Span>
-
+            
 		  	<!-- <Span name = "CompilerDirectives" rule = "CompilerDirectivesSet" bold = "false" italic = "false" color = "Black" stopateol = "true">
 			   	<Begin>#</Begin>
 		  	</Span> -->
@@ -54,6 +56,7 @@
 		<Key word = "case" />
 		<Key word = "class" />
 		<Key word = "auto" />
+        	<Key word = "static" />
 		<Key word = "template" />
 		<Key word = "sealed" />
 		<Key word = "partial" />
@@ -65,8 +68,8 @@
 		<Key word = "do" />
 		<Key word = "else" />
 		<Key word = "file" />
-		<Key word = "finnaly" />
 		<Key word = "for" />
+		<Key word = "loop" />
 		<Key word = "function" />	
 		<Key word = "if" />	
 		<Key word = "inherited" />	
@@ -82,7 +85,6 @@
 		<Key word = "until" />	
 		<Key word = "uses" />	
 		<Key word = "var" />
-		<Key word = "out" />
 		<Key word = "event" />	
 		<Key word = "while" />	
 		<Key word = "params" />	
@@ -94,12 +96,15 @@
 		<Key word = "initialization" />	
 		<Key word = "finalization" />
 		<Key word = "where" />
+		<Key word = "match" />
+		<Key word = "when" />
 	 </KeyWords> 
 
 	 
 	<KeyWords name = "ProgramSections" bold = "true" italic = "false" color = "Black">
 		<Key word = "unit" />
 		<Key word = "library" />
+        <Key word = "namespace" />
 		<Key word = "program" />
 		<Key word = "interface" />	
 		<Key word = "implementation" />	
@@ -108,6 +113,10 @@
 	<KeyWords name = "BeginEnd" bold = "true" italic = "false" color = "Black">
 		<Key word = "begin" />
 		<Key word = "end" />
+	</KeyWords> 
+
+	<KeyWords name = "Special" bold = "true" italic = "false" color = "Red">
+		<Key word = "•" />
 	</KeyWords> 
 
 	<KeyWords name = "Async" bold = "true" italic = "false" color = "Black">
@@ -142,6 +151,7 @@
 	<KeyWords name = "NonReserved1" bold="false" italic="false" color="Blue">
 		<Key word = "self" />
 		<Key word = "result" />
+		<Key word = "value" />
 	</KeyWords>
 			
 	<KeyWords name = "OperatorKeywords" bold="true" italic="false" color="Black">

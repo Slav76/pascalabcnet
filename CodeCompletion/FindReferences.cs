@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -11,6 +11,7 @@ using PascalABCCompiler;
 using PascalABCCompiler.TreeConverter;
 //using PascalABCCompiler.TreeRealization;
 using SymbolTable;
+using System.IO;
 using PascalABCCompiler.Parsers;
 
 namespace CodeCompletion
@@ -45,7 +46,9 @@ namespace CodeCompletion
             }
             catch (Exception e)
             {
-
+#if DEBUG
+                File.AppendAllText("log.txt", e.Message + Environment.NewLine + e.StackTrace + Environment.NewLine);
+#endif
             }
             return pos_list.ToArray();
         }
@@ -68,7 +71,16 @@ namespace CodeCompletion
             if (cur_scope == null)
                 cur_scope = tmp;
             foreach (statement stmt in _statement_list.subnodes)
+            {
+                IBaseScope tmp2 = cur_scope;
+                if (stmt.source_context != null)
+                    cur_scope = cur_scope.FindScopeByLocation(stmt.source_context.begin_position.line_num, stmt.source_context.begin_position.column_num);
+                if (cur_scope == null)
+                    cur_scope = tmp2;
                 stmt.visit(this);
+                cur_scope = tmp2;
+            }
+                
             cur_scope = tmp;
         }
 
@@ -199,7 +211,7 @@ namespace CodeCompletion
                 else ret_tn = ret_tn.FindNameInAnyOrder(_named_type_reference.names[i].name);
                 if (ret_tn == null) break;
                 else if (founded_scope.IsEqual(ret_tn))
-                    pos_list.Add(get_position(_named_type_reference));
+                    pos_list.Add(get_position(_named_type_reference.names[i]));
             }
         }
 
@@ -393,7 +405,7 @@ namespace CodeCompletion
                 foreach (ident s in _typed_parametres.idents.idents)
                 {
                     IBaseScope ss = entry_scope.FindScopeByLocation(s.source_context.begin_position.line_num, s.source_context.begin_position.column_num);
-                    if (ss != null && ss.IsEqual(founded_scope))
+                    if (ss != null && ss.IsEqual(founded_scope) && founded_scope.SymbolInfo.Name == s.name)
                         pos_list.Add(get_position(s));
                 }
             if (_typed_parametres.vars_type != null)
@@ -422,7 +434,7 @@ namespace CodeCompletion
                     {
                         if (with_body)
                         {
-                            if (cur_scope != null && cur_scope.IsEqual(founded_scope))
+                            if (cur_scope != null && (cur_scope.IsEqual(founded_scope) || founded_scope is IProcScope && (founded_scope as IProcScope).Realization != null && cur_scope.IsEqual((founded_scope as IProcScope).Realization)))
                                 pos_list.Add(get_position(_procedure_header.name.meth_name));
                         }
                         else
@@ -435,6 +447,7 @@ namespace CodeCompletion
                     if (_procedure_header.name.class_name != null)
                     {
                         sc = cur_scope.FindNameInAnyOrder(_procedure_header.name.class_name.name);
+
                         if (sc != null && sc.IsEqual(founded_scope))
                             pos_list.Add(get_position(_procedure_header.name.class_name));
                     }
@@ -457,7 +470,7 @@ namespace CodeCompletion
                     {
                         if (with_body)
                         {
-                            if (cur_scope != null && cur_scope.IsEqual(founded_scope))
+                            if (cur_scope != null && (cur_scope.IsEqual(founded_scope) || founded_scope is IProcScope && (founded_scope as IProcScope).Realization != null && cur_scope.IsEqual((founded_scope as IProcScope).Realization)))
                                 pos_list.Add(get_position(_function_header.name.meth_name));
                         }
                         else
@@ -504,7 +517,9 @@ namespace CodeCompletion
         {
             //SymScope ss = entry_scope.FindScopeByLocation(_type_declaration.source_context.begin_position.line_num,_type_declaration.source_context.begin_position.column_num);
             IBaseScope ss = entry_scope.FindNameInAnyOrder(_type_declaration.type_name.name);
-            if (for_refactoring && ss != null && ss.IsEqual(founded_scope) && string.Compare(ss.SymbolInfo.name, _type_declaration.type_name.name, true) == 0)
+            if (ss == null && entry_scope is IInterfaceUnitScope && (entry_scope as IInterfaceUnitScope).ImplementationUnitScope != null)
+                ss = (entry_scope as IInterfaceUnitScope).ImplementationUnitScope.FindNameInAnyOrder(_type_declaration.type_name.name);
+            if (for_refactoring && ss != null && ss.IsEqual(founded_scope) && string.Compare(ss.SymbolInfo.name, _type_declaration.type_name.name, true) == 0 && !(ss is ITypeSynonimScope && !(founded_scope is ITypeSynonimScope)))
             {
                 pos_list.Add(get_position(_type_declaration.type_name));
             }
@@ -522,7 +537,7 @@ namespace CodeCompletion
         {
             if (for_refactoring)
             {
-                IBaseScope ss = entry_scope.FindScopeByLocation(_simple_const_definition.source_context.begin_position.line_num, _simple_const_definition.source_context.begin_position.column_num);
+                IBaseScope ss = entry_scope.FindScopeByLocation(_simple_const_definition.const_name.source_context.begin_position.line_num, _simple_const_definition.const_name.source_context.begin_position.column_num);
                 if (ss != null && ss.IsEqual(founded_scope))
                     pos_list.Add(get_position(_simple_const_definition.const_name));
             }
@@ -666,6 +681,8 @@ namespace CodeCompletion
                 if (_dot_node.right is ident)
                 {
                     ret_tn = ret_tn.FindNameOnlyInType((_dot_node.right as ident).name);
+                    if (ret_tn == null && left_scope is IElementScope && (left_scope as IElementScope).Type is ITypeScope)
+                        ret_tn = ((left_scope as IElementScope).Type as ITypeScope).FindExtensionMethod((_dot_node.right as ident).name);
                 }
             }
             if (ret_tn != null && ret_tn.IsEqual(founded_scope))
@@ -748,7 +765,7 @@ namespace CodeCompletion
             if (for_refactoring)
             {
                 IBaseScope ss = entry_scope.FindScopeByLocation(_simple_property.source_context.begin_position.line_num, _simple_property.source_context.begin_position.column_num);
-                if (ss != null && ss.IsEqual(founded_scope))
+                if (ss != null && (ss.IsEqual(founded_scope) || ss is IProcScope && ss.Name.StartsWith("#getset") && string.Compare(ss.Name.Replace("#getset",""), founded_scope.Name, true) == 0))
                     pos_list.Add(get_position(_simple_property.property_name));
             }
             if (_simple_property.parameter_list != null)
@@ -791,7 +808,7 @@ namespace CodeCompletion
             //throw new NotImplementedException();
         }
 
-        public override void visit(class_body _class_body)
+        public override void visit(class_body_list _class_body)
         {
             if (_class_body.class_def_blocks != null)
                 foreach (class_members cm in _class_body.class_def_blocks)
@@ -845,6 +862,14 @@ namespace CodeCompletion
 
         public override void visit(enum_type_definition _enum_type_definition)
         {
+            IBaseScope scope = entry_scope.FindScopeByLocation(_enum_type_definition.source_context.begin_position.line_num, _enum_type_definition.source_context.begin_position.column_num);
+            if (!(scope is IEnumScope))
+            {
+                foreach (enumerator en in _enum_type_definition.enumerators.enumerators)
+                {
+                    en.name.visit(this);
+                }
+            }
             //throw new NotImplementedException();
         }
 
@@ -1228,7 +1253,10 @@ namespace CodeCompletion
 
         public override void visit(loop_stmt _loop_stmt)
         {
-            throw new NotImplementedException();
+            if (_loop_stmt.count != null)
+                _loop_stmt.count.visit(this);
+            if (_loop_stmt.stmt != null)
+                _loop_stmt.stmt.visit(this);
         }
 
         public override void visit(foreach_stmt _foreach_stmt)
@@ -1522,6 +1550,8 @@ namespace CodeCompletion
             IBaseScope ss = entry_scope.FindScopeByLocation(_name_assign_expr.name.source_context.begin_position.line_num, _name_assign_expr.name.source_context.begin_position.column_num);
             if (ss != null && ss.IsEqual(founded_scope))
                 pos_list.Add(get_position(_name_assign_expr.name));
+            if (_name_assign_expr.expr == null)
+                _name_assign_expr.expr = new ident(_name_assign_expr.name.name, _name_assign_expr.name.source_context);
             _name_assign_expr.expr.visit(this);
         }
         public override void visit(name_assign_expr_list _name_assign_expr_list) // SSM 27.06.13
@@ -1548,6 +1578,118 @@ namespace CodeCompletion
         {
             _yield_node.ex.visit(this);
         }
+        public override void visit(slice_expr _slice_expr)
+        {
+            _slice_expr.v.visit(this);
+            if (_slice_expr.from != null)
+                _slice_expr.from.visit(this);
+            if (_slice_expr.to != null)
+                _slice_expr.to.visit(this);
+            if (_slice_expr.step != null)
+                _slice_expr.step.visit(this);
+        }
+        public override void visit(slice_expr_question _slice_expr_question)
+        {
+            _slice_expr_question.v.visit(this);
+            if (_slice_expr_question.from != null)
+                _slice_expr_question.from.visit(this);
+            if (_slice_expr_question.to != null)
+                _slice_expr_question.to.visit(this);
+            if (_slice_expr_question.step != null)
+                _slice_expr_question.step.visit(this);
+        }
+        public override void visit(yield_sequence_node _yield_sequence_node)
+        {
+            _yield_sequence_node.ex.visit(this);
+        }
+        public override void visit(tuple_node _tuple_node)
+        {
+            _tuple_node.el.visit(this);
+        }
+        public override void visit(assign_var_tuple _assign_var_tuple)
+        {
+            for (int i = 0; i < _assign_var_tuple.idents.idents.Count; i++)
+            {
+                _assign_var_tuple.idents.idents[i].visit(this);
+            }
+            _assign_var_tuple.expr.visit(this);
+        }
+        public override void visit(is_pattern_expr _is_pattern_expr)
+        {
+            if (_is_pattern_expr.left != null)
+                _is_pattern_expr.left.visit(this);
+            if (_is_pattern_expr.right != null)
+                _is_pattern_expr.right.visit(this);
+        }
+        public override void visit(type_pattern _type_pattern)
+        {
+            if (_type_pattern.type != null)
+                _type_pattern.type.visit(this);
+            if (_type_pattern.identifier != null)
+                _type_pattern.identifier.visit(this);
+        }
+        public override void visit(dot_question_node _dot_question_node)
+        {
+            _dot_question_node.left.visit(this);
+            _dot_question_node.right.visit(this);
+        }
+        public override void visit(double_question_node _double_question_node)
+        {
+            _double_question_node.left.visit(this);
+            _double_question_node.right.visit(this);
+        }
+        public override void visit(pattern_cases _pattern_cases)
+        {
+            foreach (pattern_case pc in _pattern_cases.elements)
+                pc.visit(this);
+        }
+        public override void visit(var_deconstructor_parameter _var_deconstructor_parameter)
+        {
+            ident s = _var_deconstructor_parameter.identifier;
+            IBaseScope ss = entry_scope.FindScopeByLocation(s.source_context.begin_position.line_num, s.source_context.begin_position.column_num);
+            if (ss != null && ss.IsEqual(founded_scope))
+                pos_list.Add(get_position(s));
+        }
+        public override void visit(pattern_case _pattern_case)
+        {
+            if (_pattern_case.condition != null)
+                _pattern_case.condition.visit(this);
+            if (_pattern_case.pattern != null)
+                _pattern_case.pattern.visit(this);
+            if (_pattern_case.case_action != null)
+            {
+                if (!(_pattern_case.case_action is statement_list))
+                    new statement_list(_pattern_case.case_action, _pattern_case.source_context).visit(this);
+                else
+                    _pattern_case.case_action.visit(this);
+            }
+                
+        }
+        public override void visit(match_with _match_with)
+        {
+            if (_match_with.defaultAction != null)
+                _match_with.defaultAction.visit(this);
+            if (_match_with.expr != null)
+                _match_with.expr.visit(this);
+            if (_match_with.case_list != null)
+                _match_with.case_list.visit(this);
+        }
+        public override void visit(matching_expression _matching_expression)
+        {
+            _matching_expression.left.visit(this);
+            _matching_expression.right.visit(this);
+        }
+        public override void visit(deconstructor_pattern _deconstructor_pattern)
+        {
+            _deconstructor_pattern.type.visit(this);
+            foreach (pattern_parameter pdp in _deconstructor_pattern.parameters)
+                pdp.visit(this);
+        }
+        public override void visit(recursive_deconstructor_parameter _recursive_deconstructor_parameter)
+        {
+            _recursive_deconstructor_parameter.pattern.visit(this);
+        }
+        
         public override void visit(modern_proc_type _modern_proc_type)
         {
             if (_modern_proc_type.aloneparam != null)
@@ -1558,6 +1700,7 @@ namespace CodeCompletion
             }
             else
             {
+                if (_modern_proc_type.el != null)
                 foreach (enumerator en in _modern_proc_type.el.enumerators)
                 {
                     en.name.visit(this); // Это исправил - SSM 15.1.16

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Строковые константы.
 using System;
@@ -128,7 +128,7 @@ namespace PascalABCCompiler.TreeConverter
         public static readonly string minusassign_name = "-=";
         public static readonly string multassign_name = "*=";
         public static readonly string divassign_name = "/=";
-
+        public static readonly string power_name = "**";
         public static readonly string gr_name = ">";
         public static readonly string sm_name = "<";
         public static readonly string greq_name = ">=";
@@ -320,6 +320,7 @@ namespace PascalABCCompiler.TreeConverter
         // SSM - Константы директив компилятора. Вообще разбросаны по коду. Пусть будут здесь (3.1.2011)
         public static string compiler_directive_apptype = "apptype";
         public static string compiler_directive_reference = "reference";
+        public static string include_namespace_directive = "includenamespace";
         public static string compiler_savepcu = "savepcu";
         public static string compiler_directive_nullbasedstrings = "nullbasedstrings";
         public static string compiler_directive_nullbasedstrings_ON = "string_nullbased+";
@@ -337,6 +338,8 @@ namespace PascalABCCompiler.TreeConverter
         public static string copyright_string = "copyright";
         public static string trademark_string = "trademark";
         public static string main_resource_string = "mainresource";
+        public static string title_string = "title";
+        public static string description_string = "description";
 
         public static string system_unit_marker = "__IS_SYSTEM_MODULE";
         public static string system_unit_file_name = "PABCSystem";
@@ -368,10 +371,14 @@ namespace PascalABCCompiler.TreeConverter
         public static string ienumerable_auto_type_name = "IEnumerableAutoType"; // SSM 05.07.16 - тип, который определяется на этапе компиляции при первом присваивании
         public static string recort_printable_name_template = "record{0}end";
         public static string set_name = "TypedSet";
-
+        public const string deconstruct_method_name = "deconstruct";
+        public const string is_test_function_name = "__TypeCheckAndAssignForIsMatch";
+        public const string wild_cards_tuple_equal_function_name = "__WildCardsTupleEqual";
+        public const string seq_function_name = "Seq";
+        public const string count_property_name = "Count";
         public static string bounded_array_printable_name_template = "array [{0}..{1}] of {2}";
         public static string array_printable_name_template = "array of {0}";
-
+        public static string multi_dim_array_printable_name_template = "array [{0}] of {1}";
         public static readonly string generic_params_infix = "`";
 
         public static string GetAccessorName(string accessorTemplate, string name)

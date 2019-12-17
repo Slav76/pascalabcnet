@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -10,6 +10,7 @@ namespace PascalABCCompiler.TreeRealization
     [Serializable]
     public abstract class constant_definition_node : definition_node, SemanticTree.IConstantDefinitionNode
     {
+        public override string ToString() => "const " + name + " : " + type;
         /// <summary>
         /// Имя константы.
         /// </summary>

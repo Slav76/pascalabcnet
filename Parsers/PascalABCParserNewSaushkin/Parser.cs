@@ -112,7 +112,7 @@ namespace PascalABCCompiler.PascalABCNewParser
         //public Preprocessor2.Preprocessor2 preprocessor2 = new PascalABCCompiler.Preprocessor2.Preprocessor2(null);
 
         public PascalABCNewLanguageParser()
-            : base("PascalABC.NET", "1.2", "Copyright © 2005-2017 by Ivan Bondarev, Stanislav Mihalkovich", false, new string[] { ".pas" })
+            : base("PascalABC.NET", "1.2", "Copyright © 2005-2019 by Ivan Bondarev, Stanislav Mikhalkovich", false, new string[] { ".pas" })
         {
         }
 
@@ -219,11 +219,19 @@ namespace PascalABCCompiler.PascalABCNewParser
 
         public override syntax_tree_node BuildTreeInExprMode(string FileName, string Text)
         {
-            // LineCorrection = -1 не забыть
+            if (Text == string.Empty)
+                return null;
+                // LineCorrection = -1 не забыть
+            string origText = Text;
             Text = String.Concat("<<expression>>", Environment.NewLine, Text);
             localparserhelper = new GPPGParserHelper(Errors, Warnings, FileName);
             // localparser.parsertools.LineCorrection = -1;
             syntax_tree_node root = localparserhelper.Parse(Text);
+            if (root == null && origText != null && origText.Contains("<"))
+            {
+                Errors.Clear();
+                root = localparserhelper.Parse(String.Concat("<<expression>>", Environment.NewLine, origText.Replace("<","&<")));
+            }
             return root as expression;
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -63,6 +63,18 @@ namespace PascalABCCompiler.TreeRealization
 	[Serializable]
 	public abstract class function_node : definition_node, SemanticTree.IFunctionNode
 	{
+        public override string ToString()
+        {
+            System.Text.StringBuilder str = new System.Text.StringBuilder();
+            str.Append((return_value_type != null ? "function " : "procedure ") + name + "(");
+            foreach (var par in parameters)
+                str.Append(par.ToString() + ";");
+            str.Append(")");
+            if (return_value_type != null)
+                str.Append(": " + return_value_type);
+            return str.ToString();
+        }
+
         private parameter_list _parameters = new parameter_list();
 
 		private type_node _ret_type;
@@ -593,7 +605,7 @@ namespace PascalABCCompiler.TreeRealization
 	[Serializable]
 	public abstract class common_function_node : function_node, SemanticTree.ICommonFunctionNode
 	{
-		protected string _name;
+        protected string _name;
 
         protected readonly local_variable_list _var_defs = new local_variable_list();
 
@@ -610,18 +622,18 @@ namespace PascalABCCompiler.TreeRealization
         }
 
         //TODO: Возможно вынести в ассоциированную с функцией информацию.
-		//Только указание - какая переменная возвтащается. Ссылка на эту-же переменную есть в _var_defs.
+		//Только указание - какая переменная возвращается. Ссылка на эту-же переменную есть в _var_defs.
 		private local_variable _return_variable;
 
         private readonly common_in_function_function_node_list _fnl = new common_in_function_function_node_list();
 		private statement_node _function_code;
 
         //TODO: Возможно вынести оба этих поля в ассоциированную с функцией информацию.
-		private bool _overload=false;
-		private bool _is_forward=false;
+		private bool _overload = false;
+		private bool _is_forward = false;
 
         //TODO: Вынести в ассоциированную с функцией информацию.
-		private statement_node_stack _cycles_stack=new statement_node_stack();
+		private statement_node_stack _cycles_stack = new statement_node_stack();
 
 		private SymbolTable.Scope _scope;
 
@@ -784,9 +796,9 @@ namespace PascalABCCompiler.TreeRealization
         /// </summary>
         /// <param name="name">Имя символа.</param>
         /// <returns>Информация о найленном символе. null, если ни чего не найдено.</returns>
-        public PascalABCCompiler.TreeConverter.SymbolInfo find(string name, SymbolTable.Scope CurrentScope)
+        public List<TreeConverter.SymbolInfo> find(string name, SymbolTable.Scope CurrentScope)
         {
-            return _scope.Find(name, CurrentScope);//y
+            return _scope.Find(name, CurrentScope);
         }
 
         /// <summary>
@@ -844,6 +856,14 @@ namespace PascalABCCompiler.TreeRealization
                 _loc = value;
             }
 		}
+
+        public override location location
+        {
+            get
+            {
+                return _loc;
+            }
+        }
 
         /// <summary>
         /// Расположение имени функции в программе.
@@ -1652,13 +1672,16 @@ namespace PascalABCCompiler.TreeRealization
 	[Serializable]
 	public class compiled_function_node : function_node, SemanticTree.ICompiledMethodNode
 	{
-		private readonly System.Reflection.MethodInfo _mi;
+        public override string ToString() => _mi.ToString().Replace("System.Collections.Generic.", "").Replace("System.", "").Replace("`1", "").Replace("`2", "");
+
+        private readonly System.Reflection.MethodInfo _mi;
 		private compiled_type_node _cont_type;
         private int _generic_params_count;
         private int _num_of_default_parameters;
         private bool _is_extension_method=false;
         private compiled_type_node connected_to_type;
         private List<compiled_type_node> _generic_params;
+        private System.Reflection.PropertyInfo getter_of_property;
         private static System.Collections.Generic.Dictionary<System.Reflection.MethodInfo, compiled_function_node> compiled_methods =
             new System.Collections.Generic.Dictionary<System.Reflection.MethodInfo, compiled_function_node>();
 
@@ -1678,6 +1701,7 @@ namespace PascalABCCompiler.TreeRealization
                     ret_val = null;
                 }
 			}
+            
 			System.Reflection.ParameterInfo[] pinf=mi.GetParameters();
             parameter_list pal = new parameter_list();
             //if (!(_mi.IsGenericMethod))
@@ -1727,7 +1751,16 @@ namespace PascalABCCompiler.TreeRealization
             _is_extension_method = NetHelper.NetHelper.IsExtensionMethod(mi);
 			this.return_value_type=ret_val;
 			this.parameters.AddRange(pal);
-		}
+            if (mi.Name.StartsWith("get_"))
+                foreach (System.Reflection.PropertyInfo pi in mi.DeclaringType.GetProperties())
+                {
+                    if (pi.GetGetMethod() == mi)
+                    {
+                        getter_of_property = pi;
+                        break;
+                    }
+                }
+        }
 
         /// <summary>
         /// Метод создания узла. Позволяет обеспичивать уникальность обертки для каждого метода.
@@ -1756,6 +1789,16 @@ namespace PascalABCCompiler.TreeRealization
 				return _mi;
 			}
 		}
+
+        public bool is_readonly
+        {
+            get
+            {
+                if (getter_of_property != null && getter_of_property.GetSetMethod() == null)
+                    return true;
+                return false;
+            }
+        }
 
         public override bool is_extension_method
         {
@@ -1870,7 +1913,7 @@ namespace PascalABCCompiler.TreeRealization
 				{
 					return SemanticTree.polymorphic_state.ps_static;
 				}
-				if (_mi.IsVirtual)
+				if (_mi.IsVirtual && !_mi.IsFinal)
 				{
 					return SemanticTree.polymorphic_state.ps_virtual;
 				}

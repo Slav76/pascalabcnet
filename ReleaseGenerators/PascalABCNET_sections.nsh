@@ -16,11 +16,14 @@ SectionGroupEnd
 
 !include sect_PT4.nsh
 
+!include sect_Files.nsh
+
 !include sect_Samples.nsh
 
 SectionGroup $(DESC_Localization) Localization
   !include sect_LocRus.nsh
   !include sect_LocEng.nsh
+  !include sect_LocUkr.nsh
 SectionGroupEnd
 
 

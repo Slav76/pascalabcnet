@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -138,12 +138,22 @@ namespace PascalABCCompiler.TreeRealization
 			}
 		}
 
+        public static implicit  operator SyntaxTree.SourceContext(location loc)
+        {
+            if (loc == null)
+                return null;
+            return new SyntaxTree.SourceContext(loc.begin_line_num, loc.begin_column_num, loc.end_line_num, loc.end_column_num, loc.document != null ? loc.document.file_name : null);
+        }
+
 		public override string ToString()
 		{
-			string res="File:  "+doc.ToString();
-			res+="  line:  "+begin_line_num.ToString();
-			res+="  column:  "+begin_column_num.ToString();
-			return res;
+
+            return string.Format("[({0},{1})-({2},{3})]",
+                begin_line_num, begin_column_num, end_line_num, end_column_num);
+            /*string res ="File:  "+doc.ToString();
+			    res+="  line:  "+begin_line_num.ToString();
+			    res+="  column:  "+begin_column_num.ToString();
+			    return res;*/
 		}
 	}
 

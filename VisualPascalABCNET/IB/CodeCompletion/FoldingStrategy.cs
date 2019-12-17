@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -23,10 +23,10 @@ namespace VisualPascalABC
 
 	public class ParserFoldingStrategy : IFoldingStrategy
 	{
-        private List<FoldMarker> GetFoldMarkers(IDocument doc, IBaseScope root)
+        private List<FoldMarker> GetFoldMarkers(IDocument doc, IBaseScope root, string fileName)
         {
             List<FoldMarker> foldMarkers = new List<FoldMarker>();
-            if (!(root is TypeScope))
+            if (!(root is ITypeScope))
             {
                 Position pos = root.GetPosition();
                 if (pos.file_name != null)
@@ -34,7 +34,15 @@ namespace VisualPascalABC
                     Position head_pos = root.GetHeaderPosition();
                     FoldMarker newFoldMarker = null;
                     if (head_pos.file_name == null)
-                        newFoldMarker = new FoldMarker(doc, pos.line - 1, pos.column - 1, pos.end_line - 1, pos.end_column, FoldType.MemberBody);
+                    {
+                        if (root is ImplementationUnitScope)
+                        {
+                            Position unit_pos = root.TopScope.GetPosition();
+                            newFoldMarker = new FoldMarker(doc, pos.line - 1, pos.column - 1, unit_pos.end_line - 1, unit_pos.end_column, FoldType.MemberBody);
+                        }
+                        else
+                            newFoldMarker = new FoldMarker(doc, pos.line - 1, pos.column - 1, pos.end_line - 1, pos.end_column, FoldType.MemberBody);
+                    }
                     else
                         newFoldMarker = new FoldMarker(doc, head_pos.end_line - 1, head_pos.end_column - 1, pos.end_line - 1, pos.end_column, FoldType.MemberBody);
                     if (newFoldMarker.Length > 0)
@@ -67,20 +75,22 @@ namespace VisualPascalABC
                 {
                     Position body_pos = ss.GetBodyPosition();
                     Position head_pos = ss.GetHeaderPosition();
-                    if (head_pos.file_name == null || body_pos.file_name == null) continue;
+                    if (head_pos.file_name == null || body_pos.file_name == null)
+                        continue;
                     FoldMarker newFoldMarker = new FoldMarker(doc, head_pos.end_line - 1, head_pos.end_column - 1, body_pos.end_line - 1, body_pos.end_column, FoldType.TypeBody);
                     if (newFoldMarker.Length > 0)
                     {
                         foldMarkers.Add(newFoldMarker);
                     }
-                    foldMarkers.AddRange(GetFoldMarkers(doc, ss));
+                    foldMarkers.AddRange(GetFoldMarkers(doc, ss, fileName));
                 }
                 else if (ss is IProcScope)
                 {
                     FoldType ft = FoldType.MemberBody;
                     Position head_pos = ss.GetHeaderPosition();
                     Position body_pos = ss.GetBodyPosition();
-                    if (head_pos.file_name == null || body_pos.file_name == null) continue;
+                    if (head_pos.file_name == null || body_pos.file_name == null)
+                        continue;
                     FoldMarker newFoldMarker = new FoldMarker(doc, head_pos.end_line - 1, head_pos.end_column, body_pos.end_line - 1, body_pos.end_column, ft);
                     if (newFoldMarker.Length > 0)
                     {
@@ -88,15 +98,15 @@ namespace VisualPascalABC
                     }
                 }
                 else if (ss is IImplementationUnitScope)
-                    foldMarkers.AddRange(GetFoldMarkers(doc, ss));
+                    foldMarkers.AddRange(GetFoldMarkers(doc, ss, fileName));
             }
-
+            
             return foldMarkers;
         }
 		
 		public List<FoldMarker> GenerateFoldMarkers(IDocument document, string fileName, object parseInfo)
 		{
-			List<FoldMarker> foldMarkers = GetFoldMarkers(document, parseInfo as IBaseScope);
+			List<FoldMarker> foldMarkers = GetFoldMarkers(document, parseInfo as IBaseScope, fileName);
 			return foldMarkers;
 		}
 		

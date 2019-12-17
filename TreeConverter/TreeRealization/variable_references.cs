@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 
@@ -11,7 +11,11 @@ namespace PascalABCCompiler.TreeRealization
 		private local_variable _var;
 		private int _static_depth;
 
-		public local_variable_reference(local_variable var,int static_depth,location loc) : base(var.type,loc)
+        public override string ToString()
+        {
+            return this.var.name;
+        }
+        public local_variable_reference(local_variable var,int static_depth,location loc) : base(var.type,loc)
 		{
 			_var=var;
 			this.static_depth=static_depth;   
@@ -85,6 +89,7 @@ namespace PascalABCCompiler.TreeRealization
     [Serializable]
     public class local_block_variable_reference : variable_reference, SemanticTree.ILocalBlockVariableReferenceNode
     {
+        public override string ToString() => _var.ToString();
         private local_block_variable _var;
 
         public local_block_variable_reference(local_block_variable var, location loc)

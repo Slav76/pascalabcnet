@@ -1,10 +1,11 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Здесь описана реализация неуправляемых шаблонов
 //Файлом владеет ssyy.
 using System;
 using System.Collections.Generic;
 using PascalABCCompiler.TreeConverter;
+using System.Linq;
 
 namespace PascalABCCompiler.TreeRealization
 {
@@ -28,6 +29,8 @@ namespace PascalABCCompiler.TreeRealization
 
     public class template_class : definition_node, PascalABCCompiler.SemanticTree.ITemplateClass
     {
+        public override string ToString() => type_dec.type_name + "=" + type_dec.type_def.ToString();
+
         public static bool check_template_definitions = true;
 
         public static bool TypeDependedFromTemplate(type_node tn)
@@ -63,8 +66,8 @@ namespace PascalABCCompiler.TreeRealization
                     using_namespace_list new_unl = new using_namespace_list();
                     foreach (using_namespace un in unl)
                     {
-                        SymbolInfo si = netsc.FindOnlyInScope(un.namespace_name);
-                        if ((si.sym_info as compiled_namespace_node) != null)
+                        List<SymbolInfo> sil = netsc.FindOnlyInScope(un.namespace_name);
+                        if ((sil.FirstOrDefault().sym_info as compiled_namespace_node) != null)
                         {
                             new_unl.AddElement(un);
                         }
@@ -479,13 +482,18 @@ namespace PascalABCCompiler.TreeRealization
         //    return rez;
         //}
 
-        public override SymbolInfo find_in_type(string name, bool no_search_in_extension_methods = false)
+        public override SymbolInfo find_first_in_type(string name, bool no_search_in_extension_methods = false)
         {
             indefinite_definition_node idn = new indefinite_definition_node(name, this);
             return new SymbolInfo(idn, access_level.al_public, symbol_kind.sk_indefinite);
         }
+        public override List<SymbolInfo> find_in_type(string name, bool no_search_in_extension_methods = false)
+        {
+            indefinite_definition_node idn = new indefinite_definition_node(name, this);
+            return new List<SymbolInfo> { new SymbolInfo(idn, access_level.al_public, symbol_kind.sk_indefinite) };
+        }
 
-        public override SymbolInfo find(string name, bool no_search_in_extension_methods = false)
+        public override List<SymbolInfo> find(string name, bool no_search_in_extension_methods = false)
         {
             return find_in_type(name);
         }

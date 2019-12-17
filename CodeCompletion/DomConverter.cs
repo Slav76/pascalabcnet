@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -17,6 +17,21 @@ namespace CodeCompletion
     public struct RetValue
     {
         public object prim_val;
+
+        public string string_val
+        {
+            get
+            {
+                string s = (string)prim_val;
+                if (s != null && s.StartsWith("'") && s.EndsWith("'"))
+                    s = s.Substring(1, s.Length - 2);
+                return s;
+            }
+            set
+            {
+                prim_val = "'" + value + "'";
+            }
+        }
     }
 
     public class DomConverter : ICodeCompletionDomConverter
@@ -38,9 +53,13 @@ namespace CodeCompletion
                 int i = 0;
                 foreach (string s in files)
                 {
+                    string fname = Path.GetFileNameWithoutExtension(s);
+                    if (fname == "__RedirectIOMode" || fname == "__RunMode" || fname == "PABCExtensions")
+                        continue;
                     SymInfo si = new SymInfo(Path.GetFileNameWithoutExtension(s), SymbolKind.Namespace, null);
-
                     si.IsUnitNamespace = true;
+
+                    si.description = GetUnitDescription(s);
                     standard_units[i++] = si;
                 }
             }
@@ -48,6 +67,23 @@ namespace CodeCompletion
             {
                 //standard_units = new SymInfo[0];
             }
+        }
+
+        private string GetUnitDescription(string fileName)
+        {
+            var reader = File.OpenText(fileName);
+            string line = null;
+            string doc = "";
+            while (!reader.EndOfStream)
+            {
+                line = reader.ReadLine();
+                if (line.StartsWith("///"))
+                    doc += line.Substring(3) + Environment.NewLine;
+                else if (line.StartsWith("unit"))
+                    break;
+            }
+            reader.Close();
+            return doc;
         }
 
         bool ICodeCompletionDomConverter.IsCompiled
@@ -101,7 +137,7 @@ namespace CodeCompletion
             if (visitor.cur_scope == null) return null;
             if (col + 1 > str.Length)
                 col -= str.Length;
-            SymScope si = visitor.FindScopeByLocation(line + 1, col + 1);//stv.cur_scope;
+            SymScope si = visitor.FindScopeByLocation(line + 1, col);//stv.cur_scope;
             if (si == null)
             {
                 si = visitor.FindScopeByLocation(line, col + 1);
@@ -109,7 +145,11 @@ namespace CodeCompletion
                     return null;
             }
             SetCurrentUsedAssemblies();
+            string trimed = str.Trim();
+            if (trimed.Length > 0 && trimed[0] == '(' && trimed[trimed.Length - 1] == ')')
+                expr = new bracket_expr(expr);
             ExpressionVisitor ev = new ExpressionVisitor(expr, si, visitor);
+           
             si = ev.GetScopeOfExpression(true, false);
             root = si;
             if (si is ElementScope) root = (si as ElementScope).sc;
@@ -121,7 +161,13 @@ namespace CodeCompletion
                     SymInfo[] syms = si.GetNamesAsInObject(ev);
                     SymInfo[] ext_syms = null;
                     if (si is ElementScope)
-                        ext_syms = visitor.cur_scope.GetSymInfosForExtensionMethods((si as ElementScope).sc as TypeScope);
+                    {
+                        SymScope root_scope = visitor.entry_scope;
+                        //if (root_scope is ImplementationUnitScope || root_scope is BlockScope)
+                        //    root_scope = root_scope.topScope;
+                        ext_syms = root_scope.GetSymInfosForExtensionMethods((si as ElementScope).sc as TypeScope);
+                    }
+                        
                     List<SymInfo> lst = new List<SymInfo>();
                     lst.AddRange(syms);
                     if (ext_syms != null)
@@ -283,9 +329,10 @@ namespace CodeCompletion
                     }
                     foreach (SymScope symsc in ts.members)
                     {
-                        if (symsc is ProcScope && !(symsc as ProcScope).already_defined && symsc.loc != null)
+                        ProcScope proc = symsc as ProcScope;
+                        if (proc != null && !proc.already_defined && !proc.is_abstract && symsc.loc != null)
                         {
-                            meths.Add(symsc as ProcScope);
+                            meths.Add(proc);
                         }
                     }
                 }
@@ -315,9 +362,10 @@ namespace CodeCompletion
                         }
                         foreach (SymScope symsc in ts.members)
                         {
-                            if (symsc is ProcScope && !(symsc as ProcScope).already_defined && symsc.loc != null)
+                            ProcScope proc = symsc as ProcScope;
+                            if (proc != null && !proc.already_defined && !proc.is_abstract && symsc.loc != null)
                             {
-                                meths.Add(symsc as ProcScope);
+                                meths.Add(proc);
                             }
                         }
                     }
@@ -416,23 +464,26 @@ namespace CodeCompletion
         public SymInfo[] GetNameByPattern(string pattern, int line, int col, bool all_names, int nest_level)
         {
             if (visitor.cur_scope == null) return null;
-            SymScope si = visitor.FindScopeByLocation(line + 1, col + 1);
+            SymScope si = visitor.FindScopeByLocation(line + 1, col);
             if (si == null)
             {
                 si = visitor.FindScopeByLocation(line, col + 1);
                 if (si == null)
                     si = visitor.cur_scope;
             }
+
             SymInfo[] elems = null;
             if (si == null) return null;
-            if (pattern == null || pattern == "") elems = si.GetNamesInAllTopScopes(all_names, new ExpressionVisitor(si, visitor), false);
-            else elems = si.GetNamesInAllTopScopes(all_names, new ExpressionVisitor(si, visitor), false);
+            if (pattern == null || pattern == "")
+                elems = si.GetNamesInAllTopScopes(all_names, new ExpressionVisitor(si, visitor), false);
+            else
+                elems = si.GetNamesInAllTopScopes(all_names, new ExpressionVisitor(si, visitor), false);
             List<SymInfo> result_names = new List<SymInfo>();
             if (elems == null) return null;
             for (int i = 0; i < elems.Length; i++)
                 if (pattern == null || pattern == "")
                 {
-                    if (!elems[i].name.StartsWith("$"))
+                    if (!elems[i].name.StartsWith("$") && !elems[i].name.StartsWith("<"))
                         if (all_names)
                         {
                             if (elems[i].kind != SymbolKind.Namespace || nest_level == 0)
@@ -522,7 +573,7 @@ namespace CodeCompletion
             if (elems == null) return null;
             for (int i = 0; i < elems.Length; i++)
             {
-                if (!elems[i].name.StartsWith("$") && (elems[i].kind == SymbolKind.Class || elems[i].kind == SymbolKind.Namespace) && elems[i].kind != SymbolKind.Interface)
+                if (!elems[i].name.StartsWith("$") && (elems[i].kind == SymbolKind.Class || elems[i].kind == SymbolKind.Struct || elems[i].kind == SymbolKind.Namespace) && elems[i].kind != SymbolKind.Interface)
                 {
                     if (expr != null && si != null && si is ElementScope &&
                     string.Compare(elems[i].name, (si as ElementScope).sc.si.name, true) == 0)
@@ -631,10 +682,13 @@ namespace CodeCompletion
                 {
                     if (ss.loc != null)
                     {
-                        pos.line = ss.loc.begin_line_num;
-                        pos.column = ss.loc.begin_column_num;
-                        pos.file_name = ss.loc.doc.file_name;
-                        poses.Add(pos);
+                        if (!(ss.is_static && ss is ProcScope && (ss as ProcScope).is_constructor))
+                        {
+                            pos.line = ss.loc.begin_line_num;
+                            pos.column = ss.loc.begin_column_num;
+                            pos.file_name = ss.loc.doc.file_name;
+                            poses.Add(pos);
+                        }  
                     }
                     else if (ss is ProcScope && (ss as ProcScope).is_constructor)
                     {
@@ -699,12 +753,14 @@ namespace CodeCompletion
                         pos.full_metadata_title = cfs.CompiledField.DeclaringType.FullName + "." + cfs.CompiledField.Name;
                         poses.Add(pos);
                     }
-                    else if (ss is CompiledMethodScope)
+                    else if (ss is CompiledMethodScope || ss is ProcScope && (ss as ProcScope).original_function is CompiledMethodScope)
                     {
                         pos.from_metadata = true;
                         pos.line = 1;
                         pos.column = 1;
                         CompiledMethodScope cms = ss as CompiledMethodScope;
+                        if (cms == null)
+                            cms = (ss as ProcScope).original_function as CompiledMethodScope;
                         pos.metadata_title = prepare_file_name(cms.CompiledMethod.DeclaringType.Name);
                         pos.metadata_type = MetadataType.Method;
                         if (!only_check)
@@ -844,9 +900,9 @@ namespace CodeCompletion
                     ExpressionVisitor ev = new ExpressionVisitor(expr, ss, visitor);
                     ss = ev.GetScopeOfExpression();
                 }
-                while (ss != null && ss is ProcScope && (ss as ProcScope).proc_realization != null && (ss as ProcScope).proc_realization.loc != null)
+                while (ss != null && ss is ProcScope && (ss as ProcScope).procRealization != null && (ss as ProcScope).procRealization.loc != null)
                 {
-                    ProcRealization pr = (ss as ProcScope).proc_realization;
+                    ProcRealization pr = (ss as ProcScope).procRealization;
                     pos.line = pr.loc.begin_line_num;
                     pos.column = pr.loc.begin_column_num;
                     pos.file_name = pr.loc.doc.file_name;
@@ -856,7 +912,7 @@ namespace CodeCompletion
                     ss = null;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
@@ -930,7 +986,18 @@ namespace CodeCompletion
                         else if (ss is TypeScope)
                             ss.AddDocumentation(UnitDocCache.GetDocumentation(ss as TypeScope));
                         else if (ss is ProcScope)
-                            ss.AddDocumentation(UnitDocCache.GetDocumentation(ss as ProcScope));
+                        {
+                            ProcScope ps = ss as ProcScope;
+                            if (ps.is_constructor && ps.is_static)
+                                return null;
+                            if (ps.original_function != null)
+                                ps = ps.original_function;
+                            if (ps is CompiledMethodScope)
+                                ss.AddDocumentation(AssemblyDocCache.GetDocumentation((ps as CompiledMethodScope).mi));
+                            else
+                                ss.AddDocumentation(UnitDocCache.GetDocumentation(ps));
+                        }
+                            
                         else if (ss is InterfaceUnitScope)
                             ss.AddDocumentation(UnitDocCache.GetDocumentation(ss as InterfaceUnitScope));
                         else if (ss is ElementScope && string.IsNullOrEmpty(ss.si.description) && (ss as ElementScope).sc is TypeScope)
@@ -967,6 +1034,12 @@ namespace CodeCompletion
             }
             ExpressionVisitor ev = new ExpressionVisitor(expr, si, visitor);
             si = ev.GetScopeOfExpression(false, true);
+            if (si is ProcScope)
+            {
+                ProcScope ps = si as ProcScope;
+                if (ps.is_constructor)
+                    si = new ElementScope(ps.declaringType);
+            }
             return CodeCompletionController.CurrentParser.LanguageInformation.GetIndexerString(si);
         }
 
@@ -1077,6 +1150,11 @@ namespace CodeCompletion
 
         private bool equal_params(ProcScope ps, List<ProcScope> procs)
         {
+            foreach (ProcScope proc in procs)
+            {
+                if ((ps.IsOverride || proc.IsOverride) && ps.IsParamsEquals(proc))
+                    return true;
+            }
             return false;
         }
 
@@ -1094,6 +1172,11 @@ namespace CodeCompletion
         {
             if (tmp_cur_used_assemblies != null)
                 PascalABCCompiler.NetHelper.NetHelper.cur_used_assemblies = tmp_cur_used_assemblies;
+        }
+
+        ~DomConverter()
+        {
+
         }
     }
 

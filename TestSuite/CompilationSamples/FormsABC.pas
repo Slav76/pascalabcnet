@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 unit FormsABC;
 
@@ -79,7 +79,7 @@ type
     procedure SetText(t: string) := b.Text := t;
   public 
     event Click: procedure;
-    constructor Create(text: string);
+    constructor Create(text: string := '');
     property Width: integer read GetW write SetW;
     property Text: string read GetText write SetText;
   end;

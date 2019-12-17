@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 //Инициализация системной библиотеки
 using System;
@@ -9,6 +9,8 @@ using PascalABCCompiler.TreeConverter;
 
 using System.Collections;
 using System.Collections.Generic;
+
+using System.Linq;
 
 namespace PascalABCCompiler.SystemLibrary
 {
@@ -491,6 +493,9 @@ namespace PascalABCCompiler.SystemLibrary
 
         private static basic_function_node _obj_to_obj;
 
+        private static basic_function_node _int64_to_pointer;
+        private static basic_function_node _pointer_to_int64;
+
         private static compiled_function_node _resize_func;
 
         private static System.StringComparer _string_comparer = StringComparer.Ordinal;
@@ -525,7 +530,7 @@ namespace PascalABCCompiler.SystemLibrary
         public static basic_function_node make_unary_operator(string operator_name, type_node to,
             SemanticTree.basic_function_type bft, type_node ret_value_type)
         {
-            basic_function_node bfn = new basic_function_node(bft, ret_value_type,true);
+            basic_function_node bfn = new basic_function_node(bft, ret_value_type,true, operator_name);
             basic_parameter par = new basic_parameter(compiler_string_consts.unary_param_name, to,
                 SemanticTree.parameter_type.value, bfn);
             bfn.parameters.AddElement(par);
@@ -956,18 +961,19 @@ namespace PascalABCCompiler.SystemLibrary
             basic_function_node inc_var = create_oti_method(vinc, type, SemanticTree.parameter_type.var);
             basic_function_node dec_var = create_oti_method(vdec, type, SemanticTree.parameter_type.var);
 
-            SymbolInfo si = type.find_in_type(compiler_string_consts.greq_name);
+            SymbolInfo si = type.find_first_in_type(compiler_string_consts.greq_name);
             basic_function_node greq = (basic_function_node)si.sym_info;
         
-            si = type.find(compiler_string_consts.smeq_name);
+            si = type.find(compiler_string_consts.smeq_name).FirstOrDefault();
             basic_function_node loeq = (basic_function_node)si.sym_info;
+            
 			
-            si = type.find(compiler_string_consts.sm_name);
+            si = type.find(compiler_string_consts.sm_name).FirstOrDefault();
             basic_function_node lo = (basic_function_node)si.sym_info;
             
-            si = type.find(compiler_string_consts.gr_name);
+            si = type.find(compiler_string_consts.gr_name).FirstOrDefault();
             basic_function_node gr = (basic_function_node)si.sym_info;
-            
+
             ordinal_type_interface oti = new ordinal_type_interface(inc_value, dec_value, inc_var, dec_var,
                 loeq, greq, lo, gr, lower_value, upper_value, t2i, t2i_comp);
 
@@ -1844,6 +1850,7 @@ namespace PascalABCCompiler.SystemLibrary
             make_function_comparison(_real_smeq, _float_smeq, function_compare.greater);
             make_function_comparison(_real_eq, _float_eq, function_compare.greater);
             make_function_comparison(_real_noteq, _float_noteq, function_compare.greater);
+            make_function_comparison(_real_div, _float_div, function_compare.greater);
 
             //char type.
             //Assign.
@@ -2016,12 +2023,22 @@ namespace PascalABCCompiler.SystemLibrary
             string[] s=new string[0];
             _array_of_string = compiled_type_node.get_type_node(s.GetType());
 
-            make_type_conversion_use_ctor(_float_type, _decimal_type, type_compare.less_type, true);
-            make_type_conversion_use_ctor(_double_type, _decimal_type, type_compare.less_type, true);
-            //это преобразование есть явно в decimal
+            //это преобразование есть явно в decimal - это уже давно было закомментировано
             //make_type_conversion_use_ctor(_integer_type, _decimal_type, type_compare.less_type, true);
-            make_type_conversion_use_ctor(_uint_type, _decimal_type, type_compare.less_type, true);
-            make_type_conversion_use_ctor(_uint64_type, _decimal_type, type_compare.less_type, true);
+
+            //make_type_conversion_use_ctor(_float_type, _decimal_type, type_compare.less_type, true);
+            //make_type_conversion_use_ctor(_double_type, _decimal_type, type_compare.less_type, true);
+
+            //make_type_conversion_use_ctor(_uint_type, _decimal_type, type_compare.less_type, true);
+            //make_type_conversion_use_ctor(_uint64_type, _decimal_type, type_compare.less_type, true);
+
+            // SSM 21.07.18 закомментировал четыре строчки выше, т.к. они давали неоднозначность при decimal(2.5). 
+            // Теперь из real в decimal и из single в decimal возможно только явное преобразование
+            // Из longword в decimal и из uint64 в decimal существуют как явное, так и неявное преобразования
+            // Это полностью соответствует тому, что в C#
+
+            // забавно, но make_type_conversion_use_ctor используется ТОЛЬКО тут и ТОЛЬКО для типа decimal !!!!!!!
+            // То есть, это было неправильное исправление 
 
             writable_in_typed_files_types.Clear();
             writable_in_typed_files_types.Add(_bool_type, _bool_type);
@@ -2043,6 +2060,8 @@ namespace PascalABCCompiler.SystemLibrary
             
             _exception_base_type = compiled_type_node.get_type_node(typeof(System.Exception), symtab);
             _exception_base_type.SetName(compiler_string_consts.base_exception_class_name);
+            _int64_to_pointer = make_type_conversion(_int64_type, _pointer_type, type_compare.greater_type, SemanticTree.basic_function_type.ltop, false);
+            _pointer_to_int64 = make_type_conversion(_pointer_type, _int64_type, type_compare.less_type, SemanticTree.basic_function_type.ptol, false);
         }
 		
         private static List<type_node> wait_add_ref_list = new List<type_node>();
@@ -5140,6 +5159,22 @@ namespace PascalABCCompiler.SystemLibrary
         	{
         		return _enum_smeq;
         	}
+        }
+
+        public static basic_function_node int64_to_pointer
+        {
+            get
+            {
+                return _int64_to_pointer;
+            }
+        }
+
+        public static basic_function_node pointer_to_int64
+        {
+            get
+            {
+                return _pointer_to_int64;
+            }
         }
 
         public static compiled_type_node icloneable_interface

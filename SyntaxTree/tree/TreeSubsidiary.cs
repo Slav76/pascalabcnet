@@ -11,7 +11,7 @@ namespace PascalABCCompiler.SyntaxTree
 
     public enum WhileCycleType { While, DoWhile };
 
-    public enum UnitHeaderKeyword { Unit, Library }
+    public enum UnitHeaderKeyword { Unit, Library, Namespace }
 
     public enum JumpStmtType { Return, Break, Continue };
     public enum SwitchPartType { Switch, Case, Default };
@@ -74,7 +74,8 @@ namespace PascalABCCompiler.SyntaxTree
         Member,                 //  .       .
         Implicit,
         Explicit,
-        Deref                   // ^ SSM 3.02.12
+        Deref,                   // ^ SSM 3.02.12
+        Power
     };
 
     public class OperatorServices
@@ -122,7 +123,8 @@ namespace PascalABCCompiler.SyntaxTree
                     case Operators.Assignment: return ":=";          
                     case Operators.In: return "in";                  
                     case Operators.Is: return "is";                  
-                    case Operators.As: return "as";                  
+                    case Operators.As: return "as"; 
+                    case Operators.Power: return "**";
                 }
             }
             else
@@ -173,7 +175,7 @@ namespace PascalABCCompiler.SyntaxTree
 
 	public enum for_cycle_type {to,downto};
 	
-	public enum proc_attribute {attr_override, attr_forward, attr_virtual, attr_overload, attr_reintroduce, attr_abstract, attr_static, attr_extension };
+	public enum proc_attribute {attr_override, attr_forward, attr_virtual, attr_overload, attr_reintroduce, attr_abstract, attr_static, attr_extension, attr_none }; // attr_none нужно дл€ свойств когда virtual » override не указываетс€
 
     public enum definition_attribute {None, Static, Const};
 
@@ -183,7 +185,7 @@ namespace PascalABCCompiler.SyntaxTree
 
     public enum parametr_kind { none, var_parametr, const_parametr, out_parametr, params_parametr };
 
-    [FlagsAttribute] public enum class_attribute { None = 0, Sealed = 1, Partial = 2, Abstract = 4, Auto = 8 }; // Auto - SSM 24.03.14
+    [FlagsAttribute] public enum class_attribute { None = 0, Sealed = 1, Partial = 2, Abstract = 4, Auto = 8, Static=16 }; // Auto - SSM 24.03.14
     public enum class_keyword { Class, Interface, Record, Struct, Union, TemplateClass, TemplateRecord, TemplateInterface };
 
     public enum c_scalar_type_name { tn_char, tn_int, tn_short, tn_long, tn_short_int, tn_long_int, tn_float, tn_double, tn_void};
@@ -208,6 +210,10 @@ namespace PascalABCCompiler.SyntaxTree
 			{
 				return _line_num;
 			}
+            set
+            {
+                _line_num = value;
+            }
 		}
 
 		public int column_num
@@ -216,6 +222,10 @@ namespace PascalABCCompiler.SyntaxTree
 			{
 				return _column_num;
 			}
+            set
+            {
+                _column_num = value;
+            }
 		}
 
 	}
@@ -388,5 +398,21 @@ namespace PascalABCCompiler.SyntaxTree
         }
     }
 
+    public class base_syntax_namespace_node: declaration
+    {
+        string _name;
+        List<declaration> _defs;
+        uses_list _uses_modules;
 
+        public base_syntax_namespace_node(string name)
+        {
+            _name = name;
+            _defs = new List<declaration>();
+        }
+
+        public string name { get => _name; set => _name = value; }
+        public List<declaration> defs { get => _defs; set => _defs = value; }
+        public uses_list uses_modules { get => _uses_modules; set => _uses_modules = value; }
+ 
+    }
 }

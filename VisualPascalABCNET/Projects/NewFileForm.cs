@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 
 using System;
@@ -9,6 +9,8 @@ using System.Windows.Forms;
 
 namespace VisualPascalABC
 {
+    public enum FileType { Unit, Namespace, Form}
+
 	/// <summary>
 	/// Description of NewFileForm.
 	/// </summary>
@@ -23,7 +25,7 @@ namespace VisualPascalABC
 			
 			foreach (ListViewItem li in lvTemplates.Items)
 			{
-				if ((string)li.Tag == "0")
+				if ((string)li.Tag == "0" || (string)li.Tag == "2")
 					source_items.Add(li);
 				else
 					forms_items.Add(li);
@@ -105,6 +107,15 @@ namespace VisualPascalABC
 			foreach (ListViewItem li in forms_items)
 				lvTemplates.Items.Add(li);
             lvTemplates.Items[0].Selected = true;
+        }
+
+        public FileType GetFileFilter()
+        {
+            if ((string)lvTemplates.SelectedItems[0].Tag == "0")
+                return FileType.Unit;
+            else if ((string)lvTemplates.SelectedItems[0].Tag == "2")
+                return FileType.Namespace;
+            return FileType.Form;
         }
 
         public Button CancelButtonCommon

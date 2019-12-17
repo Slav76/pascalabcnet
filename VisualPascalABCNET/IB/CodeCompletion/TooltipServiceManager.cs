@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -36,6 +36,24 @@ namespace VisualPascalABC
             List<PascalABCCompiler.Errors.Error> Errors = new List<PascalABCCompiler.Errors.Error>();
             PascalABCCompiler.SyntaxTree.expression tree = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetExpression("test" + Path.GetExtension(FileName), expr, Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
             bool header = false;
+            if (Errors.Count > 0)
+            {
+                if (expr.IndexOf('<') != -1 && expr.IndexOf('>') != -1)
+                {
+                    Errors.Clear();
+                    tree = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetExpression("test" + Path.GetExtension(FileName), expr.Replace("<", "&<"), Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
+                }
+                else
+                {
+                    string s = expr.TrimStart();
+                    if (s.Length > 0 && s[0] == '^')
+                    {
+                        Errors.Clear();
+                        expr_without_brackets = expr_without_brackets.TrimStart().Substring(1);
+                        tree = WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.StandartCompiler.ParsersController.GetExpression("test" + Path.GetExtension(FileName), s.Substring(1), Errors, new List<PascalABCCompiler.Errors.CompilerWarning>());
+                    }
+                }
+            }
             if (tree == null || Errors.Count > 0)
             {
                 Errors.Clear();

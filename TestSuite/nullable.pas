@@ -1,4 +1,4 @@
-type TRec = record
+﻿type TRec = record
 a: integer;
 b: real;
 end;
@@ -146,6 +146,7 @@ begin
   assert(v1 = nil);
   v1 := 4;
   assert(v1 <> nil);
+  assert(not (v1 = nil));
   v2 := nil;
   assert(v2 = nil);
   v2 := new TRec;
@@ -169,4 +170,7 @@ begin
   assert(arr[0] = nil);
   arr[0] := 2;
   assert(arr[0] <> nil);
+  var lst: List<integer?> := new List<integer?>;
+  lst.Add(nil);
+  assert(lst[0] = nil);
 end.

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -148,7 +148,10 @@ namespace VisualPascalABC
                     if (VisibleBottomContent.Count > 0)
                     {
                         foreach (DockContent dc in VisibleBottomContent)
+                        {
                             dc.Show();
+                        }
+                            
                         VisibleBottomContent.Clear();
                     }
                     else
@@ -160,7 +163,7 @@ namespace VisualPascalABC
                     VisibleBottomContent.Clear();
                     DockContent dca = BottomDockContent[0].Pane.ActiveContent as DockContent;
                     foreach (DockContent dc in BottomDockContent)
-                        if (!dc.IsHidden)
+                        if (!dc.IsHidden && !BottomPane.IsAutoHide)
                         {
                             if (dc != dca)
                                 VisibleBottomContent.Add(dc);
@@ -237,6 +240,32 @@ namespace VisualPascalABC
                     if (ProjectExplorerWindow != null)
                     {
                         //PropertiesWindow.IsHidden = true;
+                    }
+                }
+            }
+
+        }
+
+        public bool DisassemblyWindowVisible
+        {
+            get
+            {
+                return DisassemblyWindow != null && DisassemblyWindow.Visible;
+            }
+            set
+            {
+                if (value)
+                {
+                    if (DisassemblyWindow == null)
+                    {
+                        AddDisassemblyWindow();
+                    }
+                    else
+                    {
+                        //ShowContent(PropertiesWindow, false);
+                        DisassemblyWindow.Show();
+                        DisassemblyWindow.ShowDisassembly();
+                        //PropertiesWindow.IsHidden = false; //Show(MainDockPanel, DockState.Hidden);
                     }
                 }
             }
@@ -457,6 +486,11 @@ namespace VisualPascalABC
         {
         }
 
+        public void SetDisassemblyMenuVisible(bool flag)
+        {
+            tsDisassembly.Visible = flag;
+        }
+
         public void SetPlayButtonsVisible(bool start)
         {
             if (play_pause_buttons_visible)
@@ -593,7 +627,7 @@ namespace VisualPascalABC
                 {
                     watch_vis = true;
                 }
-                if (WorkbenchServiceFactory.DebuggerManager.show_debug_tabs)
+                if (WorkbenchServiceFactory.DebuggerManager.ShowDebugTabs)
                 {
                     if (!BottomTabsVisible)
                         BottomTabsVisible = true;

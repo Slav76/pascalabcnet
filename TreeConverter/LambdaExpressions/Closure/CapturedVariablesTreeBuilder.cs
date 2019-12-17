@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -21,6 +21,7 @@ namespace TreeConverter.LambdaExpressions.Closure
         private CapturedVariablesTreeNode _rootNode;
         private CapturedVariablesTreeNodeClassScope _classScope;
         private CapturedVariablesTreeNodeProcedureScope _procedureScope;
+        private List<CapturedVariablesTreeNode.CapturedSymbolInfo> _pendingCapturedSymbols = new List<CapturedVariablesTreeNode.CapturedSymbolInfo>();
 
         public class CapturedVariablesInfo
         {
@@ -70,17 +71,17 @@ namespace TreeConverter.LambdaExpressions.Closure
 
         public override void visit(var_def_statement varDefStmt)
         {
+            if (varDefStmt.inital_value != null)
+            {
+                ProcessNode(varDefStmt.inital_value);
+            }
+
             _visitor.visit(varDefStmt);
             
             foreach (var id in varDefStmt.vars.idents)
             {
-                var si = _visitor.context.find(id.name);
+                SymbolInfo si = _visitor.context.find_first(id.name);
                 _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(varDefStmt, si));
-            }
-
-            if (varDefStmt.inital_value != null)
-            {
-                ProcessNode(varDefStmt.inital_value);
             }
         }
 
@@ -104,7 +105,9 @@ namespace TreeConverter.LambdaExpressions.Closure
             _currentTreeNode = newTreeNode;
 
             _scopesCapturedVarsNodesDictionary.Add(stl.Scope.ScopeNum, _currentTreeNode);
-
+            foreach (var csi in _pendingCapturedSymbols)
+                _currentTreeNode.VariablesDefinedInScope.Add(csi);
+            _pendingCapturedSymbols.Clear();
             if (stmtList.subnodes != null)
             {
                 foreach (var stmt in stmtList.subnodes)
@@ -122,26 +125,59 @@ namespace TreeConverter.LambdaExpressions.Closure
         {
             if (newExpr.params_list != null && newExpr.params_list.expressions != null)
             {
-                foreach (var expr in newExpr.params_list.expressions)
+                for (int i = 0; i < newExpr.params_list.expressions.Count; i++)
                 {
+                    expression expr = newExpr.params_list.expressions[i];
                     ProcessNode(expr);
                 }
+                ProcessNode(newExpr.array_init_expr);
             }
+        }
+
+        /*public override void visit(exception_handler eh)
+        {
+            _visitor.visit(eh);
+            SymbolInfo si = _visitor.context.find_first(eh.variable.name);
+            _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(eh, si));
+            ProcessNode(eh.statements);
+        }*/
+
+        public override void visit(exception_handler eh)
+        {
+            // Отдельным визитором переменные в on присвою локальным переменным и переименую везде внутри блока
+            statements_list sl = new statements_list(_visitor.get_location(eh.statements));
+            _visitor.convertion_data_and_alghoritms.statement_list_stack_push(sl);
+
+            _visitor.context.enter_code_block_without_bind();
+            
+            if (eh.variable != null)
+                _visitor.context.add_var_definition(eh.variable.name, _visitor.get_location(eh.variable), _visitor.convert_strong(eh.type_name), PascalABCCompiler.SemanticTree.polymorphic_state.ps_common, true);
+            //SymbolInfo si = _visitor.context.find_first(eh.variable.name);
+            //var csi = new CapturedVariablesTreeNode.CapturedSymbolInfo(eh, si);
+            //_currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(eh, si));
+            //_pendingCapturedSymbols.Add(csi);
+            ProcessNode(eh.variable);
+
+            ProcessNode(eh.statements);
+            _visitor.context.leave_code_block();
+            _visitor.convertion_data_and_alghoritms.statement_list_stack_pop();
+            //_pendingCapturedSymbols.Remove(csi);
         }
 
         public override void visit(ident id)
         {
             var idName = id.name.ToLower();
 
-            var si = _visitor.context.find(idName);
+            SymbolInfo si = _visitor.context.find_first(idName);
+            //var q = si.GetHashCode();
             
             if (si == null)
             {
-                if (InLambdaContext)
+                /*if (InLambdaContext)
                 {
                     _visitor.AddError(new ThisTypeOfVariablesCannotBeCaptured(_visitor.get_location(id)));
                     return;
-                }
+                }*/
                 return;
             }
 
@@ -149,15 +185,21 @@ namespace TreeConverter.LambdaExpressions.Closure
                 si.sym_info.semantic_node_type == semantic_node_type.common_namespace_function_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.namespace_constant_definition ||
                 si.sym_info.semantic_node_type == semantic_node_type.compiled_function_node ||
-                si.sym_info.semantic_node_type == semantic_node_type.common_method_node || // SSM bug fix  #167
+                //si.sym_info.semantic_node_type == semantic_node_type.common_method_node || // SSM bug fix  #1991 11.06.19  конкурирует с #891
                 si.sym_info.semantic_node_type == semantic_node_type.compiled_namespace_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.compiled_variable_definition ||
                 si.sym_info.semantic_node_type == semantic_node_type.common_type_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.compiled_type_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.basic_interface_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.common_unit_node ||
+                si.sym_info.semantic_node_type == semantic_node_type.common_namespace_node ||
                 si.sym_info.semantic_node_type == semantic_node_type.compiled_unit_node ||
-                si.sym_info.semantic_node_type == semantic_node_type.template_type)
+                si.sym_info.semantic_node_type == semantic_node_type.template_type ||
+                si.sym_info.semantic_node_type == semantic_node_type.ref_type_node ||
+                si.sym_info.semantic_node_type == semantic_node_type.generic_indicator ||
+                si.sym_info.semantic_node_type == semantic_node_type.class_constant_definition ||
+                si.sym_info.semantic_node_type == semantic_node_type.function_constant_definition || // SSM 03.11.18 bug fix #1449
+                si.sym_info.semantic_node_type == semantic_node_type.basic_function_node && (idName == "exit" || idName == "continue" || idName == "break"))
             {
                 return;
             }
@@ -165,7 +207,104 @@ namespace TreeConverter.LambdaExpressions.Closure
             var acceptableVarType = si.sym_info.semantic_node_type == semantic_node_type.local_variable ||
                                     si.sym_info.semantic_node_type == semantic_node_type.local_block_variable ||
                                     si.sym_info.semantic_node_type == semantic_node_type.common_parameter ||
-                                    si.sym_info.semantic_node_type == semantic_node_type.class_field;
+                                    si.sym_info.semantic_node_type == semantic_node_type.class_field
+                                    ;
+            //trjuk, chtoby ne perelopachivat ves kod. zamenjaem ident na self.ident
+            // Использую этот трюк для нестатических полей предков - они не захватываются из-за плохого алгоритма захвата
+            // aab 12.06.19 begin
+            // Добавил такое же переименование для статичесских полей класса. Теперь захват работает
+            if ((si.sym_info.semantic_node_type == semantic_node_type.class_field || si.sym_info.semantic_node_type == semantic_node_type.common_method_node
+                || si.sym_info.semantic_node_type == semantic_node_type.common_event || si.sym_info.semantic_node_type == semantic_node_type.common_property_node) && InLambdaContext)
+            {
+                dot_node dn = null;
+                // Поменял принцип добавления имени класса для статических полей и функций
+                Func<common_type_node, addressed_value> getClassIdent = classNode =>
+                {
+                    if (classNode.name.Contains("<"))
+                    {
+                        var classIdent = new ident(classNode.name.Remove(classNode.name.IndexOf("<")));
+                        var templateParams = new template_param_list(classNode.instance_params.Select(x => x.name).Aggregate("", (acc, elem) => acc += elem));
+                        return new ident_with_templateparams(classIdent,  templateParams);
+                    }
+                    else
+                    {
+                        return new ident(classNode.name);
+                    }
+                };
+                if (si.sym_info is class_field classField && classField.IsStatic)
+                {
+                    dn = new dot_node(getClassIdent(classField.cont_type),
+                        new ident(id.name, id.source_context), id.source_context);
+                }
+                else if (si.sym_info is common_method_node commonMethodNode && commonMethodNode.IsStatic)
+                {
+                    dn = new dot_node(getClassIdent(commonMethodNode.cont_type),
+                        new ident(id.name, id.source_context), id.source_context);
+                }
+                else
+                {
+                    dn = new dot_node(new ident("self", id.source_context), new ident(id.name, id.source_context), id.source_context);
+                }
+                // aab 12.06.19 end
+                bool ok = true;
+                try
+                {
+                    id.Parent.ReplaceDescendantUnsafe(id, dn);
+                }
+                catch
+                {
+                    ok = false;
+                }
+                if (ok)
+                {
+                    ProcessNode(dn); // SSM 26.06.19 #1893
+                    /*if (id.Parent is var_def_statement)
+                        ProcessNode(dn); // Грубая правка, закрывающая ошибку #1390 // SSM 19.06.19 заменил id на dn
+                    else ProcessNode(dn); // Грубо, поскольку id.Parent уже начал обходиться - а здесь рекурсия // Это рубится на коде var s := c; где s - локальная в лямбде, а c - захваченное поле класса. В результате s создаётся дважды.*/
+                    return;
+                }
+            }
+
+            if (si.sym_info.semantic_node_type == semantic_node_type.common_method_node && (si.sym_info as common_method_node).IsStatic)
+            {
+                // надо дописывать к идентификатору имя типа. Подниматься по синтаксическому дереву конечно долго ))
+                syntax_tree_node sn = id;
+                ident cname = null;
+                while (!(sn is procedure_definition) && sn != null) // Это если метод класса определен вне интерфейса класса
+                    sn = sn.Parent;
+                if (sn != null)
+                {
+                    var pd = sn as procedure_definition;
+                    var ph = pd.proc_header;
+                    if (ph.name.class_name != null)
+                    {
+                        cname = ph.name.class_name;
+                        addressed_value id1 = null;
+                        if (cname is template_type_name ttn)
+                        {
+                            var tpl = new template_param_list(ttn.template_args.idents.Select(l => SyntaxTreeBuilder.BuildSimpleType(l.name)).ToList(), ttn.template_args.source_context);
+                            id1 = new ident_with_templateparams(new ident(ttn.name, ttn.source_context), tpl,ttn.source_context);
+                        }
+                        else id1 = new ident(cname.name, cname.source_context);
+                        dot_node dn = new dot_node(id1, new ident(id.name, id.source_context), id.source_context);
+                        id.Parent.ReplaceDescendantUnsafe(id, dn);
+                        ProcessNode(dn);
+                        return;
+                    }
+                }
+                while (!(sn is class_definition) && sn != null)
+                    sn = sn.Parent;
+                if (sn != null)
+                {
+                    var cd = sn as class_definition;
+                    cname = (cd.Parent as type_declaration).type_name;
+                    dot_node dn = new dot_node(new ident(cname.name, cname.source_context), new ident(id.name, id.source_context), id.source_context);
+                    id.Parent.ReplaceDescendantUnsafe(id, dn);
+                    ProcessNode(dn);
+                }
+                return;
+            }
+                
 
             if (!(acceptableVarType) && InLambdaContext) 
             {
@@ -173,7 +312,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                 return;
             }
 
-            if (si.sym_info.semantic_node_type == semantic_node_type.class_field && InLambdaContext)
+            /*if (si.sym_info.semantic_node_type == semantic_node_type.class_field && InLambdaContext)
             {
                 var semClassField = (class_field)si.sym_info;
                 if (semClassField.polymorphic_state != polymorphic_state.ps_common)
@@ -181,7 +320,7 @@ namespace TreeConverter.LambdaExpressions.Closure
                     _visitor.AddError(new ThisTypeOfVariablesCannotBeCaptured(_visitor.get_location(id)));
                     return;
                 }
-            }
+            }*/
 
             if (si.scope == null)
             {
@@ -197,13 +336,13 @@ namespace TreeConverter.LambdaExpressions.Closure
                 var prScope = scope as CapturedVariablesTreeNodeProcedureScope;
                 if (prScope != null && acceptableVarType)
                 {
-                    if (si.sym_info.semantic_node_type == semantic_node_type.local_variable)
+                    /*if (si.sym_info.semantic_node_type == semantic_node_type.local_variable)
                     {
                         if (!(idName == compiler_string_consts.self_word && si.scope is SymbolTable.ClassMethodScope && _classScope != null) && InLambdaContext)
                         {
                             _visitor.AddError(new ThisTypeOfVariablesCannotBeCaptured(_visitor.get_location(id)));
                         }
-                    }
+                    }*/
                     if (si.sym_info.semantic_node_type == semantic_node_type.common_parameter && prScope.FunctionNode.parameters.First(v => v.name.ToLower() == idName).parameter_type != parameter_type.value && InLambdaContext)
                     {
                         _visitor.AddError(new CannotCaptureNonValueParameters(_visitor.get_location(id)));
@@ -224,12 +363,22 @@ namespace TreeConverter.LambdaExpressions.Closure
                     }
                     else
                     {
-                        var field = prScope.VariablesDefinedInScope.Find(var => var.SymbolInfo == si);
+                        var field = prScope.VariablesDefinedInScope.Find(var => var.SymbolInfo == si); 
 
-                        if (field == null)
+                        if (field == null) // если не было такого
                         {
-                            prScope.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(null,
-                                                                                                                 si));
+                            // local_block_variable   common_parameter - в процедуре могут быть только эти
+                            var found = false;
+                            foreach (var v in prScope.VariablesDefinedInScope) // и не было с таким же именем
+                            {
+                                if (v.SymbolInfo.sym_info is var_definition_node vdn && vdn.name.ToLower() == id.name.ToLower()) // SSM попытка бороться с #2001 - исключаю одноимённые
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) // то добавить
+                                prScope.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(null, si)); // это было
                         }
                     }
                 }
@@ -257,19 +406,37 @@ namespace TreeConverter.LambdaExpressions.Closure
                     }
                 }
 
-                var idRef = (selfWordInClass ? _classScope : scope)
-                    .VariablesDefinedInScope
-                    .Find(var => var.SymbolInfo == si);
+                var sc = selfWordInClass ? _classScope : scope;
+                var idRef = sc.VariablesDefinedInScope.Find(var => var.SymbolInfo == si);
 
                 if (idRef == null)                                     //TODO: Осторожнее переделать
                 {
                     {
-                        return;
+                        var index = -1;
+                        for (var i=0; i < sc.VariablesDefinedInScope.Count; i++) 
+                        {
+                            if (sc.VariablesDefinedInScope[i].SymbolInfo.sym_info is var_definition_node vdn && vdn.name.ToLower() == id.name.ToLower()) // SSM #2001 и подобные - исключаю одноимённые
+                            {
+                                index = i;
+                                si = sc.VariablesDefinedInScope[i].SymbolInfo;
+                                break;
+                            }
+                        }
+                        if (index == -1) // то добавить
+                        {
+                            sc.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(null, si));
+                            index = sc.VariablesDefinedInScope.Count - 1;
+                        }
+                        idRef = sc.VariablesDefinedInScope[index];
+                        if (!(idRef.SymbolInfo.sym_info is IVAriableDefinitionNode))
+                          return; // SSM 21/06/19 - так было
                     }
                 } 
 
                 if (_currentTreeNode.CorrespondingSyntaxTreeNode != null)
                 {
+                    if (!(idRef.SymbolInfo.sym_info is IVAriableDefinitionNode)) // SSM 21/06/19
+                        return;
                     var varName = ((IVAriableDefinitionNode)idRef.SymbolInfo.sym_info).name;                      //TODO: случай параметров и полей класса!!!!!!!!!!!!!!!!!!
                     var substKey = new SubstitutionKey(varName, idRef.SyntaxTreeNodeWithVarDeclaration, _currentTreeNode.CorrespondingSyntaxTreeNode);
 
@@ -420,8 +587,8 @@ namespace TreeConverter.LambdaExpressions.Closure
             type_node elemType = null;
             if (inWhat.type == null)
                 inWhat = tmp;
-
-            _visitor.FindIEnumerableElementType(/*_foreach_stmt, */inWhat.type, ref elemType);
+            bool bb; // здесь bb не нужно. Оно нужно в foreach
+            _visitor.FindIEnumerableElementType(/*_foreach_stmt, */inWhat.type, ref elemType, out bb);
 
             if (_foreach_stmt.type_name == null)
             {
@@ -447,11 +614,11 @@ namespace TreeConverter.LambdaExpressions.Closure
 
                 _visitor.context.close_var_definition_list(tn, null);
 
-                _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(_foreach_stmt, _visitor.context.find(loopIdentName)));
+                _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(_foreach_stmt, _visitor.context.find_first(loopIdentName)));
             }
 
-            newTreeNode.SymbolInfoLoopVar = _visitor.context.find(loopIdentName);
-
+            newTreeNode.SymbolInfoLoopVar = _visitor.context.find_first(loopIdentName);
+            
             if (!(vdn.type is compiled_generic_instance_type_node))
                 _visitor.convertion_data_and_alghoritms.check_convert_type_with_inheritance(vdn.type, elemType, _visitor.get_location(_foreach_stmt.identifier));
 
@@ -523,12 +690,12 @@ namespace TreeConverter.LambdaExpressions.Closure
                                                           _visitor.get_location(_for_node.loop_variable), tn,
                                                           polymorphic_state.ps_common);
 
-                _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(_for_node, _visitor.context.find(loopIdentName)));
+                _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(_for_node, _visitor.context.find_first(loopIdentName)));
             }
 
 
-            newTreeNode.SymbolInfoLoopVar = _visitor.context.find(loopIdentName);
-
+            newTreeNode.SymbolInfoLoopVar = _visitor.context.find_first(loopIdentName);
+            
             var fn = new PascalABCCompiler.TreeRealization.for_node(null, null, null, null, null, _visitor.get_location(_for_node));
             if (vdn.type == SystemLibrary.bool_type)
             {
@@ -569,15 +736,17 @@ namespace TreeConverter.LambdaExpressions.Closure
                 {
                     var varType = lambdaDefinition.formal_parameters.params_list[i].vars_type is lambda_inferred_type ?
                         LambdaHelper.ConvertSemanticTypeToSyntaxType((type_node)((lambda_inferred_type)lambdaDefinition.formal_parameters.params_list[i].vars_type).real_type) :
+                        //new semantic_type_node(((lambda_inferred_type)lambdaDefinition.formal_parameters.params_list[i].vars_type).real_type): // SSM 29/12/18 поменял - пробую - не получилось
                         lambdaDefinition.formal_parameters.params_list[i].vars_type;
                     
                     for (var j = 0; j < lambdaDefinition.formal_parameters.params_list[i].idents.idents.Count; j++)
                     {
                         var varName = "<>" + lambdaDefinition.formal_parameters.params_list[i].idents.idents[j].name;
-                        var vds = new var_def_statement(new ident(lambdaDefinition.formal_parameters.params_list[i].idents.idents[j].name), varType);
-                        vds.inital_value = new ident(varName);
+                        SourceContext sc = lambdaDefinition.formal_parameters.params_list[i].idents.idents[j].source_context;
+                        var vds = new var_def_statement(new ident(lambdaDefinition.formal_parameters.params_list[i].idents.idents[j].name, sc), varType, sc);
+                        vds.inital_value = new ident(varName, sc);
                         lambdaDefinition.formal_parameters.params_list[i].idents.idents[j].name = varName;
-                        varDefsList.Add(new var_statement(vds));
+                        varDefsList.Add(new var_statement(vds, sc));
                     }
                 }
 
@@ -624,7 +793,15 @@ namespace TreeConverter.LambdaExpressions.Closure
         {
             _visitor.AddError(_visitor.get_location(_with_statement), "WITH_AND_LAMBDAS_NOT_ALLOWED");
         }
-
+        
+        public override void visit(PascalABCCompiler.SyntaxTree.goto_statement _goto_statement)
+        {
+        	if (_goto_statement.source_context != null) // видимо, это сделано для того чтобы сахарные конструкции всё же можно было использовать с лямбдами. То есть, это какое-то искусственное ограничение
+            	_visitor.AddError(_visitor.get_location(_goto_statement), "GOTO_AND_LAMBDAS_NOT_ALLOWED");
+        	else
+        		base.visit(_goto_statement);
+        }
+        
         private void VisitProcParameters(formal_parameters procParametres)
         {
             if (procParametres == null ||
@@ -637,7 +814,7 @@ namespace TreeConverter.LambdaExpressions.Closure
             {
                 foreach (var id in tp.idents.idents)
                 {
-                    var si = _visitor.context.find(id.name);
+                    SymbolInfo si = _visitor.context.find_first(id.name);
                     _currentTreeNode.VariablesDefinedInScope.Add(new CapturedVariablesTreeNode.CapturedSymbolInfo(tp, si));
                 }
             }

@@ -1,11 +1,11 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 
 /// Стандартный модуль
 /// !! System unit
 unit PABCSystem;
 
- {$define PascalABC}
+{$define PascalABC}
 
 {$gendoc true}
 
@@ -28,10 +28,10 @@ uses
 
 //{{{doc: Начало секции стандартных констант для документации }}} 
 
+const
 // -----------------------------------------------------
 //>>     Стандартные константы # Standard constants
 // -----------------------------------------------------
-const
   /// Максимальное значение типа shortint
   MaxShortInt = shortint.MaxValue; 
   /// Максимальное значение типа byte
@@ -65,7 +65,7 @@ const
   Pi = 3.141592653589793;
   /// Константа E
   /// !! E constant
-  E  = 2.718281828459045;
+  E = 2.718281828459045;
   /// Константа перехода на новую строку
   /// !! The newline string defined for this environment.
   NewLine = System.Environment.NewLine;
@@ -79,10 +79,10 @@ const
   __IS_SYSTEM_MODULE = true;
 
 //{{{doc: Начало секции стандартных типов для документации }}} 
+type
 // -----------------------------------------------------
 //>>     Стандартные типы # Standard types
 // -----------------------------------------------------
-type
   /// Базовый тип объектов
   Object = System.Object;
   
@@ -104,6 +104,9 @@ type
   
   /// Представляет произвольно большое целое число
   BigInteger = System.Numerics.BigInteger;
+
+  /// Представляет дату и время
+  DateTime = System.DateTime;
   
   /// Представляет комплексное число
   Complex = System.Numerics.Complex;
@@ -119,24 +122,24 @@ type
   
   /// Представляет базовый класс для реализации интерфейса IComparer
   IComparable<T> = System.IComparable<T>;
-
+  
   /// Представляет множество значений, реализованное на базе хеш-таблицы
   HashSet<T> = System.Collections.Generic.HashSet<T>;
   
   /// Представляет множество значений, реализованное на базе бинарного дерева поиска
   SortedSet<T> = System.Collections.Generic.SortedSet<T>;
-
+  
   /// Представляет ассоциативный массив (набор пар Ключ-Значение), реализованный на базе хеш-таблицы
-  Dictionary<Key,Value> = System.Collections.Generic.Dictionary<Key,Value>;
+  Dictionary<Key, Value> = System.Collections.Generic.Dictionary<Key, Value>;
   
   /// Представляет ассоциативный массив, реализованный на базе бинарного дерева поиска
-  SortedDictionary<Key,Value> = System.Collections.Generic.SortedDictionary<Key,Value>;
+  SortedDictionary<Key, Value> = System.Collections.Generic.SortedDictionary<Key, Value>;
   
   /// Представляет ассоциативный массив (набор пар ключ-значение), реализованный на базе динамического массива пар
-  SortedList<Key,Value> = System.Collections.Generic.SortedList<Key,Value>;
+  SortedList<Key, Value> = System.Collections.Generic.SortedList<Key, Value>;
   
   /// Представляет пару Ключ-Значение для ассоциативного массива 
-  KeyValuePair<Key,Value> = System.Collections.Generic.KeyValuePair<Key,Value>;
+  KeyValuePair<Key, Value> = System.Collections.Generic.KeyValuePair<Key, Value>;
   
   /// Представляет двусвязный список
   LinkedList<T> = System.Collections.Generic.LinkedList<T>;
@@ -149,31 +152,31 @@ type
   
   /// Представляет стек - набор элементов, реализованных по принципу "последний вошел-первый вышел"
   Stack<T> = System.Collections.Generic.Stack<T>;
-
+  
   /// Представляет интерфейс для коллекции
   ICollection<T> = System.Collections.Generic.ICollection<T>;
-
+  
   /// Представляет интерфейс для сравнения двух элементов
   IComparer<T> = System.Collections.Generic.IComparer<T>;
-
+  
   /// Представляет интерфейс для набора пар Ключ-Значение
-  IDictionary<Key,Value> = System.Collections.Generic.IDictionary<Key,Value>;
+  IDictionary<Key, Value> = System.Collections.Generic.IDictionary<Key, Value>;
   
   /// Представляет интерфейс, предоставляющий перечислитель для перебора элементов коллекции
   IEnumerable<T> = System.Collections.Generic.IEnumerable<T>;
-
+  
   /// Представляет интерфейс для перебора элементов коллекции
   IEnumerator<T> = System.Collections.Generic.IEnumerator<T>;
   
   /// Представляет интерфейс для поддержки сравнения на равенство
   IEqualityComparer<T> = System.Collections.Generic.IEqualityComparer<T>;
-
+  
   /// Представляет интерфейс для коллекции с доступом по индексу
   IList<T> = System.Collections.Generic.IList<T>;
-
+  
   /// Представляет интерфейс для множества
   ISet<T> = System.Collections.Generic.ISet<T>;
-
+  
   /// Представляет изменяемую строку символов
   StringBuilder = System.Text.StringBuilder;
   
@@ -185,52 +188,52 @@ type
   
   /// Представляет действие с одним параметром
   Action<T> = System.Action<T>;
-
+  
   /// Представляет действие с двумя параметрами
-  Action2<T1,T2> = System.Action<T1,T2>;
-
+  Action2<T1, T2> = System.Action<T1, T2>;
+  
   /// Представляет действие с тремя параметрами
-  Action3<T1,T2,T3> = System.Action<T1,T2,T3>;
-
+  Action3<T1, T2, T3> = System.Action<T1, T2, T3>;
+  
   /// Представляет функцию без параметров
   Func0<Res> = System.Func<Res>;
-
+  
   /// Представляет функцию с одним параметром
-  Func<T,Res> = System.Func<T,Res>;
-
+  Func<T, Res> = System.Func<T, Res>;
+  
   /// Представляет функцию с двумя параметрами
-  Func2<T1,T2,Res> = System.Func<T1,T2,Res>;
-
+  Func2<T1, T2, Res> = System.Func<T1, T2, Res>;
+  
   /// Представляет функцию с тремя параметрами
-  Func3<T1,T2,T3,Res> = System.Func<T1,T2,T3,Res>;
+  Func3<T1, T2, T3, Res> = System.Func<T1, T2, T3, Res>;
   
   /// Представляет функцию с одним параметром целого типа, возвращающую целое
-  IntFunc = Func<integer,integer>;
+  IntFunc = Func<integer, integer>;
   
   /// Представляет функцию с одним параметром вещественного типа, возвращающую вещественное
-  RealFunc = Func<real,real>;
+  RealFunc = Func<real, real>;
   
   /// Представляет функцию с одним параметром строкового типа, возвращающую строку
-  StringFunc = Func<string,string>;
-
+  StringFunc = Func<string, string>;
+  
   /// Представляет функцию с одним параметром, возвращающую boolean 
   Predicate<T> = System.Predicate<T>;
-
+  
   /// Представляет функцию с двумя параметрами, возвращающую boolean 
-  Predicate2<T1,T2> = function(x1: T1; x2: T2): boolean;
-
+  Predicate2<T1, T2> = function(x1: T1; x2: T2): boolean;
+  
   /// Представляет функцию с тремя параметрами, возвращающую boolean 
-  Predicate3<T1,T2,T3> = function(x1: T1; x2: T2; x3: T3): boolean;
+  Predicate3<T1, T2, T3> = function(x1: T1; x2: T2; x3: T3): boolean;
   
   /// Представляет регулярное выражение
   Regex = System.Text.RegularExpressions.Regex;
-
+  
   /// Представляет результаты из отдельного совпадения регулярного выражения
-  Match = System.Text.RegularExpressions.Match;
-
+  &Match = System.Text.RegularExpressions.&Match;
+  
   /// Представляет метод, вызываемый при обнаружении совпадения в Regex.Replace
   MatchEvaluator = System.Text.RegularExpressions.MatchEvaluator;
-
+  
   /// Представляет набор успешных совпадений регулярного выражения
   MatchCollection = System.Text.RegularExpressions.MatchCollection;
   
@@ -245,37 +248,37 @@ type
   
   /// Представляет тип короткой строки фиксированной длины 255 символов
   ShortString = string[255];
-
+  
 //{{{--doc: Конец секции стандартных типов для документации }}} 
-
-//------------------------------------------------------------------------------
-//Pointers
-//------------------------------------------------------------------------------
   
-  //1                   //pointed to
-  PBoolean  = ^boolean;//bool
-  PByte     = ^byte;//byte
-  PShortint = ^shortint;//sbyte
-  //2
-  PChar     = ^char;//char
-  PSmallint = ^smallint;//short
-  PWord     = ^word;//ushort
-  //4
-  PPointer  = ^pointer;//void*
-  PInteger  = ^integer;//int32
-  PLongword = ^longword;//uint32
-  PLongint  = ^longint;//int64
-  //8
-  PInt64    = ^int64;
-  PUInt64   = ^uint64;//unit64
-  
-  //8
-  PSingle   = ^single;//single
-  //16
-  PReal     = ^real;//double
-  PDouble   = ^double;//double  //ошибка, не сохранится, надо исправить
+  //------------------------------------------------------------------------------
+  //Pointers
   //------------------------------------------------------------------------------
   
+    //1                   //pointed to
+  PBoolean = ^boolean;//bool
+  PByte = ^byte;//byte
+  PShortint = ^shortint;//sbyte
+  //2
+  PChar = ^char;//char
+  PSmallint = ^smallint;//short
+  PWord = ^word;//ushort
+  //4
+  PPointer = ^pointer;//void*
+  PInteger = ^integer;//int32
+  PLongword = ^longword;//uint32
+  PLongint = ^longint;//int64
+  //8
+  PInt64 = ^int64;
+  PUInt64 = ^uint64;//unit64
+  
+  //8
+  PSingle = ^single;//single
+  //16
+  PReal = ^real;//double
+  PDouble = ^double;//double  //ошибка, не сохранится, надо исправить
+  //------------------------------------------------------------------------------
+
 // -----------------------------------------------------
 // IOSystem interface & IOStandardSystem implementation
 // -----------------------------------------------------
@@ -308,27 +311,27 @@ type
     state := 0; // 0 - нет символа в буфере char, 1 - есть символ в буфере char
     sym: integer;  // буфер в 1 символ для моделирования Peek в консоли
   public 
-    function peek: integer;          virtual; // использует state и sym
-    function read_symbol: char;      virtual; // использует state и sym 
-    procedure read(var x: integer);  virtual;
-    procedure read(var x: real);     virtual;
-    procedure read(var x: char);     virtual;
-    procedure read(var x: string);   virtual;
-    procedure read(var x: byte);     virtual;
+    function peek: integer; virtual;// использует state и sym
+    function read_symbol: char; virtual;// использует state и sym 
+    procedure read(var x: integer); virtual;
+    procedure read(var x: real); virtual;
+    procedure read(var x: char); virtual;
+    procedure read(var x: string); virtual;
+    procedure read(var x: byte); virtual;
     procedure read(var x: shortint); virtual;
     procedure read(var x: smallint); virtual;
-    procedure read(var x: word);     virtual;
+    procedure read(var x: word); virtual;
     procedure read(var x: longword); virtual;
-    procedure read(var x: int64);    virtual;
-    procedure read(var x: uint64);   virtual;
-    procedure read(var x: single);   virtual;
-    procedure read(var x: boolean);  virtual;
-    procedure readln;                virtual;
-    procedure write(p: pointer);     virtual;
-    procedure write(obj: object);    virtual;
-    procedure writeln;               virtual;
+    procedure read(var x: int64); virtual;
+    procedure read(var x: uint64); virtual;
+    procedure read(var x: single); virtual;
+    procedure read(var x: boolean); virtual;
+    procedure readln; virtual;
+    procedure write(p: pointer); virtual;
+    procedure write(obj: object); virtual;
+    procedure writeln; virtual;
   end;
-  
+
 // -----------------------------------------------------
 //                  Classes for files & typed sets
 // -----------------------------------------------------
@@ -350,6 +353,8 @@ type
     function ReadString: string;
     /// Возвращает значение типа boolean, введенное из текстового файла
     function ReadBoolean: boolean;
+    /// Возвращает слово, введенное из текстового файла
+    function ReadWord: string;
     /// Возвращает значение типа integer, введенное из текстового файла, и переходит на следующую строку
     function ReadlnInteger: integer;
     /// Возвращает значение типа real, введенное из текстового файла, и переходит на следующую строку
@@ -366,6 +371,10 @@ type
     procedure Write(params o: array of Object);
     /// Записывает в текстовый файл значения и переходит на следующую строку
     procedure Writeln(params o: array of Object);
+    /// Записывает в текстовый файл значения, разделяя их пробелами
+    procedure Print(params o: array of Object);
+    /// Записывает в текстовый файл значения, разделяя их пробелами, и переходит на следующую строку
+    procedure Println(params o: array of Object);
     /// Возвращает True, если достигнут конец файла, и False в противном случае
     function Eof: boolean;
     /// Возвращает True, если достигнут конец строки, и False в противном случае
@@ -388,14 +397,26 @@ type
     function FullName: string;
     /// Возвращает в виде строки содержимое файла от текущего положения до конца
     function ReadToEnd: string;
-    /// Устанавливает файловый указатель на начало файла
+    /// Открывает текстовый файл на чтение в кодировке Windows
     procedure Reset;
+    /// Открывает текстовый файл на чтение в указанной кодировке
+    procedure Reset(en: Encoding);
+    /// Открывает текстовый файл на запись в кодировке Windows
+    procedure Rewrite;
+    /// Открывает текстовый файл на запись в указанной кодировке
+    procedure Rewrite(en: Encoding);
+    /// Открывает текстовый файл на дополнение в кодировке Windows
+    procedure Append;
+    /// Открывает текстовый файл на дополнение в указанной кодировке
+    procedure Append(en: Encoding);
+    /// Возвращает последовательность строк открытого текстового файла 
+    function Lines: sequence of string;
   end;
   
   /// Тип текстового файла
   TextFile = Text;
-  
-type 
+
+type
   // Вспомогательный тип для диапазонного типа
   ///--
   Diapason = record
@@ -404,13 +425,13 @@ type
     constructor(_low, _high: integer);
     constructor(_low, _high: object);
   end;
-  
+
   ///--
   {TypedSetComparer = class(System.Collections.IEqualityComparer)
     public function Equals(x: System.Object; y: System.Object): boolean;
     public function GetHashCode(obj: System.Object): integer;
   end;}
-  
+
 type
   // Вспомогательный тип для множества
   ///-- 
@@ -451,11 +472,14 @@ type
     function ToString: string; override;
     class function operator implicit<T>(s: TypedSet): HashSet<T>;
     class function operator implicit<T>(s: HashSet<T>): TypedSet;
+    function Count: integer := ht.Count;
+    procedure Print(delim: string := ' ');
+    procedure Println(delim: string := ' ');
   end;
 
 type
-// Base class for typed and binary files
-///--
+  // Base class for typed and binary files
+  ///--
   AbstractBinaryFile = class
   private 
     fi: FileInfo;
@@ -476,10 +500,16 @@ type
     ///- f.Write(a,b,...)
     /// Выводит значения a,b,... в двоичный файл
     procedure Write(params vals: array of object);
-    /// Устанавливает файловый указатель на начало файла
+    /// Открывает существующий двоичный файл на чтение и запись. Устанавливает файловый указатель на начало файла
     procedure Reset;
+    /// Открывает двоичный файл на чтение и запись. Если файл не существовал, он создаётся, если существовал, он обнуляется
+    procedure Rewrite;
+    /// Возвращает имя файла
+    function Name: string;
+    /// Возвращает полное имя файла
+    function FullName: string;
   end;
-
+  
   // Class for typed files
   ///--
   TypedFile = sealed class(AbstractBinaryFile)
@@ -487,32 +517,56 @@ type
     ElementSize: int64;
     offset: integer;
     offsets: array of integer;
+    function GetFilePos: int64;
   public 
     ElementType: System.Type;
     constructor Create(ElementType: System.Type);
     constructor Create(ElementType: System.Type; offs: integer; params offsets: array of integer);
     function ToString: string; override;
-    /// Возвращает текущую позицию файлового указателя в типизированном файле
-    function FilePos: int64;
     /// Возвращает количество элементов в типизированном файле
-    function FileSize: int64;
+    function Size: int64;
     /// Устанавливает текущую позицию файлового указателя в типизированном файле на элемент с номером n  
     procedure Seek(n: int64);
+    /// Возвращает или устанавливает текущую позицию файлового указателя в типизированном файле
+    property Position: int64 read GetFilePos write Seek; 
   end;
   
   // Class for binary files
   ///--
   BinaryFile = sealed class(AbstractBinaryFile)
+  private 
+    function GetFilePos: int64;
+    procedure InternalCheck;
   public 
     function ToString: string; override;
-    /// Возвращает текущую позицию файлового указателя в бестиповом файле
-    function FilePos: int64;
+    /// Открывает существующий бестиповой файл на чтение и запись в указанной кодировке 
+    procedure Reset(en: Encoding);
+    /// Открывает существующий бестиповой файл на чтение и запись в указанной кодировке. Если файл не существовал, он создаётся, если существовал, он обнуляется
+    procedure Rewrite(en: Encoding);
     /// Возвращает количество байт в бестиповом файле
-    function FileSize: int64;
-    /// Устанавливает текущую позицию файлового указателя в бестиповом файле на байт с номером n  
+    function Size: int64;
+    /// Устанавливает текущую позицию файлового указателя в бестиповом файле на байт с номером n
     procedure Seek(n: int64);
+    /// Возвращает или устанавливает текущую позицию файлового указателя в бестиповом файле
+    property Position: int64 read GetFilePos write Seek;
+    /// Записывает данные из байтового массива в бестиповой файл
+    procedure WriteBytes(a: array of byte);
+    /// Считывает указанное количество байтов из бестипового файла в байтовый массив
+    function ReadBytes(count: integer): array of byte;
+    /// Считывает целое из бестипового файла
+    function ReadInteger: integer;
+    /// Считывает логическое из бестипового файла
+    function ReadBoolean: boolean;
+    /// Считывает байт из бестипового файла
+    function ReadByte: byte;
+    /// Считывает символ из бестипового файла
+    function ReadChar: char;
+    /// Считывает вещественное из бестипового файла
+    function ReadReal: real;
+    /// Считывает строку из бестипового файла
+    function ReadString: string;
   end;
- 
+
 //{{{doc: Начало секции интерфейса для документации }}} 
 
 // -----------------------------------------------------
@@ -551,6 +605,27 @@ procedure Read(var x: boolean);
 /// Вводит значения a,b,... с клавиатуры и осуществляет переход на следующую строку
 procedure Readln;
 
+/// Вводит числовое значение x клавиатуры. Возвращает False если при вводе произошла ошибка
+function TryRead(var x: integer): boolean;
+///--
+function TryRead(var x: real): boolean;
+///--
+function TryRead(var x: byte): boolean;
+///--
+function TryRead(var x: shortint): boolean;
+///--
+function TryRead(var x: smallint): boolean;
+///--
+function TryRead(var x: word): boolean;
+///--
+function TryRead(var x: longword): boolean;
+///--
+function TryRead(var x: int64): boolean;
+///--
+function TryRead(var x: uint64): boolean;
+///--
+function TryRead(var x: single): boolean;
+
 /// Возвращает значение типа integer, введенное с клавиатуры
 function ReadInteger: integer;
 /// Возвращает значение типа real, введенное с клавиатуры
@@ -572,6 +647,108 @@ function ReadlnChar: char;
 function ReadlnString: string;
 /// Возвращает значение типа boolean, введенное с клавиатуры, и переходит на следующую строку ввода
 function ReadlnBoolean: boolean;
+
+/// Возвращает кортеж из двух значений типа integer, введенных с клавиатуры
+function ReadInteger2: (integer, integer);
+/// Возвращает кортеж из двух значений типа real, введенных с клавиатуры
+function ReadReal2: (real, real);
+/// Возвращает кортеж из двух значений типа char, введенных с клавиатуры
+function ReadChar2: (char, char);
+/// Возвращает кортеж из двух значений типа string, введенных с клавиатуры
+function ReadString2: (string, string);
+/// Возвращает кортеж из двух значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger2: (integer, integer);
+/// Возвращает кортеж из двух значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal2: (real, real);
+/// Возвращает кортеж из двух значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar2: (char, char);
+/// Возвращает кортеж из двух значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString2: (string, string);
+
+/// Возвращает кортеж из трёх значений типа integer, введенных с клавиатуры
+function ReadInteger3: (integer, integer, integer);
+/// Возвращает кортеж из трёх значений типа real, введенных с клавиатуры
+function ReadReal3: (real, real, real);
+/// Возвращает кортеж из трёх значений типа char, введенных с клавиатуры
+function ReadChar3: (char, char, char);
+/// Возвращает кортеж из трёх значений типа string, введенных с клавиатуры
+function ReadString3: (string, string, string);
+/// Возвращает кортеж из трёх значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger3: (integer, integer, integer);
+/// Возвращает кортеж из трёх значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal3: (real, real, real);
+/// Возвращает кортеж из трёх значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar3: (char, char, char);
+/// Возвращает кортеж из трёх значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString3: (string, string, string);
+
+/// Возвращает кортеж из четырёх значений типа integer, введенных с клавиатуры
+function ReadInteger4: (integer, integer, integer, integer);
+/// Возвращает кортеж из четырёх значений типа real, введенных с клавиатуры
+function ReadReal4: (real, real, real, real);
+/// Возвращает кортеж из четырёх значений типа char, введенных с клавиатуры
+function ReadChar4: (char, char, char, char);
+/// Возвращает кортеж из четырёх значений типа string, введенных с клавиатуры
+function ReadString4: (string, string, string, string);
+/// Возвращает кортеж из четырёх значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger4: (integer, integer, integer, integer);
+/// Возвращает кортеж из четырёх значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal4: (real, real, real, real);
+/// Возвращает кортеж из четырёх значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar4: (char, char, char, char);
+/// Возвращает кортеж из четырёх значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString4: (string, string, string, string);
+
+/// Возвращает кортеж из двух значений типа integer, введенных с клавиатуры
+function ReadInteger2(prompt: string): (integer, integer);
+/// Возвращает кортеж из двух значений типа real, введенных с клавиатуры
+function ReadReal2(prompt: string): (real, real);
+/// Возвращает кортеж из двух значений типа char, введенных с клавиатуры
+function ReadChar2(prompt: string): (char, char);
+/// Возвращает кортеж из двух значений типа string, введенных с клавиатуры
+function ReadString2(prompt: string): (string, string);
+/// Возвращает кортеж из двух значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger2(prompt: string): (integer, integer);
+/// Возвращает кортеж из двух значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal2(prompt: string): (real, real);
+/// Возвращает кортеж из двух значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar2(prompt: string): (char, char);
+/// Возвращает кортеж из двух значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString2(prompt: string): (string, string);
+
+/// Возвращает кортеж из трёх значений типа integer, введенных с клавиатуры
+function ReadInteger3(prompt: string): (integer, integer, integer);
+/// Возвращает кортеж из трёх значений типа real, введенных с клавиатуры
+function ReadReal3(prompt: string): (real, real, real);
+/// Возвращает кортеж из трёх значений типа char, введенных с клавиатуры
+function ReadChar3(prompt: string): (char, char, char);
+/// Возвращает кортеж из трёх значений типа string, введенных с клавиатуры
+function ReadString3(prompt: string): (string, string, string);
+/// Возвращает кортеж из трёх значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger3(prompt: string): (integer, integer, integer);
+/// Возвращает кортеж из трёх значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal3(prompt: string): (real, real, real);
+/// Возвращает кортеж из трёх значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar3(prompt: string): (char, char, char);
+/// Возвращает кортеж из трёх значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString3(prompt: string): (string, string, string);
+
+/// Возвращает кортеж из четырёх значений типа integer, введенных с клавиатуры
+function ReadInteger4(prompt: string): (integer, integer, integer, integer);
+/// Возвращает кортеж из четырёх значений типа real, введенных с клавиатуры
+function ReadReal4(prompt: string): (real, real, real, real);
+/// Возвращает кортеж из четырёх значений типа char, введенных с клавиатуры
+function ReadChar4(prompt: string): (char, char, char, char);
+/// Возвращает кортеж из четырёх значений типа string, введенных с клавиатуры
+function ReadString4(prompt: string): (string, string, string, string);
+/// Возвращает кортеж из четырёх значений типа integer, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnInteger4(prompt: string): (integer, integer, integer, integer);
+/// Возвращает кортеж из четырёх значений типа real, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnReal4(prompt: string): (real, real, real, real);
+/// Возвращает кортеж из четырёх значений типа char, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnChar4(prompt: string): (char, char, char, char);
+/// Возвращает кортеж из четырёх значений типа string, введенных с клавиатуры, и переходит на следующую строку ввода
+function ReadlnString4(prompt: string): (string, string, string, string);
 
 /// Выводит приглашение к вводу и возвращает значение типа integer, введенное с клавиатуры
 function ReadInteger(prompt: string): integer;
@@ -724,6 +901,8 @@ procedure WritelnFormat(f: Text; formatstr: string; params args: array of object
 
 ///- procedure Print(a,b,...);
 /// Выводит значения a,b,... на экран, после каждого значения выводит пробел
+procedure Print(o: object);
+///--
 procedure Print(s: string);
 ///--
 procedure Print(params args: array of object);
@@ -875,6 +1054,23 @@ procedure Rewrite(f: AbstractBinaryFile);
 /// Связывает файловую переменную f с файлом name на диске и открывает двоичный файл на чтение и запись, при этом обнуляя его содержимое.
 ///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
 procedure Rewrite(f: AbstractBinaryFile; name: string);
+
+///- procedure Reset(f: двоичный файл; en: Encoding);
+/// Открывает двоичный файл на чтение и запись в заданной кодировке.
+///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
+procedure Reset(f: AbstractBinaryFile; en: Encoding);
+///- procedure Reset(f: двоичный файл; name: string; en: Encoding);
+/// Связывает файловую переменную f с файлом name на диске и открывает двоичный файл на чтение и запись в заданной кодировке.
+///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
+procedure Reset(f: AbstractBinaryFile; name: string; en: Encoding);
+///- procedure Rewrite(f: двоичный файл; en: Encoding);
+/// Открывает двоичный файл на чтение и запись в заданной кодировке, при этом обнуляя его содержимое. Если файл существовал, он обнуляется.
+///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
+procedure Rewrite(f: AbstractBinaryFile; en: Encoding);
+///- procedure Rewrite(f: двоичный файл; name: string; en: Encoding);
+/// Связывает файловую переменную f с файлом name на диске и открывает двоичный файл на чтение и запись в заданной кодировке, при этом обнуляя его содержимое.
+///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
+procedure Rewrite(f: AbstractBinaryFile; name: string; en: Encoding);
 ///- procedure Truncate(f: двоичный файл);
 /// Усекает двоичный файл, отбрасывая все элементы с позиции файлового указателя.
 ///Двоичный файл - это либо типизированный файл file of T, либо бестиповой файл file
@@ -946,7 +1142,7 @@ function GetCurrentDir: string;
 function RemoveDir(s: string): boolean;
 /// Переименовывает файл name, давая ему новое имя newname. Возвращает True, если файл успешно переименован
 function RenameFile(name, newname: string): boolean;
-/// Устанавивает текущий каталог. Возвращает True, если каталог успешно удален
+/// Устанавливает текущий каталог. Возвращает True, если каталог успешно удален
 function SetCurrentDir(s: string): boolean;
 
 /// Изменяет расширение файла с именем name на newext
@@ -954,8 +1150,10 @@ function ChangeFileNameExtension(name, newext: string): string;
 /// Возвращает True, если файл с именем name существует
 function FileExists(name: string): boolean;
 
+///- procedure Assert(cond: boolean);
 /// Выводит в специальном окне стек вызовов подпрограмм если условие не выполняется
 procedure Assert(cond: boolean; sourceFile: string := ''; line: integer := 0);
+///- procedure Assert(cond: boolean; message: string);
 /// Выводит в специальном окне диагностическое сообщение и стек вызовов подпрограмм если условие не выполняется
 procedure Assert(cond: boolean; message: string; sourceFile: string := ''; line: integer := 0);
 
@@ -1012,7 +1210,7 @@ function EnumerateAllDirectories(path: string): sequence of string;
 
 
 // -----------------------------------------------------
-//>>     Функции для работы с именами файлов # Functions for file names
+//>>     Подпрограммы для работы с именами файлов # Functions for file names
 // -----------------------------------------------------
 /// Выделяет имя файла из полного имени файла fname
 function ExtractFileName(fname: string): string;
@@ -1030,63 +1228,75 @@ function ExpandFileName(fname: string): string;
 // -----------------------------------------------------
 //>>     Математические подпрограммы # Math subroutines
 // -----------------------------------------------------
-///-function Sign(x: число): число;
-/// Возвращает знак числа x
+///-function Sign(x: число): integer;
+/// Возвращает -1, 0 или +1 в зависимости от знака числа x
 function Sign(x: shortint): integer;
 ///--
 function Sign(x: smallint): integer;
 ///--
 function Sign(x: integer): integer;
 ///--
-function Sign(x: BigInteger): integer;
+function Sign(x: int64): integer;
+///--
+function Sign(x: byte): integer;
+///--
+function Sign(x: word): integer;
 ///--
 function Sign(x: longword): integer;
-///--
-function Sign(x: int64): integer;
 ///--
 function Sign(x: uint64): integer;
 ///--
 function Sign(x: real): integer;
+///--
+function Sign(x: BigInteger): integer;
 ///-function Abs(x: число): число;
 /// Возвращает модуль числа x
-function Abs(x: integer): integer;
-///--
 function Abs(x: shortint): shortint;
 ///--
 function Abs(x: smallint): smallint;
 ///--
-function Abs(x: BigInteger): BigInteger;
-///--
-function Abs(x: longword): longword;
+function Abs(x: integer): integer;
 ///--
 function Abs(x: int64): int64;
 ///--
+function Abs(x: byte): byte;
+///--
+function Abs(x: word): word;
+///--
+function Abs(x: longword): longword;
+///--
 function Abs(x: uint64): uint64;
 ///--
+function Abs(x: BigInteger): BigInteger;
+///--
 function Abs(x: real): real;
-/// Возвращает синус числа x
+///--
+function Abs(x: single): single;
+/// Возвращает синус угла x, измеряемого в радианах
 function Sin(x: real): real;
-/// Возвращает гиперболический синус числа x
+/// Возвращает гиперболический синус угла x, измеряемого в радианах
 function Sinh(x: real): real;
-/// Возвращает косинус числа x
+/// Возвращает косинус угла x, измеряемого в радианах
 /// !! Returns the cosine of number x
 function Cos(x: real): real;
-/// Возвращает гиперболический косинус числа x
+/// Возвращает гиперболический косинус угла x, измеряемого в радианах
 function Cosh(x: real): real;
-/// Возвращает тангенс числа x
+/// Возвращает тангенс угла x, измеряемого в радианах
 function Tan(x: real): real;
-/// Возвращает гиперболический тангенс числа x
+/// Возвращает гиперболический тангенс угла x, измеряемого в радианах
 function Tanh(x: real): real;
-/// Возвращает арксинус числа x
+/// Возвращает угол в радианах, синус которого равен x, -1<=x<=1
 function ArcSin(x: real): real;
-/// Возвращает арккосинус числа x
+/// Возвращает угол в радианах, косинус которого равен x, -1<=x<=1
 function ArcCos(x: real): real;
-/// Возвращает арктангенс числа x
+/// Возвращает угол в радианах, тангенс которого равен x
 function ArcTan(x: real): real;
 /// Возвращает экспоненту числа x
 function Exp(x: real): real;
 /// Возвращает натуральный логарифм числа x
 function Ln(x: real): real;
+/// Возвращает натуральный логарифм числа x
+function Log(x: real): real;
 /// Возвращает логарифм числа x по основанию 2
 function Log2(x: real): real;
 /// Возвращает десятичный логарифм числа x
@@ -1097,30 +1307,36 @@ function LogN(base, x: real): real;
 function Sqrt(x: real): real;
 ///-function Sqr(x: число): число;
 /// Возвращает квадрат числа x
-function Sqr(x: integer): int64;
-///--
 function Sqr(x: shortint): integer;
 ///--
 function Sqr(x: smallint): integer;
 ///--
-function Sqr(x: BigInteger): BigInteger;
-///--
-function Sqr(x: longword): uint64;
+function Sqr(x: integer): int64;
 ///--
 function Sqr(x: int64): int64;
 ///--
+function Sqr(x: byte): integer;
+///--
+function Sqr(x: word): uint64;
+///--
+function Sqr(x: longword): uint64;
+///--
 function Sqr(x: uint64): uint64;
+///--
+function Sqr(x: BigInteger): BigInteger;
 ///--
 function Sqr(x: real): real;
 /// Возвращает x в степени y
 function Power(x, y: real): real;
-/// Возвращает x в степени y
-function Power(x, y: integer): real;
+/// Возвращает x в целой степени n
+function Power(x: real; n: integer): real;
 /// Возвращает x в степени y
 function Power(x: BigInteger; y: integer): BigInteger;
 /// Возвращает x, округленное до ближайшего целого. Если вещественное находится посередине между двумя целыми, 
 ///то округление осуществляется к ближайшему четному (банковское округление): Round(2.5)=2, Round(3.5)=4
 function Round(x: real): integer;
+/// Возвращает x, округленное до ближайшего вещественного с digits знаками после десятичной точки
+function Round(x: real; digits: integer): real;
 /// Возвращает x, округленное до ближайшего длинного целого
 function RoundBigInteger(x: real): BigInteger;
 /// Возвращает целую часть вещественного числа x
@@ -1146,10 +1362,34 @@ procedure Randomize;
 procedure Randomize(seed: integer);
 /// Возвращает случайное целое в диапазоне от 0 до maxValue-1
 function Random(maxValue: integer): integer;
+/// Возвращает случайное вещественное в диапазоне [0,maxValue)
+function Random(maxValue: real): real;
 /// Возвращает случайное целое в диапазоне от a до b
 function Random(a, b: integer): integer;
+/// Возвращает случайное вещественное в диапазоне [a,b)
+function Random(a, b: real): real;
 /// Возвращает случайное вещественное в диапазоне [0..1)
 function Random: real;
+/// Возвращает кортеж из двух случайных целых в диапазоне от 0 до maxValue-1
+function Random2(maxValue: integer): (integer, integer);
+/// Возвращает кортеж из двух случайных вещественных в диапазоне [0,maxValue)
+function Random2(maxValue: real): (real, real);
+/// Возвращает кортеж из двух случайных целых в диапазоне от a до b
+function Random2(a, b: integer): (integer, integer);
+/// Возвращает кортеж из двух случайных вещественных в диапазоне [a,b)
+function Random2(a, b: real): (real, real);
+/// Возвращает кортеж из двух случайных вещественных в диапазоне [0..1)
+function Random2: (real, real);
+/// Возвращает кортеж из трех случайных целых в диапазоне от 0 до maxValue-1
+function Random3(maxValue: integer): (integer, integer, integer);
+/// Возвращает кортеж из трех случайных вещественных в диапазоне [0,maxValue)
+function Random3(maxValue: real): (real, real, real);
+/// Возвращает кортеж из трех случайных целых в диапазоне от a до b
+function Random3(a, b: integer): (integer, integer, integer);
+/// Возвращает кортеж из трех случайных вещественных в диапазоне [a,b)
+function Random3(a, b: real): (real, real, real);
+/// Возвращает кортеж из трех случайных вещественных в диапазоне [0..1)
+function Random3: (real, real, real);
 
 ///-function Max(a: число, b: число): число;
 /// Возвращает максимальное из чисел a,b
@@ -1214,12 +1454,12 @@ function Odd(i: int64): boolean;
 function Odd(i: uint64): boolean;
 
 // -----------------------------------------------------
-//>>     Функции для работы с комплексными числами # Functions for Complex numbers
+//>>     Подпрограммы для работы с комплексными числами # Functions for Complex numbers
 // -----------------------------------------------------
 /// Конструирует комплексное число с вещественной частью re и мнимой частью im
-function Cplx(re,im: real): Complex;
+function Cplx(re, im: real): Complex;
 /// Конструирует комплексное число по полярным координатам
-function CplxFromPolar(magnitude,phase: real) : Complex;
+function CplxFromPolar(magnitude, phase: real): Complex;
 /// Возвращает квадратный корень из комплексного числа
 function Sqrt(c: Complex): Complex;
 /// Возвращает модуль комплексного числа
@@ -1231,16 +1471,18 @@ function Cos(c: Complex): Complex;
 /// Возвращает экспоненту комплексного числа
 function Exp(c: Complex): Complex;
 /// Возвращает натуральный логарифм комплексного числа
+function Ln(c: Complex): Complex;
+/// Возвращает натуральный логарифм комплексного числа
 function Log(c: Complex): Complex;
 /// Возвращает десятичный логарифм комплексного числа
 function Log10(c: Complex): Complex;
 /// Возвращает степень комплексного числа
-function Power(c,power: Complex): Complex;
+function Power(c, power: Complex): Complex;
 /// Возвращает синус комплексного числа
 function Sin(c: Complex): Complex;
 
 // -----------------------------------------------------
-//>>     Процедуры для работы со стандартными множествами # Subroutines for set of T
+//>>     Подпрограммы для работы со стандартными множествами # Subroutines for set of T
 // -----------------------------------------------------
 ///- procedure Include(var s: set of T; element: T);
 ///Добавляет элемент element во множество s
@@ -1340,6 +1582,8 @@ function UpperCase(s: string): string;
 function StringOfChar(ch: char; count: integer): string;
 /// Возвращает инвертированную строку
 function ReverseString(s: string): string;
+/// Возвращает инвертированную строку в диапазоне длины length начиная с индекса index
+function ReverseString(s: string; index,length: integer): string;
 /// Сравнивает строки. Возвращает значение < 0 если s1<s2, > 0 если s1>s2 и = 0 если s1=s2
 function CompareStr(s1, s2: string): integer;
 /// Возвращает первые count символов строки s
@@ -1360,6 +1604,8 @@ function StrToInt(s: string): integer;
 function StrToInt64(s: string): int64;
 /// Преобразует строковое представление вещественного числа к числовому значению
 function StrToFloat(s: string): real;
+/// Преобразует строковое представление вещественного числа к числовому значению
+function StrToReal(s: string): real;
 /// Преобразует строковое представление s целого числа к числовому значению и записывает его в value. 
 ///При невозможности преобразования возвращается False
 function TryStrToInt(s: string; var value: integer): boolean;
@@ -1372,6 +1618,12 @@ function TryStrToFloat(s: string; var value: real): boolean;
 /// Преобразует строковое представление s вещественного числа к числовому значению и записывает его в value. 
 ///При невозможности преобразования возвращается False
 function TryStrToFloat(s: string; var value: single): boolean;
+/// Преобразует строковое представление s вещественного числа к числовому значению и записывает его в value. 
+///При невозможности преобразования возвращается False
+function TryStrToReal(s: string; var value: real): boolean;
+/// Преобразует строковое представление s вещественного числа к числовому значению и записывает его в value. 
+///При невозможности преобразования возвращается False
+function TryStrToSingle(s: string; var value: single): boolean;
 /// Считывает целое из строки начиная с позиции from и устанавливает from за считанным значением
 function ReadIntegerFromString(s: string; var from: integer): integer;
 /// Считывает вещественное из строки начиная с позиции from и устанавливает from за считанным значением
@@ -1524,12 +1776,12 @@ function Length(a: System.Array): integer;
 ///- function Length(a: array of T; dim: integer): integer;
 /// Возвращает длину динамического массива по размерности dim
 function Length(a: System.Array; dim: integer): integer;
-///- procedure SetLength(var a: array of T);
+///- procedure SetLength(var a: array of T; n: integer);
 /// Устанавливает длину одномерного динамического массива. Старое содержимое сохраняется
-//procedure SetLength(var a: System.Array);
-///- procedure SetLength(var a: array of T; n1,n2,...: integer);
+//procedure SetLength<T>(var a: array of T; n: integer);
+///- procedure SetLength(var a: array [,...,] of T; n1,n2,...: integer);
 /// Устанавливает размеры n-мерного динамического массива. Старое содержимое сохраняется
-//procedure SetLength(var a: System.Array);
+//procedure SetLength<T>(var a: array[,...,] of T; n: integer);
 ///- function Copy(a: array of T): array of T;
 /// Создаёт копию динамического массива
 function Copy(a: System.Array): System.Array;
@@ -1545,14 +1797,22 @@ procedure Sort<T>(l: List<T>);
 procedure Sort<T>(l: List<T>; cmp: (T,T)->integer);
 /// Сортирует список по критерию сортировки, задаваемому функцией сравнения less
 procedure Sort<T>(l: List<T>; less: (T,T)->boolean);
+/// Сортирует динамический массив по убыванию
+procedure SortDescending<T>(a: array of T);
+/// Сортирует список по убыванию
+procedure SortDescending<T>(l: List<T>);
 /// Изменяет порядок элементов в динамическом массиве на противоположный
 procedure Reverse<T>(a: array of T);
-/// Изменяет порядок элементов на противоположный в диапазоне динамического массива длины length начиная с индекса index
-procedure Reverse<T>(a: array of T; index,count: integer);
+/// Изменяет порядок элементов на противоположный в диапазоне динамического массива длины count, начиная с индекса index
+procedure Reverse<T>(a: array of T; index, count: integer);
 /// Изменяет порядок элементов в списке на противоположный
 procedure Reverse<T>(a: List<T>);
-/// Изменяет порядок элементов на противоположный в диапазоне списка длины length начиная с индекса index
-procedure Reverse<T>(a: List<T>; index,count: integer);
+/// Изменяет порядок элементов на противоположный в диапазоне списка длины count, начиная с индекса index
+procedure Reverse<T>(a: List<T>; index, count: integer);
+/// Изменяет порядок символов в строке на противоположный
+procedure Reverse(var s: string);
+/// Изменяет порядок символов в части строки длины count на противоположный, начиная с индекса index
+procedure Reverse(var s: string; index, count: integer);
 /// Перемешивает динамический массив случайным образом
 procedure Shuffle<T>(a: array of T);
 /// Перемешивает список случайным образом
@@ -1562,15 +1822,13 @@ procedure Shuffle<T>(l: List<T>);
 //>>     Подпрограммы для генерации последовательностей # Subroutines for sequence generation
 // -----------------------------------------------------
 /// Возвращает последовательность целых от a до b
-function Range(a,b: integer): sequence of integer;
+function Range(a, b: integer): sequence of integer;
 /// Возвращает последовательность символов от c1 до c2
-function Range(c1,c2: char): sequence of char;
-/// Возвращает последовательность вещественных в точках разбиения отрезка [a,b] на n равных частей (Используйте Partition)
-function Range(a,b: real; n: integer): sequence of real;
+function Range(c1, c2: char): sequence of char;
 /// Возвращает последовательность вещественных в точках разбиения отрезка [a,b] на n равных частей
-function Partition(a,b: real; n: integer): sequence of real;
+function PartitionPoints(a, b: real; n: integer): sequence of real;
 /// Возвращает последовательность целых от a до b с шагом step
-function Range(a,b,step: integer): sequence of integer;
+function Range(a, b, step: integer): sequence of integer;
 /// Возвращает последовательность указанных элементов
 function Seq<T>(params a: array of T): sequence of T;
 /// Возвращает последовательность из n случайных целых элементов
@@ -1580,20 +1838,20 @@ function SeqRandomInteger(n: integer := 10; a: integer := 0; b: integer := 100):
 /// Возвращает последовательность из n случайных вещественных элементов
 function SeqRandomReal(n: integer := 10; a: real := 0; b: real := 10): sequence of real;
 /// Возвращает последовательность из count элементов, заполненных значениями f(i)
-function SeqGen<T>(count: integer; f: integer -> T): sequence of T;
+function SeqGen<T>(count: integer; f: integer->T): sequence of T;
 /// Возвращает последовательность из count элементов, заполненных значениями f(i), начиная с i=from
-function SeqGen<T>(count: integer; f: integer -> T; from: integer): sequence of T;
+function SeqGen<T>(count: integer; f: integer->T; from: integer): sequence of T;
 /// Возвращает последовательность из count элементов, начинающуюся с first, с функцией next перехода от предыдущего к следующему 
-function SeqGen<T>(count: integer; first: T; next: T -> T): sequence of T;
+function SeqGen<T>(count: integer; first: T; next: T->T): sequence of T;
 /// Возвращает последовательность из count элементов, начинающуюся с first и second, 
 ///с функцией next перехода от двух предыдущих к следующему 
-function SeqGen<T>(count: integer; first,second: T; next: (T,T) -> T): sequence of T;
+function SeqGen<T>(count: integer; first, second: T; next: (T,T) ->T): sequence of T;
 /// Возвращает последовательность элементов с начальным значением first, 
 ///функцией next перехода от предыдущего к следующему и условием pred продолжения последовательности 
-function SeqWhile<T>(first: T; next: T -> T; pred: T -> boolean): sequence of T;
+function SeqWhile<T>(first: T; next: T->T; pred: T->boolean): sequence of T;
 /// Возвращает последовательность элементов, начинающуюся с first и second, 
 ///с функцией next перехода от двух предыдущих к следующему и условием pred продолжения последовательности 
-function SeqWhile<T>(first,second: T; next: (T,T) -> T; pred: T -> boolean): sequence of T;
+function SeqWhile<T>(first, second: T; next: (T,T) ->T; pred: T->boolean): sequence of T;
 /// Возвращает последовательность из count элементов x 
 function SeqFill<T>(count: integer; x: T): sequence of T;
 
@@ -1605,28 +1863,28 @@ function ReadSeqReal(n: integer): sequence of real;
 function ReadSeqString(n: integer): sequence of string;
 
 /// Выводит приглашение к вводу и возвращает последовательность из n целых, введенных с клавиатуры
-function ReadSeqInteger(const prompt: string; n: integer): sequence of integer;
+function ReadSeqInteger(prompt: string; n: integer): sequence of integer;
 /// Выводит приглашение к вводу и возвращает последовательность из n вещественных, введенных с клавиатуры
-function ReadSeqReal(const prompt: string; n: integer): sequence of real;
+function ReadSeqReal(prompt: string; n: integer): sequence of real;
 /// Выводит приглашение к вводу и возвращает последовательность из n строк, введенных с клавиатуры
-function ReadSeqString(const prompt: string; n: integer): sequence of string;
+function ReadSeqString(prompt: string; n: integer): sequence of string;
 
 /// Возвращает последовательность целых, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqIntegerWhile(cond: integer -> boolean): sequence of integer;
+function ReadSeqIntegerWhile(cond: integer->boolean): sequence of integer;
 /// Возвращает последовательность вещественных, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqRealWhile(cond: real -> boolean): sequence of real;
+function ReadSeqRealWhile(cond: real->boolean): sequence of real;
 /// Возвращает последовательность строк, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqStringWhile(cond: string -> boolean): sequence of string;
+function ReadSeqStringWhile(cond: string->boolean): sequence of string;
 
 /// Выводит приглашение к вводу и возвращает последовательность целых, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqIntegerWhile(const prompt: string; cond: integer -> boolean): sequence of integer;
+function ReadSeqIntegerWhile(prompt: string; cond: integer->boolean): sequence of integer;
 /// Выводит приглашение к вводу и возвращает последовательность вещественных, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqRealWhile(const prompt: string; cond: real -> boolean): sequence of real;
+function ReadSeqRealWhile(prompt: string; cond: real->boolean): sequence of real;
 /// Выводит приглашение к вводу и возвращает последовательность строк, вводимых с клавиатуры пока выполняется определенное условие
-function ReadSeqStringWhile(const prompt: string; cond: string -> boolean): sequence of string;
+function ReadSeqStringWhile(prompt: string; cond: string->boolean): sequence of string;
 
 // -----------------------------------------------------
-//>>     Подпрограммы для генерации динамических массивов # Subroutines for array of T generation
+//>>     Подпрограммы для создания динамических массивов # Subroutines for array of T generation
 // -----------------------------------------------------
 /// Возвращает массив, заполненный указанными значениями
 function Arr<T>(params a: array of T): array of T;
@@ -1639,13 +1897,13 @@ function ArrRandomInteger(n: integer := 10; a: integer := 0; b: integer := 100):
 /// Возвращает массив размера n, заполненный случайными вещественными значениями
 function ArrRandomReal(n: integer := 10; a: real := 0; b: real := 10): array of real;
 /// Возвращает массив из count элементов, заполненных значениями gen(i)
-function ArrGen<T>(count: integer; gen: integer -> T): array of T;
+function ArrGen<T>(count: integer; gen: integer->T): array of T;
 /// Возвращает массив из count элементов, заполненных значениями gen(i), начиная с i=from
-function ArrGen<T>(count: integer; gen: integer -> T; from: integer): array of T;
+function ArrGen<T>(count: integer; gen: integer->T; from: integer): array of T;
 /// Возвращает массив из count элементов, начинающихся с first, с функцией next перехода от предыдущего к следующему 
-function ArrGen<T>(count: integer; first: T; next: T -> T): array of T;
+function ArrGen<T>(count: integer; first: T; next: T->T): array of T;
 /// Возвращает массив из count элементов, начинающихся с first и second, с функцией next перехода от двух предыдущих к следующему 
-function ArrGen<T>(count: integer; first,second: T; next: (T,T) -> T): array of T;
+function ArrGen<T>(count: integer; first, second: T; next: (T,T) ->T): array of T;
 /// Возвращает массив из count элементов x 
 function ArrFill<T>(count: integer; x: T): array of T;
 
@@ -1657,15 +1915,17 @@ function ReadArrReal(n: integer): array of real;
 function ReadArrString(n: integer): array of string;
 
 /// Выводит приглашение к вводу и возвращает массив из n целых, введенных с клавиатуры
-function ReadArrInteger(const prompt: string; n: integer): array of integer;
+function ReadArrInteger(prompt: string; n: integer): array of integer;
 /// Выводит приглашение к вводу и возвращает массив из n вещественных, введенных с клавиатуры
-function ReadArrReal(const prompt: string; n: integer): array of real;
+function ReadArrReal(prompt: string; n: integer): array of real;
 /// Выводит приглашение к вводу и возвращает массив из n строк, введенных с клавиатуры
-function ReadArrString(const prompt: string; n: integer): array of string;
+function ReadArrString(prompt: string; n: integer): array of string;
 
 // -----------------------------------------------------
-//>>     Подпрограммы для матриц # Subroutines for matrixes 
+//>>     Подпрограммы для создания двумерных динамических массивов # Subroutines for matrixes 
 // -----------------------------------------------------
+/// Возвращает двумерный массив размера m x n, заполненный указанными значениями по строкам
+function Matr<T>(m,n: integer; params data: array of T): array [,] of T;
 /// Возвращает двумерный массив размера m x n, заполненный случайными целыми значениями
 function MatrRandom(m: integer := 5; n: integer := 5; a: integer := 0; b: integer := 100): array [,] of integer;
 /// Возвращает двумерный массив размера m x n, заполненный случайными целыми значениями
@@ -1673,33 +1933,33 @@ function MatrRandomInteger(m: integer := 5; n: integer := 5; a: integer := 0; b:
 /// Возвращает двумерный массив размера m x n, заполненный случайными вещественными значениями
 function MatrRandomReal(m: integer := 5; n: integer := 5; a: real := 0; b: real := 10): array [,] of real;
 /// Возвращает двумерный массив размера m x n, заполненный элементами x 
-function MatrFill<T>(m,n: integer; x: T): array [,] of T;
-/// Возвращает двумерный массив размера m x n, заполненный элементами x 
-function MatrGen<T>(m,n: integer; gen: (integer,integer)->T): array [,] of T;
+function MatrFill<T>(m, n: integer; x: T): array [,] of T;
+/// Возвращает двумерный массив размера m x n, заполненный элементами gen(i,j) 
+function MatrGen<T>(m, n: integer; gen: (integer,integer)->T): array [,] of T;
 /// Транспонирует двумерный массив 
 function Transpose<T>(a: array [,] of T): array [,] of T;
 /// Возвращает матрицу m на n целых, введенных с клавиатуры
-function ReadMatrInteger(m,n: integer): array [,] of integer;
+function ReadMatrInteger(m, n: integer): array [,] of integer;
 /// Возвращает матрицу m на n вещественных, введенных с клавиатуры
-function ReadMatrReal(m,n: integer): array [,] of real;
-
+function ReadMatrReal(m, n: integer): array [,] of real;
 
 // -----------------------------------------------------
 //>>     Подпрограммы для создания кортежей # Subroutines for tuple generation
 // -----------------------------------------------------
 ///- function Rec(x1: T1, x2: T2,...): (T1,T2,...);
 /// Возвращает кортеж из элементов разных типов
-function Rec<T1,T2>(x1: T1; x2: T2): System.Tuple<T1,T2>;
+function Rec<T1, T2>(x1: T1; x2: T2): System.Tuple<T1, T2>;
 ///--
-function Rec<T1,T2,T3>(x1: T1; x2: T2; x3: T3): (T1,T2,T3);
+function Rec<T1, T2, T3>(x1: T1; x2: T2; x3: T3): (T1, T2, T3);
 ///--
-function Rec<T1,T2,T3,T4>(x1: T1; x2: T2; x3: T3; x4: T4): (T1,T2,T3,T4);
+function Rec<T1, T2, T3, T4>(x1: T1; x2: T2; x3: T3; x4: T4): (T1, T2, T3, T4);
 ///--
-function Rec<T1,T2,T3,T4,T5>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5): (T1,T2,T3,T4,T5);
+function Rec<T1, T2, T3, T4, T5>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5): (T1, T2, T3, T4, T5);
 ///--
-function Rec<T1,T2,T3,T4,T5,T6>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6): (T1,T2,T3,T4,T5,T6);
+function Rec<T1, T2, T3, T4, T5, T6>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6): (T1, T2, T3, T4, T5, T6);
 ///--
-function Rec<T1,T2,T3,T4,T5,T6,T7>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6; x7: T7): (T1,T2,T3,T4,T5,T6,T7);
+function Rec<T1, T2, T3, T4, T5, T6, T7>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6; x7: T7): (T1, T2, T3, T4, T5, T6, T7);
+
 
 // -----------------------------------------------------
 //>>     Короткие функции Lst, LLst, HSet, SSet, Dict, KV # Short functions Lst, HSet, SSet, Dict, KV
@@ -1728,6 +1988,42 @@ function Dict<TKey, TVal>(params pairs: array of (TKey, TVal)): Dictionary<TKey,
 function KV<TKey, TVal>(key: TKey; value: TVal): KeyValuePair<TKey, TVal>;
 
 //{{{--doc: Конец секции интерфейса для документации }}} 
+
+// -----------------------------------------------------
+//>>     Вспомогательные функции для pattern matching # 
+// -----------------------------------------------------
+
+function __TypeCheckAndAssignForIsMatch<T>(obj: object; var res: T): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4>(
+    first: Tuple<T1, T2>; 
+    second: Tuple<T3, T4>;
+    elemsToCompare: sequence of integer): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6>(
+    first: Tuple<T1, T2, T3>; 
+    second: Tuple<T4, T5, T6>;
+    elemsToCompare: sequence of integer): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8>(
+    first: Tuple<T1, T2, T3, T4>; 
+    second: Tuple<T5, T6, T7, T8>;
+    elemsToCompare: sequence of integer): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+    first: Tuple<T1, T2, T3, T4, T5>; 
+    second: Tuple<T6, T7, T8, T9, T10>;
+    elemsToCompare: sequence of integer): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+    first: Tuple<T1, T2, T3, T4, T5, T6>; 
+    second: Tuple<T7, T8, T9, T10, T11, T12>;
+    elemsToCompare: sequence of integer): boolean;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+    first: Tuple<T1, T2, T3, T4, T5, T6, T7>; 
+    second: Tuple<T8, T9, T10, T11, T12, T13, T14>;
+    elemsToCompare: sequence of integer): boolean;
 
 
 // -----------------------------------------------------
@@ -1759,16 +2055,16 @@ type
   public 
     function ToString: string; override;
   end;
-
+  
   RangeException = class(SystemException) end;
   CommandLineArgumentOutOfRangeException = class(SystemException) end;
-  
+
 
 // -----------------------------------------------------
 //     Общедоступные переменные
 // -----------------------------------------------------
 var
-/// Содержит аргумены командой строки, с которыми была запущена программа
+  /// Содержит аргумены командой строки, с которыми была запущена программа
   CommandLineArgs: array of string;
   /// Стандартный текстовый файл для вывода. Связывается процедурой Assign с файлом на диске, после чего весь вывод на консоль перенаправляется в этот файл
   output: TextFile;
@@ -1789,9 +2085,11 @@ var
   DefaultEncoding: Encoding;
   ///--
   PrintDelimDefault: string := ' ';
+  ///--
+  PrintMatrixWithFormat: boolean := True;
 
-///--
 var
+///--
   __CONFIG__: Dictionary<string, object> := new Dictionary<string, object>;
 
 // Вспомогательные подпрограммы. Из раздела интерфейса не убирать!!! 
@@ -1847,6 +2145,10 @@ function _ObjectToString(o: object): string;
 function IsUnix: boolean;
 ///--
 function ExecuteAssemlyIsDll: boolean;
+///--
+function __StandardFilesDirectory: string;
+///--
+function __FindFile(filename: string): string;
 
 // -----------------------------------------------------
 //                  Internal for OpenMPSupport
@@ -1856,7 +2158,8 @@ procedure omp_set_nested(nested: integer);
 ///--
 function omp_get_nested: integer;
 ///--
-var OMP_NESTED: boolean := false;
+var
+  OMP_NESTED: boolean := false;
 
 // -----------------------------------------------------
 //                  Internal typed sets operations
@@ -1913,7 +2216,7 @@ procedure TypedSetInitWithShortString(var st: TypedSet; len: integer);
 // -----------------------------------------------------
 //                  Internal classes
 // -----------------------------------------------------
-type  
+type
   ///--
   GCHandlersController = class(System.Collections.IEnumerable)
   private 
@@ -1935,6 +2238,93 @@ type
     constructor(ptr: pointer);
   end;
 
+type
+  ///--
+  __ConceptSingleton<T> = class where T: constructor;
+    class _instance: T;
+    class inited: boolean := false;
+  public
+    class function Instance: T;
+    begin
+      if inited = false then
+      begin
+        inited := true;
+        _instance := new T;
+      end;
+      
+      Result := _instance;
+    end;
+  end;
+
+
+type
+  ///--
+  __TypeclassRestrictedFunctionAttribute = class(Attribute)
+  public
+    constructor;
+    begin
+    end;
+  end;
+  
+  
+  ///--
+  __TypeclassGenericParameterAttribute = class(Attribute)
+  public
+    constructor(instanceName: string);
+    begin
+    end;
+  end;
+  
+  ///--
+  __TypeclassAttribute = class(Attribute)
+  public
+    constructor(typeclassName: string);
+    begin
+    end;
+  end;
+
+  ///--
+  __TypeclassMemberAttribute = class(Attribute)
+  public
+    constructor;
+    begin
+    end;
+  end;
+  
+  ///--
+  __TypeclassInstanceAttribute = class(Attribute)
+  public
+    constructor(instanceName: string);
+    begin
+    end;
+  end;
+  
+type 
+// Смысл полей Num, Width и Fmt соответствует
+// атрибутам форматирования {Num,Width:Fmt}.
+// Поле Comment может интерпретироваться как
+// дополнительная строка, приписываемая слева к свойству.
+// Если для первого атрибута дополнительная строка
+// начинается со скобок или кавычек, то парные символы
+// добавляются в конец итоговой строки.
+/// Класс атрибута форматирования текста 
+  PrintAttribute = class(System.Attribute)
+    public
+    Comment: string;
+    Num: integer;
+    Width: integer;
+    Fmt: string;
+    constructor (n: integer)                          := (Comment, Num, Width, Fmt) := ('', n, 0, '');
+    constructor (n, w: integer)                       := (Comment, Num, Width, Fmt) := ('', n, w, '');
+    constructor (n: integer; f: string)               := (Comment, Num, Width, Fmt) := ('', n, 0, f);
+    constructor (n, w: integer; f: string)            := (Comment, Num, Width, Fmt) := ('', n, w, f);
+    constructor (c: string; n: integer)               := (Comment, Num, Width, Fmt) := (c, n, 0, '');
+    constructor (c: string; n, w: integer)            := (Comment, Num, Width, Fmt) := (c, n, w, '');
+    constructor (c: string; n: integer; f: string)    := (Comment, Num, Width, Fmt) := (c, n, 0, f);
+    constructor (c: string; n, w: integer; f: string) := (Comment, Num, Width, Fmt) := (c, n, w, f);
+  end;
+  
+  
 // -----------------------------------------------------
 //                  Internal procedures for PABCRTL.dll
 // -----------------------------------------------------
@@ -1945,18 +2335,24 @@ procedure __InitPABCSystem;
 ///--
 procedure __FinalizeModule__;
 
+// -----------------------------------------------------
+//                   DQNToNullable for dot_question_node
+// -----------------------------------------------------
+
+function DQNToNullable<T>(v: T): Nullable<T>; where T: record;
+
 implementation
 
 var
-  rnd: System.Random;
+  rnd := new System.Random;
   //  ENCultureInfo: System.Globalization.CultureInfo;
   nfi: System.Globalization.NumberFormatInfo;
   LastReadChar := #0;
   AnsiOrdChrEncoding := Encoding.GetEncoding(1251);
   __one_char := new char[1];
   __one_byte := new byte[1];
-  StartTime: DateTime; // Для Milliseconds
-  
+  StartTime: DateTime;// Для Milliseconds
+
 const
   WRITELN_IN_BINARYFILE_ERROR_MESSAGE = 'Операция Writeln не применима к бинарным файлам!!Writeln is not applicable to binary files';
   InternalNullBasedArrayName = 'NullBasedArray';
@@ -1964,19 +2360,29 @@ const
   FILE_NOT_OPENED = 'Файл не открыт!!File is not opened';
   FILE_NOT_OPENED_FOR_READING = 'Файл не открыт на чтение!!File is not opened for reading';
   FILE_NOT_OPENED_FOR_WRITING = 'Файл не открыт на запись!!File is not opened for writing';
+  READ_LEXEM_AFTER_END_OF_TEXT_FILE = 'Попытка считывания за концом текстового файла!!Read after end of text file';
   RANGE_ERROR_MESSAGE = 'Выход за границы диапазона!!Out of range';
   EOF_FOR_TEXT_WRITEOPENED = 'Функция Eof не может быть вызвана для текстового файла, открытого на запись!!Eof function can''t be called for file, opened on writing';
   EOLN_FOR_TEXT_WRITEOPENED = 'Функция Eoln не может быть вызвана для текстового файла, открытого на запись!!Eoln function can''t be called for file, opened on writing';
   SEEKEOF_FOR_TEXT_WRITEOPENED = 'Функция SeekEof не может быть вызвана для текстового файла, открытого на запись!!SeekEof function can''t be called for file, opened on writing';
   SEEKEOLN_FOR_TEXT_WRITEOPENED = 'Функция SeekEoln не может быть вызвана для текстового файла, открытого на запись!!SeekEoln function can''t be called for file, opened on writing';
-  BAD_TYPE_IN_RUNTIMESIZEOF = 'Bad Type in RunTimeSizeOf';
-  PARAMETER_COUNT_MUST_BE_GREATER_0 = 'Параметр count должен быть > 0!!Parameter count must be > 0';
-  PARAMETER_COUNT_MUST_BE_GREATER_1 = 'Параметр count должен быть > 1!!Parameter count must be > 1';
+  BAD_TYPE_IN_RUNTIMESIZEOF = 'Для типизированных файлов нельзя указывать тип элементов, являющийся ссылочным или содержащий ссылочные поля!!Bad Type in RunTimeSizeOf';
+  PARAMETER_MUST_BE_GREATER_EQUAL_0 = 'Параметр должен быть >= 0!!Parameter must be >= 0';
+  PARAMETER_MUST_BE_GREATER_0 = 'Параметр должен быть > 0!!Parameter must be > 0';
+  PARAMETER_MUST_BE_GREATER_1 = 'Параметр должен быть > 1!!Parameter must be > 1';
   PARAMETER_STEP_MUST_BE_NOT_EQUAL_0 = 'Параметр step не может быть равен 0!!The step parameter must be not equal to 0';
   PARAMETER_STEP_MUST_BE_GREATER_0 = 'Параметр step должен быть > 0!!The step parameter must be not greater than 0';
   PARAMETER_FROM_OUT_OF_RANGE = 'Параметр from за пределами диапазона!!The from parameter out of bounds';
   PARAMETER_TO_OUT_OF_RANGE = 'Параметр to за пределами диапазона!!The to parameter out of bounds';
   ARR_LENGTH_MUST_BE_MATCH_TO_MATR_SIZE = 'Размер одномерного массива не согласован с размером двумерного массива!!The 1-dim array length does not match 2-dim array size';
+  INITELEM_COUNT_MUST_BE_EQUAL_TO_MATRIX_ELEMS_COUNT = 'Количество инициализирующих элементов не совпадает с количеством элементов матрицы!!The number of elements in init list must be equal to the number of elements in matrix';
+  TYPED_FILE_CANBE_OPENED_IN_SINGLEBYTE_ENCODING_ONLY = 'При открытии типизированного файла можно указывать только однобайтную кодировку!!Typed file can be opened in single byte encoding only';
+  BAD_ROW_INDEX = 'Один из элементов массива RowIndex выходит за пределы индексов строк двумерного массива!!One of the elements of RowIndex array is out of range of 2-dim array row indexes';
+  BAD_COL_INDEX = 'Один из элементов массива ColIndex выходит за пределы индексов столбцов двумерного массива!!One of the elements of ColIndex array is out of range of 2-dim array column indexes';
+  BAD_ROW_INDEX_FROM = 'FromRow выходит за пределы индексов строк двумерного массива!!FromRow is out of range of 2-dim array row indexes';
+  BAD_ROW_INDEX_TO = 'ToRow выходит за пределы индексов строк двумерного массива!!ToRow is out of range of 2-dim array row indexes';
+  BAD_COL_INDEX_FROM = 'FromCol выходит за пределы индексов строк двумерного массива!!FromCol is out of range of 2-dim array column indexes';
+  BAD_COL_INDEX_TO = 'ToCol выходит за пределы индексов строк двумерного массива!!ToCol is out of range of 2-dim array column indexes';
 
 // -----------------------------------------------------
 //                  WINAPI
@@ -1984,7 +2390,8 @@ const
 
 function WINAPI_AllocConsole: longword; external 'kernel32.dll' name 'AllocConsole';
 
-var console_alloc: boolean := false;
+var
+  console_alloc: boolean := false;
 
 // -----------------------------------------------------
 //                  Internal functions
@@ -1997,12 +2404,12 @@ begin
     Result := locale as string
   else
     Result := 'ru';
-end;  
+end;
 
 function GetTranslation(message: string): string;
 begin
   var cur_locale := GetCurrentLocale();
-  var arr := message.Split(new string[1]('!!'),StringSplitOptions.None);
+  var arr := message.Split(new string[1]('!!'), StringSplitOptions.None);
   if (cur_locale = 'en') and (arr.Length > 1) then
     Result := arr[1]
   else
@@ -2101,12 +2508,12 @@ end;
 // -----------------------------------------------------
 constructor Diapason.Create(_low, _high: integer);
 begin
-  low := _low; high := _high;
+  low := _low;high := _high;
 end;
 
 constructor Diapason.Create(_low, _high: object);
 begin
-  clow := _low; chigh := _high;
+  clow := _low;chigh := _high;
 end;
 
 // -----------------------------------------------------
@@ -2314,7 +2721,7 @@ begin
   else Result := true;
 end;
 
-function convert_elem(obj: object): object; // для TypedSet
+function convert_elem(obj: object): object;// для TypedSet
 begin
   var t := obj.GetType;
   if t.IsEnum then
@@ -2523,9 +2930,9 @@ end;
 class function TypedSet.operator implicit<T>(s: TypedSet): HashSet<T>;
 begin
   var hs := new HashSet<T>();
-  foreach key: T in s.ht.Keys do
+  foreach var key in s.ht.Keys do
   begin
-    hs.Add(key);  
+    hs.Add(T(key));  
   end;
   Result := hs; 
 end;
@@ -2641,6 +3048,28 @@ begin
   Result := CompareSetGreaterEqual(Self, s);
 end;
 
+procedure TypedSet.Print(delim: string);
+begin
+  foreach var x in ht.Keys do
+    Write(x,delim)
+end;
+
+procedure TypedSet.Println(delim: string);
+begin
+  var fst := True;
+  foreach var x in ht.Keys do
+  begin
+    if fst then
+    begin
+      fst := False;
+      Write(x);
+    end
+    else Write(delim,x);
+  end;
+  Writeln;  
+end;
+
+
 // -----------------------------------------------------
 //                  Typed Set functions
 // -----------------------------------------------------
@@ -2663,7 +3092,7 @@ begin
   Result.high := high;
 end;
 
-[System.Diagnostics.DebuggerStepThrough]
+//[System.Diagnostics.DebuggerStepThrough]
 function CreateObjDiapason(low, high: object): Diapason;
 begin
   Result.clow := low;
@@ -2673,29 +3102,50 @@ end;
 [System.Diagnostics.DebuggerStepThrough]
 function CreateSet(params elems: array of object): TypedSet;
 begin
+  var chars := false;
+  var strings := false;
+  var others := false;
+  foreach var x in elems do
+  begin
+    if (x is char) or (x is Diapason) and (Diapason(x).clow is char) then
+      chars := true
+    else if x is string then
+      strings := true
+    else 
+    begin
+      others := true;
+      break
+    end;  
+  end;
+  
   Result := new TypedSet();
-  for var i := 0 to elems.Length - 1 do
-    Result.IncludeElement(elems[i]);
+  
+  if chars and strings and not others then
+    foreach var x in elems do
+      if x is char then
+        Result.IncludeElement(x.ToString)
+      else if (x is Diapason) and (Diapason(x).clow is char) then
+      begin
+        var c1 := char(Diapason(x).clow);
+        var c2 := char(Diapason(x).chigh);
+        for var cc := c1 to c2 do
+          Result.IncludeElement(cc.ToString)
+      end
+      else Result.IncludeElement(x)
+  else    
+    foreach var x in elems do
+      Result.IncludeElement(x);
 end;
 
 [System.Diagnostics.DebuggerStepThrough]
 function Subtract(s1, s2: TypedSet): TypedSet;
-var
-  en: System.Collections.IEnumerator;
 begin
-  //Result := new TypedSet();
   Result := s1.CloneSet;
-  {en := s1.ht.GetEnumerator();
-  while en.MoveNext() = true do
+  var en := s2.ht.GetEnumerator();
+  while en.MoveNext do
   begin
-  if not s2.Contains((en as IDictionaryEnumerator).Key) then 
-  Result.ht[(en as IDictionaryEnumerator).Key] := (en as IDictionaryEnumerator).Key;
-  end;}
-  en := s2.ht.GetEnumerator();
-  while en.MoveNext() = true do
-  begin
-    if s1.Contains((en as IDictionaryEnumerator).Key) then 
-      Result.ht.Remove((en as IDictionaryEnumerator).Key);
+    if s1.Contains(en.Key) then 
+      Result.ht.Remove(en.Key);
   end;
 end;
 
@@ -2713,13 +3163,11 @@ end;
 
 [System.Diagnostics.DebuggerStepThrough]  
 function Union(s1, s2: TypedSet): TypedSet;
-var
-  en: System.Collections.IEnumerator;
 begin
   Result := s1.CloneSet;
-  en := s2.ht.GetEnumerator();
-  while en.MoveNext() = true do
-    Result.ht[(en as IDictionaryEnumerator).Key] := (en as IDictionaryEnumerator).Key;
+  var en := s2.ht.GetEnumerator();
+  while en.MoveNext do
+    Result.ht[en.Key] := en.Key;
 end;
 
 [System.Diagnostics.DebuggerStepThrough]  
@@ -2729,7 +3177,7 @@ var
 begin
   Result := new TypedSet();
   en := s1.ht.GetEnumerator();
-  while en.MoveNext() = true do
+  while en.MoveNext do
     if s2.Contains((en as IDictionaryEnumerator).Key) then 
       Result.ht[(en as IDictionaryEnumerator).Key] := (en as IDictionaryEnumerator).Key;
 end;
@@ -2760,7 +3208,7 @@ begin
     Exit;
   end;
   en := s1.ht.GetEnumerator();
-  while en.MoveNext() = true do
+  while en.MoveNext do
   begin
     var is_in_s1 := s1.Contains((en as IDictionaryEnumerator).Key);
     var is_in_s2 := s2.Contains((en as IDictionaryEnumerator).Key);
@@ -2779,7 +3227,7 @@ begin
   begin
     en := s2.ht.GetEnumerator();
     en.Reset();
-    while en.MoveNext() = true do
+    while en.MoveNext do
     begin
       var is_in_s1 := s1.Contains((en as IDictionaryEnumerator).Key);
       var is_in_s2 := s2.Contains((en as IDictionaryEnumerator).Key);
@@ -2812,7 +3260,7 @@ var
 begin
   en := s1.ht.GetEnumerator();
   en.Reset();
-  while en.MoveNext() = true do
+  while en.MoveNext do
   begin
     if not s2.Contains((en as IDictionaryEnumerator).Key) then 
     begin
@@ -2825,7 +3273,7 @@ begin
     en := s2.ht.GetEnumerator();
     en.Reset();
     var b: boolean := false;
-    while en.MoveNext() = true do
+    while en.MoveNext do
     begin
       if not s1.Contains((en as IDictionaryEnumerator).Key) then 
       begin
@@ -2846,7 +3294,7 @@ var
 begin
   en := s2.ht.GetEnumerator();
   en.Reset();
-  while en.MoveNext() = true do
+  while en.MoveNext do
   begin
     if not s1.Contains((en as IDictionaryEnumerator).Key) then 
     begin
@@ -2865,7 +3313,7 @@ var
 begin
   en := s1.ht.GetEnumerator();
   en.Reset();
-  while en.MoveNext() = true do
+  while en.MoveNext do
   begin
     if not s2.Contains((en as IDictionaryEnumerator).Key) then 
     begin
@@ -2884,7 +3332,7 @@ var
 begin
   en := s2.ht.GetEnumerator();
   en.Reset();
-  while en.MoveNext() = true do
+  while en.MoveNext do
   begin
     if not s1.Contains((en as IDictionaryEnumerator).Key) then 
     begin
@@ -2897,7 +3345,7 @@ begin
     en := s1.ht.GetEnumerator();
     en.Reset();
     var b: boolean := false;
-    while en.MoveNext() = true do
+    while en.MoveNext do
     begin
       if not s2.Contains((en as IDictionaryEnumerator).Key) then 
       begin
@@ -2931,18 +3379,12 @@ begin
   end;
 end;
 
-function TypedFile.ToString: string;
-begin
-  Result := string.Format('file of {0}', ElementType);
-end;
+function TypedFile.ToString := Format('file of {0}', ElementType);
 
 // -----------------------------------------------------
 //                      BinaryFile
 // -----------------------------------------------------
-function BinaryFile.ToString: string;
-begin
-  Result := 'file';
-end;
+function BinaryFile.ToString: string := 'file';
 
 // -----------------------------------------------------
 //                  GCHandlersController    
@@ -3009,16 +3451,16 @@ function RedefinedToString(o: object): System.Reflection.MethodInfo;
 begin
   var t := o.GetType;
   var meth: System.Reflection.MethodInfo := nil;
-  while t<>typeof(Object) do
+  while t <> typeof(Object) do
   begin
-    meth := t.GetMethod('ToString',System.Reflection.BindingFlags.Public or
+    meth := t.GetMethod('ToString', System.Reflection.BindingFlags.Public or
                 System.Reflection.BindingFlags.Instance or 
-                System.Reflection.BindingFlags.DeclaredOnly,nil,new System.Type[0],nil);
-    if meth<>nil then 
+                System.Reflection.BindingFlags.DeclaredOnly, nil, new System.Type[0], nil);
+    if meth <> nil then 
       break;
     t := t.BaseType;            
   end;
-  if (t=typeof(Object)) or (t=typeof(System.ValueType)) then
+  if (t = typeof(Object)) or (t = typeof(System.ValueType)) then
     Result := nil
   else Result := meth;   
 end;
@@ -3026,55 +3468,57 @@ end;
 function ArrNToString(a: System.Array; indexes: array of integer; i: integer): string; forward;
 
 function StructuredObjectToString(o: Object; n: integer := 0): string;
-const 
+const
   nmax = 100;
   nmax1 = 30;
 begin
-  if o is System.Reflection.Pointer then
-    Result := PointerToString(System.Reflection.Pointer.Unbox(o))
-  else if o=nil then
+  if o = nil then
     Result := 'nil' 
+  else if o is System.Reflection.Pointer then
+    Result := PointerToString(System.Reflection.Pointer.Unbox(o))
   else if (o.GetType = typeof(real)) or (o.GetType = typeof(decimal)) or (o.GetType = typeof(single)) then
     Result := FormatFloatNumber(o.ToString)
   else if (o.GetType = typeof(Complex)) then 
   begin
     var c := Complex(o);
-    Result := '('+StructuredObjectToString(c.Real)+','+StructuredObjectToString(c.Imaginary)+')';
+    Result := '(' + StructuredObjectToString(c.Real) + ',' + StructuredObjectToString(c.Imaginary) + ')';
   end
   else if (o.GetType.IsPrimitive) or (o.GetType = typeof(string)) then
     Result := o.ToString
   else if o is System.Array then
   begin
     var a := o as System.Array;  
-    Result := ArrNToString(a,new integer[a.Rank],0); 
+    Result := ArrNToString(a, new integer[a.Rank], 0); 
   end
   else if o is System.Collections.IEnumerable then
   begin
     var sb := new StringBuilder();
     var g := (o as System.Collections.IEnumerable).GetEnumerator();
     
-    var isdictorset := o.GetType.Name.Equals('Dictionary`2') or o.GetType.Name.Equals('SortedDictionary`2') or (o.GetType=typeof(TypedSet)) or o.GetType.Name.Equals('HashSet`1') or o.GetType.Name.Equals('SortedSet`1');
+    var isdictorset := o.GetType.Name.Equals('Dictionary`2') or o.GetType.Name.Equals('SortedDictionary`2') or (o.GetType = typeof(TypedSet)) or o.GetType.Name.Equals('HashSet`1') or o.GetType.Name.Equals('SortedSet`1');
     if isdictorset then
       sb.Append('{')
     else sb.Append('[');
     if g.MoveNext() then
-      sb.Append(StructuredObjectToString(g.Current,n+1));
-    var cnt := 1;  
-    while g.MoveNext() and (cnt<nmax) do 
-    begin
-      sb.Append(',');
-      sb.Append(StructuredObjectToString(g.Current,n+1));
-      cnt += 1;
-    end;
-    if cnt >= nmax then 
-      sb.Append(',...');
-
+    begin  
+      sb.Append(StructuredObjectToString(g.Current, n + 1));
+      var cnt := 1;  
+      while g.MoveNext() and (cnt < nmax) do 
+      begin
+        sb.Append(',');
+        sb.Append(StructuredObjectToString(g.Current, n + 1));
+        cnt += 1;
+      end;
+      if cnt >= nmax then 
+        sb.Append(',...');
+    end;    
+    
     if isdictorset then
       sb.Append('}')
     else sb.Append(']');
     Result := sb.ToString;
   end
-  else if o.GetType.GetField('NullBasedArray')<>nil then
+  else if o.GetType.GetField('NullBasedArray') <> nil then
   begin
     var f := o.GetType.GetField('NullBasedArray');
     Result := StructuredObjectToString(f.GetValue(o));
@@ -3084,32 +3528,32 @@ begin
     var q := RedefinedToString(o);
     var gg := o.GetType.FullName.StartsWith('System.Tuple');
     var gg1 := o.GetType.Name.StartsWith('KeyValuePair');
-    if (q<>nil) and q.IsVirtual and not gg and not gg1 then
+    if (q <> nil) and q.IsVirtual and not gg and not gg1 then
       Result := o.ToString
     else 
     begin
       var t := o.GetType;
       var sb := new System.Text.StringBuilder();
       sb.Append('(');
-      if n>nmax1 then
+      if n > nmax1 then
         sb.Append('....')
       else 
-        while t<>typeof(object) do
+        while t <> typeof(object) do
         begin
           var ff := t.GetFields(System.Reflection.BindingFlags.Public or System.Reflection.BindingFlags.Instance or System.Reflection.BindingFlags.DeclaredOnly);
           var pp := t.GetProperties(System.Reflection.BindingFlags.Public or System.Reflection.BindingFlags.Instance or System.Reflection.BindingFlags.DeclaredOnly);
-  
-          for var i:=ff.Length-1 downto 0 do
-            sb.Insert(1,StructuredObjectToString(ff[i].GetValue(o),n+1)+',');
-    
-          for var i:=pp.Length-1 downto 0 do
+          
+          for var i := ff.Length - 1 downto 0 do
+            sb.Insert(1, StructuredObjectToString(ff[i].GetValue(o), n + 1) + ',');
+          
+          for var i := pp.Length - 1 downto 0 do
             if pp[i].GetIndexParameters.Length = 0 then
-              sb.Insert(1,StructuredObjectToString(pp[i].GetValue(o, nil),n+1)+',');
-    
+              sb.Insert(1, StructuredObjectToString(pp[i].GetValue(o, nil), n + 1) + ',');
+          
           t := t.BaseType;
         end; 
-      if sb.Length>1 then 
-        sb.Length := sb.Length-1;
+      if sb.Length > 1 then 
+        sb.Length := sb.Length - 1;
       sb.Append(')');
       Result := sb.ToString;
     end;
@@ -3117,24 +3561,25 @@ begin
 end;
 
 function ArrNToString(a: System.Array; indexes: array of integer; i: integer): string;
-const nmax = 100;
+const
+  nmax = 100;
 begin
   var sb := new StringBuilder;
-  if i=a.Rank then
+  if i = a.Rank then
     sb.Append(StructuredObjectToString(a.GetValue(indexes)))
   else
   begin
     sb.Append('[');
-    for var k:=0 to a.GetLength(i)-1 do
+    for var k := 0 to a.GetLength(i) - 1 do
     begin
       indexes[i] := k;
-      sb.Append(ArrNToString(a,indexes,i+1));
-      if (k>=nmax-1) and (k<a.GetLength(i)-1) then 
+      sb.Append(ArrNToString(a, indexes, i + 1));
+      if (k >= nmax - 1) and (k < a.GetLength(i) - 1) then 
       begin
         sb.Append(',...');
         break
       end
-      else if k<a.GetLength(i)-1 then
+      else if k < a.GetLength(i) - 1 then
         sb.Append(',');            
     end;
     sb.Append(']');
@@ -3143,92 +3588,78 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-//          Operations for String
+//          Операции для string и char
 //------------------------------------------------------------------------------
 procedure string.operator+=(var left: string; right: string);
 begin
   left := left + right;
 end;
 
-function string.operator<(left, right: string): boolean;
-begin
-  result := string.CompareOrdinal(left, right) < 0;
-end;
+function string.operator<(left, right: string) := string.CompareOrdinal(left, right) < 0;
 
-function string.operator<=(left, right: string): boolean;
-begin
-  result := string.CompareOrdinal(left, right) <= 0;
-end;
+function string.operator<=(left, right: string) := string.CompareOrdinal(left, right) <= 0;
 
-function string.operator>(left, right: string): boolean;
-begin
-  result := string.CompareOrdinal(left, right) > 0;
-end;
+function string.operator>(left, right: string) := string.CompareOrdinal(left, right) > 0;
 
-function string.operator>=(left, right: string): boolean;
-begin
-  result := string.CompareOrdinal(left, right) >= 0;
-end;
+function string.operator>=(left, right: string) := string.CompareOrdinal(left, right) >= 0;
 
 /// Повторяет строку str n раз
 function string.operator*(str: string; n: integer): string;
 begin
   var sb := new StringBuilder;
-  for var i:=1 to n do
+  loop n do
     sb.Append(str);
-  result := sb.ToString;
+  Result := sb.ToString;
 end;
 
 /// Повторяет строку str n раз
 function string.operator*(n: integer; str: string): string;
 begin
   var sb := new StringBuilder;
-  for var i:=1 to n do
+  loop n do
     sb.Append(str);
-  result := sb.ToString;
+  Result := sb.ToString;
 end;
 
 /// Повторяет символ c n раз
 function char.operator*(c: char; n: integer): string;
 begin
-  var sb := new StringBuilder;
-  for var i:=1 to n do
+  if n <= 0 then
+  begin
+    Result := '';
+    exit;
+  end;
+  var sb := new StringBuilder(n, n);
+  loop n do
     sb.Append(c);
-  result := sb.ToString;
+  Result := sb.ToString;
 end;
 
 /// Повторяет символ c n раз
 function char.operator*(n: integer; c: char): string;
 begin
-  var sb := new StringBuilder;
-  for var i:=1 to n do
+  if n <= 0 then
+  begin
+    Result := '';
+    exit;
+  end;
+  var sb := new StringBuilder(n, n);
+  loop n do
     sb.Append(c);
-  result := sb.ToString;
+  Result := sb.ToString;
 end;
 
 /// Добавляет к строке str строковое представление числа n
-function string.operator+(str: string; n: integer): string;
-begin
-  result := str + n.ToString;
-end;
+function string.operator+(str: string; n: integer) := str + n.ToString;
 
 /// Добавляет к строке str строковое представление числа n
-function string.operator+(n: integer; str: string): string;
-begin
-  result := n.ToString + str;
-end;
+function string.operator+(n: integer; str: string) := n.ToString + str;
 
 /// Добавляет к строке str строковое представление числа r
-function string.operator+(str: string; r: real): string;
-begin
-  result := str + r.ToString(nfi);
-end;
+function string.operator+(str: string; r: real) := str + r.ToString(nfi);
 
 /// Добавляет к строке str строковое представление числа r
-function string.operator+(r: real; str: string): string;
-begin
-  result := r.ToString(nfi) + str;
-end;
+function string.operator+(r: real; str: string) := r.ToString(nfi) + str;
 
 procedure string.operator+=(var left: string; right: integer);
 begin
@@ -3243,15 +3674,16 @@ end;
 procedure string.operator*=(var left: string; n: integer);
 begin
   var sb := new StringBuilder;
-  for var i:=1 to n do
+  loop n do
     sb.Append(left);
   left := sb.ToString;
 end;
 
-function string.operator in(substr: string; str: string): boolean;
-begin
-  Result := str.Contains(substr);
-end;
+function string.operator in(substr: string; str: string) := str.Contains(substr);
+
+procedure operator+=(var left: StringBuilder; right: string); extensionmethod := left.Append(right);
+
+function operator implicit(s: string): StringBuilder; extensionmethod := new StringBuilder(s);
 
 //------------------------------------------------------------------------------
 //          Операции для array of T
@@ -3259,28 +3691,22 @@ end;
 /// Объединяет два массива
 function operator+<T>(a, b: array of T): array of T; extensionmethod;
 begin
-  Result := new T[a.Length+b.Length];
-  a.CopyTo(Result,0);
-  b.CopyTo(Result,a.Length);
+  Result := new T[a.Length + b.Length];
+  a.CopyTo(Result, 0);
+  b.CopyTo(Result, a.Length);
 end;
 
 ///--
-function operator in<T>(x: T; a: array of T): boolean; extensionmethod;
-begin
-  Result := a.Contains(x);
-end;
+function operator in<T>(x: T; a: array of T): boolean; extensionmethod := a.Contains(x);
 
 function operator*<T>(a: array of T; n: integer): array of T; extensionmethod;
 begin
-  Result := new T[a.Length*n];
-  for var i:=0 to n-1 do
-    a.CopyTo(Result,a.Length*i);
+  Result := new T[a.Length * n];
+  for var i := 0 to n - 1 do
+    a.CopyTo(Result, a.Length * i);
 end;
 
-function operator*<T>(n: integer; a: array of T): array of T; extensionmethod;
-begin
-  Result := a*n
-end;
+function operator*<T>(n: integer; a: array of T): array of T; extensionmethod := a * n;
 
 //------------------------------------------------------------------------------
 //          Операции для List<T> 
@@ -3321,10 +3747,7 @@ begin
 end;
 
 ///--
-function operator*<T>(n: integer; a: List<T>): List<T>; extensionmethod;
-begin
-  Result := a*n;
-end;
+function operator*<T>(n: integer; a: List<T>): List<T>; extensionmethod := a * n;
 
 //------------------------------------------------------------------------------
 //          Операции для Stack<T> 
@@ -3350,10 +3773,7 @@ end;
 //          Операции для HashSet<T> 
 //------------------------------------------------------------------------------
 ///--
-function operator in<T>(x: T; Self: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := Self.Contains(x);
-end;
+function operator in<T>(x: T; Self: HashSet<T>): boolean; extensionmethod := Self.Contains(x);
 
 function operator+=<T>(var Self: HashSet<T>; x: T): HashSet<T>; extensionmethod;
 begin
@@ -3379,27 +3799,46 @@ begin
   Result := Self;
 end;
 
-function operator=<T>(x,y: HashSet<T>): boolean; extensionmethod;
+function InternalEqual<T>(x,y: HashSet<T>): boolean;
 begin
-  Result := x.SetEquals(y)
-end;
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.SetEquals(y);
+end;   
 
-function operator<><T>(x,y: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := not x.SetEquals(y)
-end;
+function operator=<T>(x,y: HashSet<T>): boolean; extensionmethod := InternalEqual(x,y);
 
-function operator-<T>(x,y: HashSet<T>): HashSet<T>; extensionmethod;
+function operator<><T>(x,y: HashSet<T>); extensionmethod := not InternalEqual(x,y);
+
+function operator-<T>(x, y: HashSet<T>): HashSet<T>; extensionmethod;
 begin
   var v := new HashSet<T>(x);
   v.ExceptWith(y);
   Result := v;
 end;
 
-function operator+<T>(x,y: HashSet<T>): HashSet<T>; extensionmethod;
+function operator+<T>(x, y: HashSet<T>): HashSet<T>; extensionmethod;
 begin
   var v := new HashSet<T>(x);
   v.UnionWith(y);
+  Result := v;
+end;
+
+function operator+<T>(x: HashSet<T>; y: T): HashSet<T>; extensionmethod;
+begin
+  var v := new HashSet<T>(x);
+  v.Add(y);
+  Result := v;
+end;
+
+function operator-<T>(x: HashSet<T>; y: T): HashSet<T>; extensionmethod;
+begin
+  var v := new HashSet<T>(x);
+  v.Remove(y);
   Result := v;
 end;
 
@@ -3410,33 +3849,20 @@ begin
   Result := v;
 end;
 
-function operator< <T>(x,y: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsProperSubsetOf(y);
-end;
+function operator< <T>(x, y: HashSet<T>); extensionmethod := x.IsProperSubsetOf(y);
 
-function operator<= <T>(x,y: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsSubsetOf(y);
-end;
+function operator<= <T>(x, y: HashSet<T>); extensionmethod := x.IsSubsetOf(y);
 
-function operator> <T>(x,y: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsProperSupersetOf(y);
-end;
+function operator> <T>(x, y: HashSet<T>); extensionmethod := x.IsProperSupersetOf(y);
 
-function operator>= <T>(x,y: HashSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsSupersetOf(y);
-end;
+function operator>= <T>(x, y: HashSet<T>); extensionmethod := x.IsSupersetOf(y);
+
+
 
 //------------------------------------------------------------------------------
 //          Операции для SortedSet<T> 
 //------------------------------------------------------------------------------
-function operator in<T>(x: T; Self: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := Self.Contains(x);
-end;
+function operator in<T>(x: T; Self: SortedSet<T>): boolean; extensionmethod := Self.Contains(x);
 
 function operator+=<T>(var Self: SortedSet<T>; x: T): SortedSet<T>; extensionmethod;
 begin
@@ -3462,27 +3888,46 @@ begin
   Result := Self;
 end;
 
-function operator=<T>(x,y: SortedSet<T>): boolean; extensionmethod;
+function InternalEqual<T>(x,y: SortedSet<T>): boolean; 
 begin
-  Result := x.SetEquals(y)
-end;
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.SetEquals(y);
+end;   
 
-function operator<><T>(x,y: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := not x.SetEquals(y)
-end;
+function operator=<T>(x,y: SortedSet<T>): boolean; extensionmethod := InternalEqual(x,y);
 
-function operator-<T>(x,y: SortedSet<T>): SortedSet<T>; extensionmethod;
+function operator<><T>(x, y: SortedSet<T>); extensionmethod := not InternalEqual(x,y);
+
+function operator-<T>(x, y: SortedSet<T>): SortedSet<T>; extensionmethod;
 begin
   var v := new SortedSet<T>(x);
   v.ExceptWith(y);
   Result := v;
 end;
 
-function operator+<T>(x,y: SortedSet<T>): SortedSet<T>; extensionmethod;
+function operator+<T>(x, y: SortedSet<T>): SortedSet<T>; extensionmethod;
 begin
   var v := new SortedSet<T>(x);
   v.UnionWith(y);
+  Result := v;
+end;
+
+function operator+<T>(x: SortedSet<T>; y: T): SortedSet<T>; extensionmethod;
+begin
+  var v := new SortedSet<T>(x);
+  v.Add(y);
+  Result := v;
+end;
+
+function operator-<T>(x: SortedSet<T>; y: T): SortedSet<T>; extensionmethod;
+begin
+  var v := new SortedSet<T>(x);
+  v.Remove(y);
   Result := v;
 end;
 
@@ -3493,210 +3938,117 @@ begin
   Result := v;
 end;
 
-function operator< <T>(x,y: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsProperSubsetOf(y);
-end;
+function operator< <T>(x, y: SortedSet<T>); extensionmethod := x.IsProperSubsetOf(y);
 
-function operator<= <T>(x,y: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsSubsetOf(y);
-end;
+function operator<= <T>(x, y: SortedSet<T>); extensionmethod := x.IsSubsetOf(y);
 
-function operator> <T>(x,y: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsProperSupersetOf(y);
-end;
+function operator> <T>(x, y: SortedSet<T>); extensionmethod := x.IsProperSupersetOf(y);
 
-function operator>= <T>(x,y: SortedSet<T>): boolean; extensionmethod;
-begin
-  Result := x.IsSupersetOf(y);
-end;
+function operator>= <T>(x, y: SortedSet<T>): boolean; extensionmethod := x.IsSupersetOf(y);
 
 //------------------------------------------------------------------------------
 //          Операции для Dictionary<K,V>, SortedDictionary<K,V>, SortedList<K,V>
 //------------------------------------------------------------------------------
-function Dictionary<K,V>.operator in(key: K; d: Dictionary<K,V>): boolean;
+function Dictionary<K, V>.operator in(key: K; d: Dictionary<K, V>): boolean;
 begin
   Result := d.ContainsKey(key);
 end;
 
-function SortedDictionary<K,V>.operator in(key: K; d: SortedDictionary<K,V>): boolean;
+function SortedDictionary<K, V>.operator in(key: K; d: SortedDictionary<K, V>): boolean;
 begin
   Result := d.ContainsKey(key);
 end;
 
-function SortedList<K,V>.operator in(key: K; d: SortedList<K,V>): boolean;
+function SortedList<K, V>.operator in(key: K; d: SortedList<K, V>): boolean;
 begin
   Result := d.ContainsKey(key);
 end;
+
+//------------------------------------------------------------------------------
+//          **
+//------------------------------------------------------------------------------
+
+function operator**(x: real; n: integer): real; extensionmethod := Power(x, n);
+
+function operator**(x: single; n: integer): real; extensionmethod := Power(x, n);
+
+function operator**(x, y: integer): real; extensionmethod := Power(real(x), y);
+
+function operator**(x, y: real): real; extensionmethod := Power(x, y);
+
+function operator**(x, y: Complex): Complex; extensionmethod := Power(x, y);
+
+function operator**(x: BigInteger; y: integer): BigInteger; extensionmethod := Power(x, y);
 
 //------------------------------------------------------------------------------
 //          Операции для BigInteger
 //------------------------------------------------------------------------------
-function BigInteger.operator/(p: BigInteger; q: real): real;
-begin
-  Result := real(p)/q;
-end;
+function BigInteger.operator/(p: BigInteger; q: real) := real(p)/q;
 
-function BigInteger.operator/(q: real; p: BigInteger): real;
-begin
-  Result := q/real(p);
-end;
+function BigInteger.operator/(q: real; p: BigInteger) := q/real(p);
 
-function BigInteger.operator>(p: BigInteger; q: integer): boolean;
-begin
-  Result := p > BigInteger.Create(q);
-end;
+function BigInteger.operator>(p: BigInteger; q: integer) := p > BigInteger.Create(q);
 
-function BigInteger.operator>(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) > q;
-end;
+function BigInteger.operator>(p: integer; q: BigInteger) := BigInteger.Create(p) > q;
 
-function BigInteger.operator<(p: BigInteger; q: integer): boolean;
-begin
-  Result := p < BigInteger.Create(q);
-end;
+function BigInteger.operator<(p: BigInteger; q: integer) := p < BigInteger.Create(q);
 
-function BigInteger.operator<(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) < q;
-end;
+function BigInteger.operator<(p: integer; q: BigInteger) := BigInteger.Create(p) < q;
 
-function BigInteger.operator>=(p: BigInteger; q: integer): boolean;
-begin
-  Result := p >= BigInteger.Create(q);
-end;
+function BigInteger.operator>=(p: BigInteger; q: integer) := p >= BigInteger.Create(q);
 
-function BigInteger.operator>=(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) >= q;
-end;
+function BigInteger.operator>=(p: integer; q: BigInteger) := BigInteger.Create(p) >= q;
 
-function BigInteger.operator<=(p: BigInteger; q: integer): boolean;
-begin
-  Result := p <= BigInteger.Create(q);
-end;
+function BigInteger.operator<=(p: BigInteger; q: integer) := p <= BigInteger.Create(q);
 
-function BigInteger.operator<=(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) <= q;
-end;
+function BigInteger.operator<=(p: integer; q: BigInteger) := BigInteger.Create(p) <= q;
 
-function BigInteger.operator=(p: BigInteger; q: integer): boolean;
-begin
-  Result := p = BigInteger.Create(q);
-end;
+function BigInteger.operator=(p: BigInteger; q: integer) := p = BigInteger.Create(q);
 
-function BigInteger.operator=(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) = q;
-end;
+function BigInteger.operator=(p: integer; q: BigInteger) := BigInteger.Create(p) = q;
 
-function BigInteger.operator<>(p: BigInteger; q: integer): boolean;
-begin
-  Result := p <> BigInteger.Create(q);
-end;
+function BigInteger.operator<>(p: BigInteger; q: integer) := p <> BigInteger.Create(q);
 
-function BigInteger.operator<>(p: integer; q: BigInteger): boolean;
-begin
-  Result := BigInteger.Create(p) <> q;
-end;
+function BigInteger.operator<>(p: integer; q: BigInteger) := BigInteger.Create(p) <> q;
 
-procedure BigInteger.operator+=(var p: BigInteger; q: BigInteger);
-begin
-  p := p + q;
-end;
+procedure BigInteger.operator+=(var p: BigInteger; q: BigInteger) := p := p + q;
 
-procedure BigInteger.operator*=(var p: BigInteger; q: BigInteger);
-begin
-  p := p * q;
-end;
+procedure BigInteger.operator*=(var p: BigInteger; q: BigInteger) := p := p * q;
 
-procedure BigInteger.operator-=(var p: BigInteger; q: BigInteger);
-begin
-  p := p - q;
-end;
+procedure BigInteger.operator-=(var p: BigInteger; q: BigInteger) := p := p - q;
 
-function BigInteger.operator div(p,q: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Divide(p,q);
-end;
+//function BigInteger.operator div(p,q: BigInteger) := BigInteger.Divide(p,q);
 
-function BigInteger.operator mod(p,q: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Remainder(p,q);
-end;
+//function BigInteger.operator mod(p,q: BigInteger) := BigInteger.Remainder(p,q);
 
-function BigInteger.operator-(p: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Negate(p)
-end;
-
-{function BigInteger.operator+(p: BigInteger): BigInteger;
-begin
-  Result := p
-end;
-
-function BigInteger.operator+(p,q: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Add(p,q);
-end;}
+function BigInteger.operator-(p: BigInteger) := BigInteger.Negate(p);
 
 //------------------------------------------------------------------------------
 //          Операции для Complex
 //------------------------------------------------------------------------------
-function operator-(Self: Complex): Complex; extensionmethod;
-begin
-  Result := Complex.Negate(Self);
-end;
+function operator-(Self: Complex): Complex; extensionmethod := Complex.Negate(Self);
 
-function operator implicit(c: (real,real)): Complex; extensionmethod;
-begin
-  Result := Cplx(c[0],c[1]);
-end;
+function operator implicit(c: (real,real)): Complex; extensionmethod := Cplx(c[0],c[1]);
 
-function operator implicit(c: (real,integer)): Complex; extensionmethod;
-begin
-  Result := Cplx(c[0],c[1]);
-end;
+function operator implicit(c: (real,integer)): Complex; extensionmethod := Cplx(c[0],c[1]);
 
-function operator implicit(c: (integer,real)): Complex; extensionmethod;
-begin
-  Result := Cplx(c[0],c[1]);
-end;
+function operator implicit(c: (integer,real)): Complex; extensionmethod := Cplx(c[0],c[1]);
 
-function operator implicit(c: (integer,integer)): Complex; extensionmethod;
-begin
-  Result := Cplx(c[0],c[1]);
-end;
+function operator implicit(c: (integer,integer)): Complex; extensionmethod := Cplx(c[0],c[1]);
 
-procedure operator+=(var c: Complex; x: Complex); extensionmethod;
-begin
-  c := c + x;
-end;
+procedure operator+=(var c: Complex; x: Complex); extensionmethod := c := c + x;
 
-procedure operator*=(var c: Complex; x: Complex); extensionmethod;
-begin
-  c := c * x;
-end;
+procedure operator*=(var c: Complex; x: Complex); extensionmethod := c := c * x;
 
-procedure operator-=(var c: Complex; x: Complex); extensionmethod;
-begin
-  c := c - x;
-end;
+procedure operator-=(var c: Complex; x: Complex); extensionmethod := c := c - x;
 
-procedure operator/=(var c: Complex; x: Complex); extensionmethod;
-begin
-  c := c / x;
-end;
+procedure operator/=(var c: Complex; x: Complex); extensionmethod := c := c / x;
 
 //------------------------------------------------------------------------------
 //          Операции для sequence of T
 //------------------------------------------------------------------------------
 ///--
-function operator+<T>(a,b: sequence of T): sequence of T; extensionmethod;
+function operator+<T>(a, b: sequence of T): sequence of T; extensionmethod;
 begin
   Result := a.Concat(b);
 end;
@@ -3718,14 +4070,14 @@ end;
 function operator*<T>(a: sequence of T; n: integer): sequence of T; extensionmethod;
 begin
   Result := System.Linq.Enumerable.Empty&<T>();
-  for var i:=1 to n do
+  loop n do
     Result := Result.Concat(a);
 end;
 
 ///--
 function operator*<T>(n: integer; a: sequence of T): sequence of T; extensionmethod;
 begin
-  Result := a*n;
+  Result := a * n;
 end;
 
 ///--
@@ -3737,101 +4089,26 @@ end;
 //                Функции для последовательностей и динамических массивов
 // -----------------------------------------------------------------------------
 
-type
-// Вспомогательный класс для генерации всех последовательностей
-  SeqBase<T> = class(IEnumerable<T>,IEnumerator<T>)
-  public
-    function System.Collections.IEnumerable.GetEnumerator(): System.Collections.IEnumerator;
-    begin
-      Result := Self;
-    end;
-
-    function GetEnumerator(): IEnumerator<T>;
-    begin
-      Result := Self;
-    end;
-
-    function get_Current: T; virtual;
-    begin
-      Result := default(T);
-    end;
-
-    function System.Collections.IEnumerator.get_Current(): object;
-    begin
-      Result := Self.get_Current();
-    end;
-
-    function MoveNext(): boolean; virtual; 
-    begin
-      Result := True;
-    end;
-
-    procedure Dispose(); virtual;
-    begin
-    end;
-
-    procedure Reset();
-    begin
-    end;
-  end;
-  
-// Вспомогательный класс для генерации целых последовательностей
-  SeqBaseInteger = class(IEnumerable<integer>,IEnumerator<integer>)
-  public
-    function System.Collections.IEnumerable.GetEnumerator(): System.Collections.IEnumerator;
-    begin
-      Result := Self;
-    end;
-
-    function GetEnumerator(): IEnumerator<integer>;
-    begin
-      Result := Self;
-    end;
-
-    function get_Current: integer; virtual;
-    begin
-      Result := 0;
-    end;
-
-    function System.Collections.IEnumerator.get_Current(): object;
-    begin
-      Result := Self.get_Current();
-    end;
-
-    function MoveNext(): boolean; virtual; 
-    begin
-      Result := True;
-    end;
-
-    procedure Dispose(); virtual;
-    begin
-    end;
-
-    procedure Reset();
-    begin
-    end;
-  end;
-  
 function Range(a, b: integer): sequence of integer;
 begin
-  if b<a then 
+  if b < a then 
     Result := System.Linq.Enumerable.Empty&<integer>
   else Result := System.Linq.Enumerable.Range(a, b - a + 1);
 end;
 
-function Range(c1,c2: char): sequence of char;
+function Range(c1, c2: char): sequence of char;
 begin
-  Result := Range(integer(c1),integer(c2)).Select(x->Chr(x));
+  Result := Range(integer(c1), integer(c2)).Select(x -> Chr(x));
 end;
 
-function Range(a,b: real; n: integer): sequence of real;
+function Range(a, b: real; n: integer): sequence of real;
 begin
-  if n=0 then
+  if n = 0 then
     raise new System.ArgumentException('n=0');
-  if n<0 then
+  if n < 0 then
     raise new System.ArgumentException('n<0');
   var r := a;
-  var h := (b-a)/n;
+  var h := (b - a) / n;
   for var i := 0 to n do
   begin
     yield r;
@@ -3839,78 +4116,78 @@ begin
   end;
 end;
 
-function Partition(a,b: real; n: integer): sequence of real;
+function PartitionPoints(a, b: real; n: integer): sequence of real;
 begin
-  Result := Range(a,b,n)
+  Result := Range(a, b, n)
 end;
 
 type
   ArithmSeq = auto class
-    a,step: integer;
+    a, step: integer;
     function f(x: integer): integer;
     begin
-      Result := x*step+a;
+      Result := x * step + a;
     end;
   end;
 
 function Range(a, b, step: integer): sequence of integer;
 begin
-  if step=0 then
+  if step = 0 then
     raise new System.ArgumentException('step=0');
-  if (step>0) and (b<a) or (step<0) and (b>a) then
+  if (step > 0) and (b < a) or (step < 0) and (b > a) then
   begin
     Result := System.Linq.Enumerable.Empty&<integer>;
     exit;
   end;
-  var n := abs((b-a) div step) + 1;
+  var n := abs((b - a) div step) + 1;
   var ar: ArithmSeq;
   {if step<0 then
     ar := new ArithmSeq(b,step)
-  else} ar := new ArithmSeq(a,step);
+  else} ar := new ArithmSeq(a, step);
   Result := System.Linq.Enumerable.Range(0, n).Select(ar.f);
 end;
 
-function ArrRandom(n: integer; a: integer; b: integer): array of integer; 
+function ArrRandom(n: integer; a: integer; b: integer): array of integer;
 begin
   Result := new integer[n];
-  for var i:=0 to Result.Length-1 do
-    Result[i] := Random(a,b);
+  for var i := 0 to Result.Length - 1 do
+    Result[i] := Random(a, b);
 end;
 
 function ArrRandomInteger(n: integer; a: integer; b: integer): array of integer;
 begin
-  Result := ArrRandom(n,a,b);
+  Result := ArrRandom(n, a, b);
 end;
 
 function ArrRandomReal(n: integer; a: real; b: real): array of real;
 begin
   Result := new real[n];
-  for var i:=0 to Result.Length-1 do
-    Result[i] := Random()*(b-a)+a;
+  for var i := 0 to Result.Length - 1 do
+    Result[i] := Random() * (b - a) + a;
 end;
 
 function SeqRandom(n: integer; a: integer; b: integer): sequence of integer;
 begin
-  for var i:=1 to n do
-    yield Random(a,b)
+  loop n do
+    yield Random(a, b)
 end;
 
 function SeqRandomInteger(n: integer; a: integer; b: integer): sequence of integer;
 begin
-  for var i:=1 to n do
-    yield Random(a,b)
+  loop n do
+    yield Random(a, b)
 end;
 
 function SeqRandomReal(n: integer; a: real; b: real): sequence of real;
 begin
-  for var i:=1 to n do
-    yield Random()*(b-a)+a
+  loop n do
+    yield Random() * (b - a) + a
 end;
 
 function Arr<T>(params a: array of T): array of T;
 begin
   Result := new T[a.Length];
-  System.Array.Copy(a,Result,a.Length);
+  System.Array.Copy(a, Result, a.Length);
 end;
 
 function Arr<T>(a: sequence of T): array of T;
@@ -3921,7 +4198,7 @@ end;
 function Seq<T>(params a: array of T): sequence of T;
 begin
   var res := new T[a.Length];
-  System.Array.Copy(a,res,a.Length);
+  System.Array.Copy(a, res, a.Length);
   Result := res;
 end;
 
@@ -3934,68 +4211,66 @@ begin
     first := next(first);
     yield first;
   end;
-  //Result := IterateClass&<T>.Create(first,next).Select(x->T(x));
 end;
 
 /// Возвращает бесконечную рекуррентную последовательность элементов, задаваемую начальными элементами first, second и функцией next
-function Iterate<T>(first,second: T; next: (T,T)->T): sequence of T;
+function Iterate<T>(first, second: T; next: (T,T)->T): sequence of T;
 begin
   yield first;
   yield second;
   while True do
   begin
-    var nxt := next(first,second);
+    var nxt := next(first, second);
     yield nxt;
     first := second;
     second := nxt;
   end;
-//  Result := Iterate2Class&<T>.Create(first,second,next).Select(x->T(x));
 end;
 
-function SeqGen<T>(count: integer; first: T; next: T -> T): sequence of T;
+function SeqGen<T>(count: integer; first: T; next: T->T): sequence of T;
 begin
-  if count<1 then
-    raise new System.ArgumentOutOfRangeException('count',count,GetTranslation(PARAMETER_COUNT_MUST_BE_GREATER_0));
-  Result := Iterate(first,next).Take(count);
-end;  
-
-function SeqGen<T>(count: integer; first,second: T; next: (T,T) -> T): sequence of T;
-begin
-  if count<1 then
-    raise new System.ArgumentOutOfRangeException('count',count,GetTranslation(PARAMETER_COUNT_MUST_BE_GREATER_0));
-  Result := Iterate(first,second,next).Take(count);
-end;  
-
-function SeqWhile<T>(first: T; next: T -> T; pred: T -> boolean): sequence of T;
-begin
-  Result := Iterate(first,next).TakeWhile(pred);
-end;  
-
-function SeqWhile<T>(first,second: T; next: (T,T) -> T; pred: T -> boolean): sequence of T;
-begin
-  Result := Iterate(first,second,next).TakeWhile(pred);
+  if count < 1 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_0));
+  Result := Iterate(first, next).Take(count);
 end;
 
-function ArrGen<T>(count: integer; first: T; next: T -> T): array of T;
+function SeqGen<T>(count: integer; first, second: T; next: (T,T) ->T): sequence of T;
 begin
-  if count<1 then
-    raise new System.ArgumentOutOfRangeException('count',count,GetTranslation(PARAMETER_COUNT_MUST_BE_GREATER_0));
+  if count < 1 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_0));
+  Result := Iterate(first, second, next).Take(count);
+end;
+
+function SeqWhile<T>(first: T; next: T->T; pred: T->boolean): sequence of T;
+begin
+  Result := Iterate(first, next).TakeWhile(pred);
+end;
+
+function SeqWhile<T>(first, second: T; next: (T,T) ->T; pred: T->boolean): sequence of T;
+begin
+  Result := Iterate(first, second, next).TakeWhile(pred);
+end;
+
+function ArrGen<T>(count: integer; first: T; next: T->T): array of T;
+begin
+  if count < 1 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_0));
   var a := new T[count];
   a[0] := first;
-  for var i:=1 to a.Length-1 do
-    a[i] := next(a[i-1]);
+  for var i := 1 to a.Length - 1 do
+    a[i] := next(a[i - 1]);
   Result := a;
 end;
 
-function ArrGen<T>(count: integer; first,second: T; next: (T,T) -> T): array of T;
+function ArrGen<T>(count: integer; first, second: T; next: (T,T) ->T): array of T;
 begin
-  if count<2 then
-    raise new System.ArgumentOutOfRangeException('count',count,GetTranslation(PARAMETER_COUNT_MUST_BE_GREATER_1));
+  if count < 2 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_1));
   var a := new T[count];
   a[0] := first;
   a[1] := second;
-  for var i:=2 to a.Length-1 do
-    a[i] := next(a[i-2],a[i-1]);
+  for var i := 2 to a.Length - 1 do
+    a[i] := next(a[i - 2], a[i - 1]);
   Result := a;
 end;
 
@@ -4029,47 +4304,47 @@ end;}
 function ArrFill<T>(count: integer; x: T): array of T;
 begin
   Result := new T[count];
-  for var i:=0 to Result.Length-1 do
+  for var i := 0 to Result.Length - 1 do
     Result[i] := x;
 end;
 
-function ArrGen<T>(count: integer; gen: integer -> T; from: integer): array of T;
+function ArrGen<T>(count: integer; gen: integer->T; from: integer): array of T;
 begin
   Result := new T[count];
-  for var i:=0 to Result.Length-1 do
-    Result[i] := gen(i+from);
+  for var i := 0 to Result.Length - 1 do
+    Result[i] := gen(i + from);
 end;
 
-function ArrGen<T>(count: integer; gen: integer -> T): array of T;
+function ArrGen<T>(count: integer; gen: integer->T): array of T;
 begin
   Result := new T[count];
-  for var i:=0 to Result.Length-1 do
+  for var i := 0 to Result.Length - 1 do
     Result[i] := gen(i);
 end;
 
 function SeqFill<T>(count: integer; x: T): sequence of T;
 begin
-  Result := System.Linq.Enumerable.Repeat(x,count);
+  Result := System.Linq.Enumerable.Repeat(x, count);
 end;
 
-function SeqGen<T>(count: integer; f: integer -> T; from: integer): sequence of T;
+function SeqGen<T>(count: integer; f: integer->T; from: integer): sequence of T;
 begin
-  Result := Range(from,count+from-1).Select(f)
+  Result := Range(from, count + from - 1).Select(f)
 end;
 
-function SeqGen<T>(count: integer; f: integer -> T): sequence of T;
+function SeqGen<T>(count: integer; f: integer->T): sequence of T;
 begin
-  Result := Range(0,count-1).Select(f)
+  Result := Range(0, count - 1).Select(f)
 end;
 
 function ReadArrInteger(n: integer): array of integer;
 begin
   Result := new integer[n];
-  for var i:=0 to Result.Length-1 do
+  for var i := 0 to Result.Length - 1 do
     Result[i] := ReadInteger;
 end;
 
-function ReadArrInteger(const prompt: string; n: integer): array of integer;
+function ReadArrInteger(prompt: string; n: integer): array of integer;
 begin
   Print(prompt);
   Result := ReadArrInteger(n);
@@ -4078,11 +4353,11 @@ end;
 function ReadArrReal(n: integer): array of real;
 begin
   Result := new real[n];
-  for var i:=0 to Result.Length-1 do
+  for var i := 0 to Result.Length - 1 do
     Result[i] := ReadReal;
 end;
 
-function ReadArrReal(const prompt: string; n: integer): array of real;
+function ReadArrReal(prompt: string; n: integer): array of real;
 begin
   Print(prompt);
   Result := ReadArrReal(n);
@@ -4091,11 +4366,11 @@ end;
 function ReadArrString(n: integer): array of string;
 begin
   Result := new string[n];
-  for var i:=0 to Result.Length-1 do
+  for var i := 0 to Result.Length - 1 do
     Result[i] := ReadString;
 end;
 
-function ReadArrString(const prompt: string; n: integer): array of string;
+function ReadArrString(prompt: string; n: integer): array of string;
 begin
   Print(prompt);
   Result := ReadArrString(n);
@@ -4103,10 +4378,10 @@ end;
 
 function ReadSeqInteger(n: integer): sequence of integer;
 begin
-  Result := Range(1,n).Select(i->ReadInteger());
+  Result := Range(1, n).Select(i -> ReadInteger());
 end;
 
-function ReadSeqInteger(const prompt: string; n: integer): sequence of integer;
+function ReadSeqInteger(prompt: string; n: integer): sequence of integer;
 begin
   Print(prompt);
   Result := ReadSeqInteger(n);
@@ -4114,10 +4389,10 @@ end;
 
 function ReadSeqReal(n: integer): sequence of real;
 begin
-  Result := Range(1,n).Select(i->ReadReal());
+  Result := Range(1, n).Select(i -> ReadReal());
 end;
 
-function ReadSeqReal(const prompt: string; n: integer): sequence of real;
+function ReadSeqReal(prompt: string; n: integer): sequence of real;
 begin
   Print(prompt);
   Result := ReadSeqReal(n);
@@ -4125,16 +4400,16 @@ end;
 
 function ReadSeqString(n: integer): sequence of string;
 begin
-  Result := Range(1,n).Select(i->ReadString());
+  Result := Range(1, n).Select(i -> ReadString());
 end;
 
-function ReadSeqString(const prompt: string; n: integer): sequence of string;
+function ReadSeqString(prompt: string; n: integer): sequence of string;
 begin
   Print(prompt);
   Result := ReadSeqString(n);
 end;
 
-function ReadSeqIntegerWhile(cond: integer -> boolean): sequence of integer;
+function ReadSeqIntegerWhile(cond: integer->boolean): sequence of integer;
 begin
   while True do
   begin
@@ -4145,7 +4420,7 @@ begin
   end;
 end;
 
-function ReadSeqRealWhile(cond: real -> boolean): sequence of real;
+function ReadSeqRealWhile(cond: real->boolean): sequence of real;
 begin
   while True do
   begin
@@ -4156,7 +4431,7 @@ begin
   end;
 end;
 
-function ReadSeqStringWhile(cond: string -> boolean): sequence of string;
+function ReadSeqStringWhile(cond: string->boolean): sequence of string;
 begin
   while True do
   begin
@@ -4167,19 +4442,19 @@ begin
   end;
 end;
 
-function ReadSeqIntegerWhile(const prompt: string; cond: integer -> boolean): sequence of integer;
+function ReadSeqIntegerWhile(prompt: string; cond: integer->boolean): sequence of integer;
 begin
   Print(prompt);
   Result := ReadSeqIntegerWhile(cond);
 end;
 
-function ReadSeqRealWhile(const prompt: string; cond: real -> boolean): sequence of real;
+function ReadSeqRealWhile(prompt: string; cond: real->boolean): sequence of real;
 begin
   Print(prompt);
   Result := ReadSeqRealWhile(cond);
 end;
 
-function ReadSeqStringWhile(const prompt: string; cond: string -> boolean): sequence of string;
+function ReadSeqStringWhile(prompt: string; cond: string->boolean): sequence of string;
 begin
   Print(prompt);
   Result := ReadSeqStringWhile(cond);
@@ -4188,35 +4463,17 @@ end;
 // -----------------------------------------------------------------------------
 //                Функции Rec для создания кортежей
 // -----------------------------------------------------------------------------
-function Rec<T1,T2>(x1: T1; x2: T2): System.Tuple<T1,T2>;
-begin
-  Result := Tuple.Create(x1,x2);
-end;
+function Rec<T1, T2>(x1: T1; x2: T2) := Tuple.Create(x1, x2);
 
-function Rec<T1,T2,T3>(x1: T1; x2: T2; x3: T3): (T1,T2,T3);
-begin
-  Result := Tuple.Create(x1,x2,x3);
-end;
+function Rec<T1, T2, T3>(x1: T1; x2: T2; x3: T3) := Tuple.Create(x1, x2, x3);
 
-function Rec<T1,T2,T3,T4>(x1: T1; x2: T2; x3: T3; x4: T4): (T1,T2,T3,T4);
-begin
-  Result := Tuple.Create(x1,x2,x3,x4);
-end;
+function Rec<T1, T2, T3, T4>(x1: T1; x2: T2; x3: T3; x4: T4) := Tuple.Create(x1, x2, x3, x4);
 
-function Rec<T1,T2,T3,T4,T5>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5): (T1,T2,T3,T4,T5);
-begin
-  Result := Tuple.Create(x1,x2,x3,x4,x5);
-end;
+function Rec<T1, T2, T3, T4, T5>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5) := Tuple.Create(x1, x2, x3, x4, x5);
 
-function Rec<T1,T2,T3,T4,T5,T6>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6): (T1,T2,T3,T4,T5,T6);
-begin
-  Result := Tuple.Create(x1,x2,x3,x4,x5,x6);
-end;
+function Rec<T1, T2, T3, T4, T5, T6>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6) := Tuple.Create(x1, x2, x3, x4, x5, x6);
 
-function Rec<T1,T2,T3,T4,T5,T6,T7>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6; x7: T7): (T1,T2,T3,T4,T5,T6,T7);
-begin
-  Result := Tuple.Create(x1,x2,x3,x4,x5,x6,x7);
-end;
+function Rec<T1, T2, T3, T4, T5, T6, T7>(x1: T1; x2: T2; x3: T3; x4: T4; x5: T5; x6: T6; x7: T7) := Tuple.Create(x1, x2, x3, x4, x5, x6, x7);
 
 // -----------------------------------------------------------------------------
 //                Функции Lst, LLst, Dict, KV, HSet, SSet
@@ -4280,6 +4537,132 @@ begin
   Result := new KeyValuePair<TKey, TVal>(key, value);
 end;
 
+function __TypeCheckAndAssignForIsMatch<T>(obj: object; var res: T): boolean;
+begin
+  if obj is T then
+  begin
+    res := T(obj);
+    Result := true;
+  end
+  else
+  begin
+    res := default(T);
+    Result := false;
+  end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4>(
+    first: Tuple<T1, T2>; 
+    second: Tuple<T3, T4>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  end;
+end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6>(
+    first: Tuple<T1, T2, T3>; 
+    second: Tuple<T4, T5, T6>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  2: Result := Result and first.Item3.Equals(second.Item3);
+  end;
+end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8>(
+    first: Tuple<T1, T2, T3, T4>; 
+    second: Tuple<T5, T6, T7, T8>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  2: Result := Result and first.Item3.Equals(second.Item3);
+  3: Result := Result and first.Item4.Equals(second.Item4);
+  end;
+end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+    first: Tuple<T1, T2, T3, T4, T5>; 
+    second: Tuple<T6, T7, T8, T9, T10>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  2: Result := Result and first.Item3.Equals(second.Item3);
+  3: Result := Result and first.Item4.Equals(second.Item4);
+  4: Result := Result and first.Item5.Equals(second.Item5);
+  end;
+end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+    first: Tuple<T1, T2, T3, T4, T5, T6>; 
+    second: Tuple<T7, T8, T9, T10, T11, T12>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  2: Result := Result and first.Item3.Equals(second.Item3);
+  3: Result := Result and first.Item4.Equals(second.Item4);
+  4: Result := Result and first.Item5.Equals(second.Item5);
+  5: Result := Result and first.Item6.Equals(second.Item6);
+  end;
+end;
+end;
+
+function __WildCardsTupleEqual<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+    first: Tuple<T1, T2, T3, T4, T5, T6, T7>; 
+    second: Tuple<T8, T9, T10, T11, T12, T13, T14>;
+    elemsToCompare: sequence of integer): boolean;
+begin
+Result := True;
+foreach var ind in elemsToCompare do
+begin
+  case ind of
+  0: Result := Result and first.Item1.Equals(second.Item1);
+  1: Result := Result and first.Item2.Equals(second.Item2);
+  2: Result := Result and first.Item3.Equals(second.Item3);
+  3: Result := Result and first.Item4.Equals(second.Item4);
+  4: Result := Result and first.Item5.Equals(second.Item5);
+  5: Result := Result and first.Item6.Equals(second.Item6);
+  6: Result := Result and first.Item7.Equals(second.Item7);
+  end;
+end;
+end;
+
+
+///--
+procedure Deconstruct<T>(self: T; var res: T); extensionmethod;
+begin
+  res := self;
+end;
+
 {function read_lexem: string; 
 var
   c: char;
@@ -4322,7 +4705,6 @@ function read_lexem(f: Text): string;
 var
   c: char;
   i: integer;
-  sb: System.Text.StringBuilder;
 begin
   if f.fi = nil then
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
@@ -4331,8 +4713,10 @@ begin
   repeat
     i := f.sr.Read();
   until not char.IsWhiteSpace(char(i)); // pass spaces
+  if i=-1 then 
+    raise new System.IO.IOException(GetTranslation(READ_LEXEM_AFTER_END_OF_TEXT_FILE));
   c := char(i);
-  sb := System.Text.StringBuilder.Create;
+  var sb := System.Text.StringBuilder.Create;
   repeat
     sb.Append(c);
     i := f.sr.Peek();
@@ -4353,11 +4737,11 @@ function IOStandardSystem.peek: integer;
 begin
   if not console_alloc then
     AllocConsole;
-// SSM 29.11.14  
+  // SSM 29.11.14  
   if state = 1 then // в sym - символ, считанный предыдущим Peek
     Result := sym
   else // в sym ничего нет
-  begin 
+  begin
     state := 1;
     sym := Console.Read(); // считываение в буфер
     Result := sym;
@@ -4368,7 +4752,7 @@ function IOStandardSystem.read_symbol: char;
 begin
   if not console_alloc then
     AllocConsole;
-// SSM 29.11.14  
+  // SSM 29.11.14  
   if state = 1 then // в sym - символ, считанный предыдущим Peek
   begin
     state := 0;
@@ -4413,12 +4797,12 @@ begin
     var sb := new System.Text.StringBuilder;
     var c := read_symbol;
     if (c <> #13) and (c <> #10) then
-        sb.Append(c);
+      sb.Append(c);
     while (c <> #13) and (c <> #10) do
     begin
-        c := read_symbol;
-        sb.Append(c);
-        c := char(peek());
+      c := read_symbol;
+      sb.Append(c);
+      c := char(peek());
     end;
     x := sb.ToString;
   end
@@ -4488,9 +4872,15 @@ begin
   else raise new System.FormatException('Входная строка имела неверный формат');
 end;
 
-procedure IOStandardSystem.readln;
+procedure IOStandardSystem.readln; // SSM 4.11.17 - проверять правку, потенциально могут быть ошибки
 begin
-  while CurrentIOSystem.read_symbol <> END_OF_LINE_SYMBOL do;
+  // while CurrentIOSystem.read_symbol <> END_OF_LINE_SYMBOL do; // было
+  while True do
+  begin
+    var sym := CurrentIOSystem.read_symbol;
+    if (sym = END_OF_LINE_SYMBOL) or (sym = char(-1)) then
+      exit;
+  end;
 end;
 
 procedure IOStandardSystem.write(obj: object);
@@ -4521,11 +4911,11 @@ end;
 // -----------------------------------------------------
 //     Read - Readln
 // -----------------------------------------------------
-procedure read;
+procedure Read;
 begin
 end;
 
-procedure readln;
+procedure Readln;
 begin
   if input.sr <> nil then
     input.sr.ReadLine
@@ -4538,10 +4928,10 @@ begin
     end;
 end;
 
-procedure read(var x: integer);
+procedure Read(var x: integer);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4551,10 +4941,10 @@ begin
     end;
 end;
 
-procedure read(var x: real);
+procedure Read(var x: real);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4564,10 +4954,10 @@ begin
     end;
 end;
 
-procedure read(var x: char);
+procedure Read(var x: char);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4577,10 +4967,10 @@ begin
     end;
 end;
 
-procedure read(var x: string);
+procedure Read(var x: string);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4590,10 +4980,10 @@ begin
     end;
 end;
 
-procedure read(var x: byte);
+procedure Read(var x: byte);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4603,10 +4993,10 @@ begin
     end;
 end;
 
-procedure read(var x: shortint);
+procedure Read(var x: shortint);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4616,10 +5006,10 @@ begin
     end;
 end;
 
-procedure read(var x: smallint);
+procedure Read(var x: smallint);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4629,10 +5019,10 @@ begin
     end;
 end;
 
-procedure read(var x: word);
+procedure Read(var x: word);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4642,10 +5032,10 @@ begin
     end;
 end;
 
-procedure read(var x: longword);
+procedure Read(var x: longword);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4655,10 +5045,10 @@ begin
     end;
 end;
 
-procedure read(var x: int64);
+procedure Read(var x: int64);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4668,10 +5058,10 @@ begin
     end;
 end;
 
-procedure read(var x: uint64);
+procedure Read(var x: uint64);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4681,10 +5071,10 @@ begin
     end;
 end;
 
-procedure read(var x: single);
+procedure Read(var x: single);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4694,10 +5084,10 @@ begin
     end;
 end;
 
-procedure read(var x: boolean);
+procedure Read(var x: boolean);
 begin
   if input.sr <> nil then
-    read(input, x)
+    Read(input, x)
   else 
     try
       CurrentIOSystem.read(x)
@@ -4706,6 +5096,107 @@ begin
         raise e;
     end;
 end;
+
+function TryRead(var x: integer): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: real): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: byte): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: shortint): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: smallint): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: word): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: longword): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: int64): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: uint64): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
+function TryRead(var x: single): boolean;
+begin
+  Result := True;
+  try
+    Read(x)
+  except
+    Result := False;
+  end
+end;
+
 
 function ReadInteger: integer;
 begin
@@ -4771,6 +5262,107 @@ begin
   Result := ReadBoolean;
   readln();
 end;
+
+function ReadInteger2 := (ReadInteger, ReadInteger);
+
+function ReadReal2 := (ReadReal, ReadReal);
+
+function ReadChar2 := (ReadChar, ReadChar);
+
+function ReadString2 := (ReadString, ReadString);
+
+function ReadlnInteger2 := (ReadInteger, ReadlnInteger);
+
+function ReadlnReal2 := (ReadReal, ReadlnReal);
+
+function ReadlnChar2 := (ReadChar, ReadlnChar);
+
+function ReadlnString2 := (ReadString, ReadlnString);
+
+
+function ReadInteger3 := (ReadInteger, ReadInteger, ReadInteger);
+
+function ReadReal3 := (ReadReal, ReadReal, ReadReal);
+
+function ReadChar3 := (ReadChar, ReadChar, ReadChar);
+
+function ReadString3 := (ReadString, ReadString, ReadString);
+
+function ReadlnInteger3 := (ReadInteger, ReadInteger, ReadlnInteger);
+
+function ReadlnReal3 := (ReadReal, ReadReal, ReadlnReal);
+
+function ReadlnChar3 := (ReadChar, ReadChar, ReadlnChar);
+
+function ReadlnString3 := (ReadString, ReadString, ReadlnString);
+
+
+function ReadInteger4 := (ReadInteger, ReadInteger, ReadInteger, ReadInteger);
+
+function ReadReal4 := (ReadReal, ReadReal, ReadReal, ReadReal);
+
+function ReadChar4 := (ReadChar, ReadChar, ReadChar, ReadChar);
+
+function ReadString4 := (ReadString, ReadString, ReadString, ReadString);
+
+function ReadlnInteger4 := (ReadInteger, ReadInteger, ReadInteger, ReadlnInteger);
+
+function ReadlnReal4 := (ReadReal, ReadReal, ReadReal, ReadlnReal);
+
+function ReadlnChar4 := (ReadChar, ReadChar, ReadChar, ReadlnChar);
+
+function ReadlnString4 := (ReadString, ReadString, ReadString, ReadlnString);
+
+
+function ReadInteger2(prompt: string) := (ReadInteger(prompt), ReadInteger);
+
+function ReadReal2(prompt: string) := (ReadReal(prompt), ReadReal);
+
+function ReadChar2(prompt: string) := (ReadChar(prompt), ReadChar);
+
+function ReadString2(prompt: string) := (ReadString(prompt), ReadString);
+
+function ReadlnInteger2(prompt: string) := (ReadInteger(prompt), ReadlnInteger);
+
+function ReadlnReal2(prompt: string) := (ReadReal(prompt), ReadlnReal);
+
+function ReadlnChar2(prompt: string) := (ReadChar(prompt), ReadlnChar);
+
+function ReadlnString2(prompt: string) := (ReadString(prompt), ReadlnString);
+
+
+function ReadInteger3(prompt: string) := (ReadInteger(prompt), ReadInteger, ReadInteger);
+
+function ReadReal3(prompt: string) := (ReadReal(prompt), ReadReal, ReadReal);
+
+function ReadChar3(prompt: string) := (ReadChar(prompt), ReadChar, ReadChar);
+
+function ReadString3(prompt: string) := (ReadString(prompt), ReadString, ReadString);
+
+function ReadlnInteger3(prompt: string) := (ReadInteger(prompt), ReadInteger, ReadlnInteger);
+
+function ReadlnReal3(prompt: string) := (ReadReal(prompt), ReadReal, ReadlnReal);
+
+function ReadlnChar3(prompt: string) := (ReadChar(prompt), ReadChar, ReadlnChar);
+
+function ReadlnString3(prompt: string) := (ReadString(prompt), ReadString, ReadlnString);
+
+
+function ReadInteger4(prompt: string) := (ReadInteger(prompt), ReadInteger, ReadInteger, ReadInteger);
+
+function ReadReal4(prompt: string) := (ReadReal(prompt), ReadReal, ReadReal, ReadReal);
+
+function ReadChar4(prompt: string) := (ReadChar(prompt), ReadChar, ReadChar, ReadChar);
+
+function ReadString4(prompt: string) := (ReadString(prompt), ReadString, ReadString, ReadString);
+
+function ReadlnInteger4(prompt: string) := (ReadInteger(prompt), ReadInteger, ReadInteger, ReadlnInteger);
+
+function ReadlnReal4(prompt: string) := (ReadReal(prompt), ReadReal, ReadReal, ReadlnReal);
+
+function ReadlnChar4(prompt: string) := (ReadChar(prompt), ReadChar, ReadChar, ReadlnChar);
+
+function ReadlnString4(prompt: string) := (ReadString(prompt), ReadString, ReadString, ReadlnString);
 
 // Read with prompt
 
@@ -4930,7 +5522,7 @@ begin
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
   if f.sr = nil then 
     raise new System.IO.IOException(GetTranslation(FILE_NOT_OPENED_FOR_READING));
-
+  
   x := f.sr.ReadLine;
   if x = nil then
     x := '';
@@ -5131,201 +5723,199 @@ end;
 // -----------------------------------------------------
 //                   TextFile methods
 // -----------------------------------------------------
-function Text.ReadInteger: integer;
+function Text.ReadInteger := PABCSystem.ReadInteger(Self);
+
+function Text.ReadReal := PABCSystem.ReadReal(Self);
+
+function Text.ReadChar := PABCSystem.ReadChar(Self);
+
+function Text.ReadString := PABCSystem.ReadString(Self);
+
+function Text.ReadWord := read_lexem(Self);
+
+function Text.ReadBoolean := PABCSystem.ReadBoolean(Self);
+
+function Text.ReadlnInteger := PABCSystem.ReadlnInteger(Self);
+
+function Text.ReadlnReal := PABCSystem.ReadlnReal(Self);
+
+function Text.ReadlnChar := PABCSystem.ReadlnChar(Self);
+
+function Text.ReadlnString := PABCSystem.ReadlnString(Self);
+
+function Text.ReadlnBoolean := PABCSystem.ReadlnBoolean(Self);
+
+procedure Text.Readln := PABCSystem.Readln(Self);  
+
+procedure Text.Write(params o: array of Object) := PABCSystem.Write(Self, o);
+
+procedure Text.Writeln(params o: array of Object) := PABCSystem.Writeln(Self, o);
+
+procedure Text.Print(params o: array of Object);
 begin
-  Result := PABCSystem.ReadInteger(Self);
+  if PrintDelimDefault<>'' then
+    foreach var s in o do
+      PABCSystem.Write(Self, s, PrintDelimDefault)
+  else    
+    foreach var s in o do
+      PABCSystem.Write(Self, s)
 end;
 
-function Text.ReadReal: real;
+procedure Text.Println(params o: array of Object);
 begin
-  Result := PABCSystem.ReadReal(Self);
+  if o.Length <> 0 then
+  begin
+    if PrintDelimDefault<>'' then
+      for var i:=0 to o.Length-2 do
+        PABCSystem.Write(Self, o[i], PrintDelimDefault)
+    else    
+      for var i:=0 to o.Length-2 do
+        PABCSystem.Write(Self, o[i]);
+    PABCSystem.Write(Self, o.Last);
+  end;
+  PABCSystem.Writeln(Self);
 end;
 
-function Text.ReadChar: char;
+function Text.Eof := PABCSystem.Eof(Self);
+
+function Text.Eoln := PABCSystem.Eoln(Self);
+
+procedure Text.Close := PABCSystem.Close(Self);
+
+function Text.SeekEof := PABCSystem.SeekEof(Self);
+
+function Text.SeekEoln := PABCSystem.SeekEoln(Self);
+
+procedure Text.Flush := PABCSystem.Flush(Self);
+
+procedure Text.Erase := PABCSystem.Erase(Self);
+
+procedure Text.Rename(newname: string) := PABCSystem.Rename(Self, newname);
+
+function Text.Name := fi.Name;
+
+function Text.FullName := fi.FullName;
+
+function Text.ReadToEnd := sr.ReadToEnd;
+
+procedure Text.Reset := PABCSystem.Reset(Self);
+
+procedure Text.Reset(en: Encoding) := PABCSystem.Reset(Self,en);
+
+procedure Text.Rewrite := PABCSystem.Rewrite(Self);
+
+procedure Text.Rewrite(en: Encoding) := PABCSystem.Rewrite(Self,en);
+
+procedure Text.Append := PABCSystem.Append(Self);
+
+procedure Text.Append(en: Encoding) := PABCSystem.Append(Self,en);
+
+function Text.Lines: sequence of string;
 begin
-  Result := PABCSystem.ReadChar(Self);
+  Self.sr.BaseStream.Position := 0;
+  while not Eof do
+    yield ReadlnString;
 end;
 
-function Text.ReadString: string;
-begin
-  Result := PABCSystem.ReadString(Self);
-end;
-
-function Text.ReadBoolean: boolean;
-begin
-  Result := PABCSystem.ReadBoolean(Self);
-end;
-
-function Text.ReadlnInteger: integer;
-begin
-  Result := PABCSystem.ReadlnInteger(Self);
-end;
-
-function Text.ReadlnReal: real;
-begin
-  Result := PABCSystem.ReadlnReal(Self);
-end;
-
-function Text.ReadlnChar: char;
-begin
-  Result := PABCSystem.ReadlnChar(Self);
-end;
-
-function Text.ReadlnString: string;
-begin
-  Result := PABCSystem.ReadlnString(Self);
-end;
-
-function Text.ReadlnBoolean: boolean;
-begin
-  Result := PABCSystem.ReadlnBoolean(Self);
-end;
-
-procedure Text.Readln;
-begin
-  PABCSystem.Readln(Self);  
-end;
-
-procedure Text.Write(params o: array of Object);
-begin
-  PABCSystem.Write(Self,o);
-end;
-
-procedure Text.Writeln(params o: array of Object);
-begin
-  PABCSystem.Writeln(Self,o);
-end;
-
-function Text.Eof: boolean;
-begin
-  Result := PABCSystem.Eof(Self);
-end;
-
-function Text.Eoln: boolean;
-begin
-  Result := PABCSystem.Eoln(Self);
-end;
-
-procedure Text.Close;
-begin
-  PABCSystem.Close(Self);
-end;
-
-function Text.SeekEof: boolean;
-begin
-  Result := PABCSystem.SeekEof(Self);
-end;
-
-function Text.SeekEoln: boolean;
-begin
-  Result := PABCSystem.SeekEoln(Self);
-end;
-
-procedure Text.Flush;
-begin
-  PABCSystem.Flush(Self);
-end;
-
-procedure Text.Erase;
-begin
-  PABCSystem.Erase(Self);
-end;
-
-procedure Text.Rename(newname: string);
-begin
-  PABCSystem.Rename(Self, newname);
-end;
-
-function Text.Name: string;
-begin
-  Result := fi.Name  
-end;
-
-function Text.FullName: string;
-begin
-  Result := fi.FullName  
-end;
-
-function Text.ReadToEnd: string;
-begin
-  Result := sr.ReadToEnd  
-end;
-
-procedure Text.Reset;
-begin
-  PABCSystem.Reset(Self);
-end;
 
 
 // -----------------------------------------------------
 //                AbstractBinaryFile methods
 // -----------------------------------------------------
-procedure AbstractBinaryFile.Close;
-begin
-  PABCSystem.Close(Self);
-end;
+procedure AbstractBinaryFile.Close := PABCSystem.Close(Self);
 
-procedure AbstractBinaryFile.Truncate;
-begin
-  PABCSystem.Truncate(Self);
-end;
+procedure AbstractBinaryFile.Truncate := PABCSystem.Truncate(Self);
 
-function AbstractBinaryFile.Eof: boolean;
-begin
-  Result := PABCSystem.Eof(Self);
-end;
+function AbstractBinaryFile.Eof := PABCSystem.Eof(Self);
 
-procedure AbstractBinaryFile.Erase;
-begin
-  PABCSystem.Erase(Self);
-end;
+procedure AbstractBinaryFile.Erase := PABCSystem.Erase(Self);
 
-procedure AbstractBinaryFile.Rename(newname: string);
-begin
-  PABCSystem.Rename(Self, newname);
-end;
+procedure AbstractBinaryFile.Rename(newname: string) := PABCSystem.Rename(Self, newname);
 
-procedure AbstractBinaryFile.Write(params vals: array of object);
-begin
-  PABCSystem.Write(Self, vals);
-end;
+procedure AbstractBinaryFile.Write(params vals: array of object) := PABCSystem.Write(Self, vals);
 
-procedure AbstractBinaryFile.Reset;
-begin
-  PABCSystem.Reset(Self);
-end;
+procedure AbstractBinaryFile.Reset := PABCSystem.Reset(Self);
+
+procedure AbstractBinaryFile.Rewrite := PABCSystem.Rewrite(Self);
+
+function AbstractBinaryFile.Name := fi.Name;
+
+function AbstractBinaryFile.FullName := fi.FullName;
+
 
 // -----------------------------------------------------
 //                TypedFile & BinaryFile methods
 // -----------------------------------------------------
-function TypedFile.FilePos: int64;
+function TypedFile.Size: int64 := PABCSystem.FileSize(Self);
+
+function TypedFile.GetFilePos: int64 := PABCSystem.FilePos(Self);
+
+procedure TypedFile.Seek(n: int64) := PABCSystem.Seek(Self, n); 
+
+procedure BinaryFile.Reset(en: Encoding) := PABCSystem.Reset(Self,en);
+
+procedure BinaryFile.Rewrite(en: Encoding) := PABCSystem.Rewrite(Self,en);
+
+function BinaryFile.GetFilePos: int64 := PABCSystem.FilePos(Self);
+
+function BinaryFile.Size: int64 := PABCSystem.FileSize(Self);
+
+procedure BinaryFile.Seek(n: int64) := PABCSystem.Seek(Self, n);
+
+procedure BinaryFile.InternalCheck;
 begin
-  Result := PABCSystem.FilePos(Self);
+  if Self.fi = nil then
+    raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
+  if Self.fs = nil then
+    raise new System.IO.IOException(GetTranslation(FILE_NOT_OPENED));
 end;
 
-function TypedFile.FileSize: int64;
+procedure BinaryFile.WriteBytes(a: array of byte);
 begin
-  Result := PABCSystem.FileSize(Self);
+  InternalCheck;
+  Self.bw.Write(a);
 end;
 
-procedure TypedFile.Seek(n: int64);
+function BinaryFile.ReadBytes(count: integer): array of byte;
 begin
-  PABCSystem.Seek(Self, n);
+  InternalCheck;
+  Result := Self.br.ReadBytes(count)
 end;
 
-function BinaryFile.FilePos: int64;
+function BinaryFile.ReadInteger: integer;
 begin
-  Result := PABCSystem.FilePos(Self);
+  InternalCheck;
+  Result := Self.br.ReadInt32;  
 end;
 
-function BinaryFile.FileSize: int64;
+function BinaryFile.ReadBoolean: boolean;
 begin
-  Result := PABCSystem.FileSize(Self);
+  InternalCheck;
+  Result := Self.br.ReadBoolean;  
 end;
 
-procedure BinaryFile.Seek(n: int64);
+function BinaryFile.ReadByte: byte;
 begin
-  PABCSystem.Seek(Self, n);
+  InternalCheck;
+  Result := Self.br.ReadByte;  
+end;
+
+function BinaryFile.ReadChar: char;
+begin
+  InternalCheck;
+  Result := Self.br.ReadChar;  
+end;
+
+function BinaryFile.ReadReal: real;
+begin
+  InternalCheck;
+  Result := Self.br.ReadDouble;  
+end;
+
+function BinaryFile.ReadString: string;
+begin
+  InternalCheck;
+  Result := Self.br.ReadString;  
 end;
 
 // -----------------------------------------------------
@@ -5358,7 +5948,7 @@ begin
   p := ptr;
 end;
 
-procedure write;
+procedure Write;
 begin
 end;
 
@@ -5372,7 +5962,7 @@ begin
   writeln(output);
 end;
 
-procedure write(obj: object);
+procedure Write(obj: object);
 begin
   if output.sw <> nil then
     write_in_output(obj)
@@ -5384,7 +5974,7 @@ end;
 //  CurrentIOSystem.Write(ptr);
 //end;
 
-procedure write(obj1, obj2: object);
+procedure Write(obj1, obj2: object);
 begin
   if output.sw <> nil then
   begin
@@ -5398,7 +5988,7 @@ begin
   end;
 end;
 
-procedure write(params args: array of object);
+procedure Write(params args: array of object);
 begin
   for var i := 0 to args.length - 1 do
     if output.sw <> nil then
@@ -5407,7 +5997,7 @@ begin
       CurrentIOSystem.Write(args[i]);
 end;
 
-procedure writeln(obj: object);
+procedure Writeln(obj: object);
 begin
   if output.sw <> nil then
   begin
@@ -5427,7 +6017,7 @@ end;
 //  CurrentIOSystem.Writeln;
 //end;
 
-procedure writeln(obj1, obj2: object);
+procedure Writeln(obj1, obj2: object);
 begin
   if output.sw <> nil then
   begin
@@ -5443,14 +6033,14 @@ begin
   end
 end;
 
-procedure writeln;
+procedure Writeln;
 begin
   if output.sw <> nil then
     writeln_in_output
   else CurrentIOSystem.Writeln;
 end;
 
-procedure writeln(params args: array of object);
+procedure Writeln(params args: array of object);
 begin
   if output.sw <> nil then
   begin
@@ -5466,56 +6056,56 @@ begin
   end;
 end;
 
-procedure write(f: Text);
+procedure Write(f: Text);
 begin
 end;
 
-procedure write(f: Text; val: object);
+procedure Write(f: Text; val: object);
 begin
   if f.fi = nil then
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
   if f.sw = nil then 
     raise new System.IO.IOException(GetTranslation(FILE_NOT_OPENED_FOR_WRITING));
-
+  
   f.sw.Write(StructuredObjectToString(val));
   {if val = nil then
   begin
-    f.sw.Write('nil');
-    exit;
+  f.sw.Write('nil');
+  exit;
   end;
   case System.Type.GetTypeCode(val.GetType) of
-    TypeCode.Double, 
-    TypeCode.Single,  
-    TypeCode.Decimal: 
-    f.sw.Write(FormatFloatNumber(val.ToString));
+  TypeCode.Double, 
+  TypeCode.Single,  
+  TypeCode.Decimal: 
+  f.sw.Write(FormatFloatNumber(val.ToString));
   else
-    f.sw.Write(val)
+  f.sw.Write(val)
   end;}
 end;
 
-procedure write(f: Text; params args: array of object);
+procedure Write(f: Text; params args: array of object);
 begin
   for var i := 0 to args.length - 1 do
     write(f, args[i]);
 end;
 
-procedure writeln(f: Text);
+procedure Writeln(f: Text);
 begin
   if f.fi = nil then
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
   if f.sw = nil then 
     raise new System.IO.IOException(GetTranslation(FILE_NOT_OPENED_FOR_WRITING));
-
+  
   f.sw.WriteLine;
 end;
 
-procedure writeln(f: Text; val: object);
+procedure Writeln(f: Text; val: object);
 begin
   write(f, val);
   writeln(f);
 end;
 
-procedure writeln(f: Text; params args: array of object);
+procedure Writeln(f: Text; params args: array of object);
 begin
   for var i := 0 to args.length - 1 do
     write(f, args[i]);
@@ -5543,7 +6133,7 @@ end;
 procedure WritelnFormat(f: Text; formatstr: string; params args: array of object);
 begin
   var s := Format(formatstr, args);
-  writeln(f, s);
+  Writeln(f, s);
 end;
 
 // -----------------------------------------------------
@@ -5551,35 +6141,53 @@ end;
 // -----------------------------------------------------
 procedure Print(s: string);
 begin
-  write(s, ' ');
+  if PrintDelimDefault<>'' then
+    Write(s, PrintDelimDefault)
+  else Write(s)  
 end;
+
+procedure Print(o: object);
+begin
+  if PrintDelimDefault<>'' then
+    Write(o, PrintDelimDefault)
+  else     
+    Write(o)
+end; 
 
 procedure Print(params args: array of object);
 begin
   if args.Length = 0 then
     exit;
-  for var i := 0 to args.length - 1 do
-    write(args[i], ' ');
+  if PrintDelimDefault<>'' then
+    for var i := 0 to args.length - 1 do
+      Write(args[i], PrintDelimDefault)
+  else     
+    for var i := 0 to args.length - 1 do
+      Write(args[i])
 end;
 
 procedure Println(params args: array of object);
 begin
   Print(args);
-  writeln;
+  Writeln;
 end;
 
 procedure Print(f: Text; params args: array of object);
 begin
   if args.Length = 0 then
     exit;
-  for var i := 0 to args.length - 1 do
-    write(f, args[i], ' ');
+  if PrintDelimDefault<>'' then
+    for var i := 0 to args.length - 1 do
+      Write(f, args[i], PrintDelimDefault)
+  else     
+    for var i := 0 to args.length - 1 do
+      Write(f, args[i])
 end;
 
 procedure Println(f: Text; params args: array of object);
 begin
   Print(f, args);
-  writeln(f);
+  Writeln(f);
 end;
 // -----------------------------------------------------
 //                  Text files
@@ -5598,10 +6206,7 @@ begin
     f.sr := new StreamReader(f.fi.FullName, DefaultEncoding);
 end;
 
-procedure AssignFile(f: Text; name: string);
-begin
-  Assign(f, name);
-end;
+procedure AssignFile(f: Text; name: string) := Assign(f, name);
 
 procedure Close(f: Text);
 begin
@@ -5624,15 +6229,9 @@ begin
   else raise new IOException(GetTranslation(FILE_NOT_OPENED));
 end;
 
-procedure CloseFile(f: Text);
-begin
-  Close(f);
-end;
+procedure CloseFile(f: Text) := Close(f);
 
-procedure Reset(f: Text);
-begin
-  Reset(f,DefaultEncoding)
-end;
+procedure Reset(f: Text) := Reset(f, DefaultEncoding);
 
 procedure Reset(f: Text; en: Encoding);
 begin
@@ -5654,20 +6253,17 @@ begin
   end;
 end;
 
-procedure Reset(f: Text; name: string);
-begin
-  Reset(f,name,DefaultEncoding)
-end;
+procedure Reset(f: Text; name: string) := Reset(f, name, DefaultEncoding);
 
 procedure Reset(f: Text; name: string; en: Encoding);
 begin
-  assign(f, name);
-  reset(f,en);
+  Assign(f, name);
+  Reset(f, en);
 end;
 
 procedure Rewrite(f: Text);
 begin
-  Rewrite(f,DefaultEncoding)
+  Rewrite(f, DefaultEncoding)
 end;
 
 procedure Rewrite(f: Text; en: Encoding);
@@ -5691,19 +6287,16 @@ end;
 
 procedure Rewrite(f: Text; name: string);
 begin
-  Rewrite(f,name,DefaultEncoding)
+  Rewrite(f, name, DefaultEncoding)
 end;
 
 procedure Rewrite(f: Text; name: string; en: Encoding);
 begin
   Assign(f, name);
-  Rewrite(f,en);
+  Rewrite(f, en);
 end;
 
-procedure Append(f: Text);
-begin
-  Append(f,DefaultEncoding)
-end;
+procedure Append(f: Text) := Append(f, DefaultEncoding);
 
 procedure Append(f: Text; en: Encoding);
 begin
@@ -5712,50 +6305,38 @@ begin
   f.sw := new StreamWriter(f.fi.FullName, True, en);
 end;
 
-procedure Append(f: Text; name: string);
-begin
-  Append(f,name,DefaultEncoding)
-end;
+procedure Append(f: Text; name: string) := Append(f, name, DefaultEncoding);
 
 procedure Append(f: Text; name: string; en: Encoding);
 begin
   Assign(f, name);
-  Append(f,en);
+  Append(f, en);
 end;
 
-function OpenRead(fname: string): Text;
-begin
-  Result := OpenRead(fname,DefaultEncoding)
-end;
+function OpenRead(fname: string): Text := OpenRead(fname, DefaultEncoding);
 
 function OpenRead(fname: string; en: Encoding): Text;
 begin
   var f: Text := new Text;
-  Reset(f,fname,en);
+  Reset(f, fname, en);
   Result := f;
 end;
 
-function OpenWrite(fname: string): Text;
-begin
-  Result := OpenWrite(fname,DefaultEncoding)
-end;
+function OpenWrite(fname: string): Text := OpenWrite(fname, DefaultEncoding);
 
 function OpenWrite(fname: string; en: Encoding): Text;
 begin
   var f: Text := new Text;
-  Rewrite(f,fname,en);
+  Rewrite(f, fname, en);
   Result := f;
 end;
 
-function OpenAppend(fname: string): Text;
-begin
-  Result := OpenAppend(fname,DefaultEncoding)
-end;
+function OpenAppend(fname: string): Text := OpenAppend(fname, DefaultEncoding);
 
 function OpenAppend(fname: string; en: Encoding): Text;
 begin
   var f: Text := new Text;
-  Append(f,fname,en);
+  Append(f, fname, en);
   Result := f;
 end;
 
@@ -5778,8 +6359,6 @@ begin
 end;
 
 function SeekEof(f: Text): boolean;
-var
-  i: integer;
 begin
   if f.sw <> nil then
     raise new IOException(GetTranslation(SEEKEOF_FOR_TEXT_WRITEOPENED));
@@ -5788,7 +6367,7 @@ begin
   repeat
     if f.sr.EndOfStream then
       break;
-    i := f.sr.Peek;
+    var i := f.sr.Peek;
     if not char.IsWhiteSpace(char(i)) then
       break;
     f.sr.Read;
@@ -5844,62 +6423,62 @@ end;
 // -----------------------------------------------------
 function ReadLines(path: string): sequence of string;
 begin
-  Result := ReadLines(path,DefaultEncoding);
+  Result := ReadLines(path, DefaultEncoding);
 end;
 
 function ReadLines(path: string; en: Encoding): sequence of string;
 begin
-  Result := System.IO.File.ReadLines(path,en);
+  Result := System.IO.File.ReadLines(path, en);
 end;
 
 function ReadAllLines(path: string): array of string;
 begin
-  Result := ReadAllLines(path,DefaultEncoding);
+  Result := ReadAllLines(path, DefaultEncoding);
 end;
 
 function ReadAllLines(path: string; en: Encoding): array of string;
 begin
-  Result := System.IO.File.ReadAllLines(path,en);
+  Result := System.IO.File.ReadAllLines(path, en);
 end;
 
 function ReadAllText(path: string): string;
 begin
-  Result := ReadAllText(path,DefaultEncoding);
+  Result := ReadAllText(path, DefaultEncoding);
 end;
 
 function ReadAllText(path: string; en: Encoding): string;
 begin
-  Result := System.IO.File.ReadAllText(path,en);
+  Result := System.IO.File.ReadAllText(path, en);
 end;
 
 procedure WriteLines(path: string; ss: sequence of string);
 begin
-  WriteLines(path,ss,DefaultEncoding);
+  WriteLines(path, ss, DefaultEncoding);
 end;
 
 procedure WriteLines(path: string; ss: sequence of string; en: Encoding);
 begin
-  System.IO.File.WriteAllLines(path,ss,en);
+  System.IO.File.WriteAllLines(path, ss, en);
 end;
 
 procedure WriteAllLines(path: string; ss: array of string);
 begin
-  WriteAllLines(path,ss,DefaultEncoding);
+  WriteAllLines(path, ss, DefaultEncoding);
 end;
 
 procedure WriteAllLines(path: string; ss: array of string; en: Encoding);
 begin
-  System.IO.File.WriteAllLines(path,ss,en);
+  System.IO.File.WriteAllLines(path, ss, en);
 end;
 
 procedure WriteAllText(path: string; s: string);
 begin
-  System.IO.File.WriteAllText(path,s,DefaultEncoding);
+  System.IO.File.WriteAllText(path, s, DefaultEncoding);
 end;
 
 procedure WriteAllText(path: string; s: string; en: Encoding);
 begin
-  System.IO.File.WriteAllText(path,s,en);
+  System.IO.File.WriteAllText(path, s, en);
 end;
 
 // -----------------------------------------------------
@@ -5910,10 +6489,7 @@ begin
   f.fi := System.IO.FileInfo.Create(name);
 end;
 
-procedure AssignFile(f: AbstractBinaryFile; name: string);
-begin
-  Assign(f, name);
-end;
+procedure AssignFile(f: AbstractBinaryFile; name: string) := Assign(f, name);
 
 procedure Close(f: AbstractBinaryFile);
 begin
@@ -5931,24 +6507,25 @@ begin
   end;
 end;
 
-procedure CloseFile(f: AbstractBinaryFile);
-begin
-  Close(f);
-end;
+procedure CloseFile(f: AbstractBinaryFile) := Close(f);
 
-procedure Reset(f: AbstractBinaryFile);
+procedure Reset(f: AbstractBinaryFile; en: Encoding);
 begin
   if f.fi = nil then
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
+  if (f is TypedFile) and not en.IsSingleByte then
+    raise new System.IO.IOException(GetTranslation(TYPED_FILE_CANBE_OPENED_IN_SINGLEBYTE_ENCODING_ONLY));
   if f.fs = nil then 
   begin
     f.fs := new FileStream(f.fi.FullName, FileMode.Open);
-    f.br := new BinaryReader(f.fs, DefaultEncoding);
-    f.bw := new BinaryWriter(f.fs, DefaultEncoding);
+    f.br := new BinaryReader(f.fs, en);
+    f.bw := new BinaryWriter(f.fs, en);
   end 
   else
     f.fs.Position := 0;
 end;
+
+procedure Reset(f: AbstractBinaryFile) := Reset(f,DefaultEncoding);
 
 procedure Reset(f: AbstractBinaryFile; name: string);
 begin
@@ -5956,21 +6533,37 @@ begin
   Reset(f);
 end;
 
-procedure Rewrite(f: AbstractBinaryFile);
+procedure Reset(f: AbstractBinaryFile; name: string; en: Encoding);
+begin
+  Assign(f, name);
+  Reset(f,en);
+end;
+
+procedure Rewrite(f: AbstractBinaryFile; en: Encoding);
 begin
   if f.fi = nil then
     raise new System.IO.IOException(GetTranslation(FILE_NOT_ASSIGNED));
+  if (f is TypedFile) and not en.IsSingleByte then
+    raise new System.IO.IOException(GetTranslation(TYPED_FILE_CANBE_OPENED_IN_SINGLEBYTE_ENCODING_ONLY));
   if f.fs = nil then
   begin
     f.fs := new FileStream(f.fi.FullName, FileMode.Create);
-    f.bw := new BinaryWriter(f.fs, DefaultEncoding);
-    f.br := new BinaryReader(f.fs, DefaultEncoding);
+    f.bw := new BinaryWriter(f.fs, en);
+    f.br := new BinaryReader(f.fs, en);
   end
   else 
   begin
     f.fs.Position := 0;
     Truncate(f);
   end;  
+end;
+
+procedure Rewrite(f: AbstractBinaryFile) := Rewrite(f,DefaultEncoding);
+
+procedure Rewrite(f: AbstractBinaryFile; name: string; en: Encoding);
+begin
+  Assign(f, name);
+  Rewrite(f,en);
 end;
 
 procedure Rewrite(f: AbstractBinaryFile; name: string);
@@ -6024,35 +6617,42 @@ begin
     with f.br do
       case System.Type.GetTypeCode(t) of
         TypeCode.Boolean: Result := ReadBoolean;
-        TypeCode.Byte:    Result := ReadByte;
-        TypeCode.Char:    Result := ReadChar;
+        TypeCode.Byte: Result := ReadByte;
+        TypeCode.Char: Result := ReadChar;
         TypeCode.Decimal: Result := ReadDecimal;
-        TypeCode.Double:  Result := ReadDouble;
-        TypeCode.Int16:   Result := ReadInt16;
-        TypeCode.Int32:   Result := ReadInt32;
-        TypeCode.Int64:   Result := ReadInt64;
-        TypeCode.UInt16:  Result := ReadUInt16;
-        TypeCode.UInt32:  Result := ReadUInt32;
-        TypeCode.UInt64:  Result := ReadUInt64;
-        TypeCode.SByte:   Result := ReadSByte;
-        TypeCode.Single:  Result := ReadSingle;
+        TypeCode.Double: Result := ReadDouble;
+        TypeCode.Int16: Result := ReadInt16;
+        TypeCode.Int32: Result := ReadInt32;
+        TypeCode.Int64: Result := ReadInt64;
+        TypeCode.UInt16: Result := ReadUInt16;
+        TypeCode.UInt32: Result := ReadUInt32;
+        TypeCode.UInt64: Result := ReadUInt64;
+        TypeCode.SByte: Result := ReadSByte;
+        TypeCode.Single: Result := ReadSingle;
       
       end;
   end 
   else if t.IsEnum then Result := f.br.ReadInt32
   else if t.IsValueType then
   begin
-    elem := Activator.CreateInstance(t);
-    fa := t.GetFields;
+    elem := Activator.CreateInstance(t,true);
+    fa := t.GetFields(System.Reflection.BindingFlags.GetField or System.Reflection.BindingFlags.Instance or System.Reflection.BindingFlags.Public or System.Reflection.BindingFlags.NonPublic);
     for var i := 0 to fa.Length - 1 do
-      if not fa[i].IsStatic then
+      if {not fa[i].IsStatic and} not fa[i].IsLiteral then
         fa[i].SetValue(elem, AbstractBinaryFileReadT(f, fa[i].FieldType, ind, in_arr));
     Result := elem;
   end
   else
   if t = typeof(string) then
   begin
-    Result := f.br.ReadString();
+    if f is TypedFile then
+    begin
+      var len := f.br.ReadByte();
+      var chh := f.br.ReadChars(len);
+    
+      Result := new string(chh);
+    end
+    else Result := f.br.ReadString();
     if (f is TypedFile) and ((f as TypedFile).offsets <> nil) and ((f as TypedFile).offsets.Length > 0) then
     begin
       f.br.BaseStream.Seek((f as TypedFile).offsets[ind] - (Result as string).Length, SeekOrigin.Current);
@@ -6132,18 +6732,22 @@ begin
   end  
   else if t.IsValueType then
   begin
-    fa := t.GetFields;
+    fa := t.GetFields(System.Reflection.BindingFlags.GetField or System.Reflection.BindingFlags.Instance or System.Reflection.BindingFlags.Public or System.Reflection.BindingFlags.NonPublic);
     for var i := 0 to fa.Length - 1 do
     begin
-      if not fa[i].IsStatic then
+      if {not fa[i].IsStatic and} not fa[i].IsLiteral then
         Write(f, fa[i].GetValue(val), true, ind, in_arr);
     end;
   end
   else if t = typeof(string) then
   begin
     //var tmp := f.bw.BaseStream.Position;
-    //f.bw.Write(byte(string(val).Length));
-    f.bw.Write(string(val));
+    if f is TypedFile then
+    begin
+      f.bw.Write(byte(string(val).Length));
+      f.bw.Write(string(val).ToArray);
+    end
+    else f.bw.Write(string(val));
     if (f is TypedFile) and ((f as TypedFile).offsets <> nil) and ((f as TypedFile).offsets.Length > 0) then
     begin
       f.bw.Write(new byte[(f as TypedFile).offsets[ind] - (val as string).Length]);
@@ -6426,17 +7030,18 @@ begin
     //var currentLine := stackTrace.GetFrame(ind).GetFileLineNumber();
     //var currentFile := stackTrace.GetFrame(ind).GetFileName();
     if not IsWDE then
-      System.Diagnostics.Debug.Assert(cond,'Файл '+sourceFile+', строка '+line.ToString())
+      System.Diagnostics.Debug.Assert(cond, 'Файл ' + sourceFile + ', строка ' + line.ToString())
     else if not cond then
     begin
-      var err := 'Сбой подтверждения: '+Environment.NewLine+'Файл '+sourceFile+', строка '+line.ToString();
+      var err := 'Сбой подтверждения: ' + Environment.NewLine + 'Файл ' + sourceFile + ', строка ' + line.ToString();
       writeln(err);
       System.Threading.Thread.Sleep(500);
       raise new Exception();
     end;
   end
   else
-    System.Diagnostics.Debug.Assert(cond);
+    //System.Diagnostics.Debug.Assert(cond);
+    System.Diagnostics.Contracts.Contract.Assert(cond,'Файл '+sourceFile+', строка '+line.ToString())
 end;
 
 procedure Assert(cond: boolean; message: string; sourceFile: string; line: integer);
@@ -6450,17 +7055,18 @@ begin
     //var currentLine := stackTrace.GetFrame(ind).GetFileLineNumber();
     //var currentFile := stackTrace.GetFrame(ind).GetFileName();
     if not IsWDE then
-      System.Diagnostics.Debug.Assert(cond,'Файл '+sourceFile+', строка '+line.ToString()+': '+message)
+      System.Diagnostics.Debug.Assert(cond, 'Файл ' + sourceFile + ', строка ' + line.ToString() + ': ' + message)
     else if not cond then
     begin
-      var err := 'Сбой подтверждения: '+message+Environment.NewLine+'Файл '+sourceFile+', строка '+line.ToString();
-      writeln(err);
+      var err := 'Сбой подтверждения: ' + message + Environment.NewLine + 'Файл ' + sourceFile + ', строка ' + line.ToString();
+      Writeln(err);
       System.Threading.Thread.Sleep(500);
       raise new Exception();
     end;
   end
   else
-    System.Diagnostics.Debug.Assert(cond, message);
+    //System.Diagnostics.Debug.Assert(cond, message);
+    System.Diagnostics.Contracts.Contract.Assert(cond,'Файл '+sourceFile+', строка '+line.ToString() + ': ' + message)
 end;
 
 function DiskFree(diskname: string): int64;
@@ -6513,7 +7119,8 @@ begin
   Result := DiskSize(ConvertDiskToDiskName(disk));
 end;
 
-var curr_time := DateTime.Now;
+var
+  curr_time := DateTime.Now;
 
 function Milliseconds: integer;
 begin
@@ -6555,7 +7162,10 @@ begin
   //result:= Convert.ToString(integer(p), 16);
   if p = nil then
     result := 'nil'
-  else result := '$' + integer(p).ToString('X');
+  else if Environment.Is64BitProcess then 
+    result := '$' + int64(p).ToString('X')
+  else
+    result := '$' + integer(p).ToString('X')
 end;
 
 procedure Exec(filename: string);
@@ -6573,32 +7183,29 @@ begin
   System.Diagnostics.Process.Start(filename)
 end;
 
-procedure Execute(filename: string; args: string);
-begin
-  System.Diagnostics.Process.Start(filename, args)
-end;
+procedure Execute(filename: string; args: string) := System.Diagnostics.Process.Start(filename, args);
 
 // -----------------------------------------------------
 // EnumerateFiles, EnumerateDirectories
 // -----------------------------------------------------
 function EnumerateFiles(path: string; searchPattern: string): sequence of string;
 begin
-  Result := System.IO.Directory.EnumerateFiles(path,searchPattern,System.IO.SearchOption.TopDirectoryOnly)
+  Result := System.IO.Directory.EnumerateFiles(path, searchPattern, System.IO.SearchOption.TopDirectoryOnly)
 end;
 
 function EnumerateAllFiles(path: string; searchPattern: string): sequence of string;
 begin
-  Result := System.IO.Directory.EnumerateFiles(path,searchPattern,System.IO.SearchOption.AllDirectories)
+  Result := System.IO.Directory.EnumerateFiles(path, searchPattern, System.IO.SearchOption.AllDirectories)
 end;
 
 function EnumerateDirectories(path: string): sequence of string;
 begin
-  Result := System.IO.Directory.EnumerateDirectories(path,'*.*',System.IO.SearchOption.TopDirectoryOnly)
+  Result := System.IO.Directory.EnumerateDirectories(path, '*.*', System.IO.SearchOption.TopDirectoryOnly)
 end;
 
 function EnumerateAllDirectories(path: string): sequence of string;
 begin
-  Result := System.IO.Directory.EnumerateDirectories(path,'*.*',System.IO.SearchOption.AllDirectories)
+  Result := System.IO.Directory.EnumerateDirectories(path, '*.*', System.IO.SearchOption.AllDirectories)
 end;
 
 // -----------------------------------------------------
@@ -6620,7 +7227,7 @@ function ExtractFilePath(fname: string): string;
 begin
   var fi := new System.IO.FileInfo(fname);
   Result := fi.DirectoryName;
-  if (Result.Length > 0) and (Result[Result.Length] <> '\') and  (Result[Result.Length] <> '/') then
+  if (Result.Length > 0) and (Result[Result.Length] <> '\') and (Result[Result.Length] <> '/') then
     Result += '\';
 end;
 
@@ -6654,268 +7261,156 @@ end;
 // -----------------------------------------------------
 //                Mathematical functions: implementation
 // -----------------------------------------------------
-function Sign(x: shortint): integer;
+function Sign(x: shortint): integer := Math.Sign(x);
+
+function Sign(x: smallint): integer := Math.Sign(x);
+
+function Sign(x: integer): integer := Math.Sign(x);
+
+function Sign(x: BigInteger) := x.Sign;
+
+function Sign(x: int64) := Math.Sign(x);
+
+function Sign(x: byte): integer := 1;
+
+function Sign(x: word): integer := 1;
+
+function Sign(x: longword): integer := 1;
+
+function Sign(x: uint64): integer := 1;
+
+function Sign(x: real): integer := Math.Sign(x);
+
+function Abs(x: shortint): shortint := Math.Abs(x);
+
+function Abs(x: smallint): smallint := Math.Abs(x);
+
+function Abs(x: integer): integer := Math.Abs(x);
+
+function Abs(x: int64): int64 := Math.Abs(x);
+
+function Abs(x: BigInteger): BigInteger := BigInteger.Abs(x);
+
+function Abs(x: byte): byte := x;
+
+function Abs(x: word): word := x;
+
+function Abs(x: longword): longword := x;
+
+function Abs(x: uint64): uint64 := x;
+
+function Abs(x: real): real := Math.Abs(x);
+
+function Abs(x: single): single := Math.Abs(x);
+
+function Sin(x: real) := Math.Sin(x);
+
+function Sinh(x: real) := Math.Sinh(x);
+
+function Cos(x: real) := Math.Cos(x);
+
+function Cosh(x: real) := Math.Cosh(x);
+
+function Tan(x: real) := Math.Tan(x);
+
+function Tanh(x: real) := Math.Tanh(x);
+
+function ArcSin(x: real) := Math.Asin(x);
+
+function ArcCos(x: real) := Math.Acos(x);
+
+function ArcTan(x: real) := Math.Atan(x);
+
+function Exp(x: real) := Math.Exp(x);
+
+function Ln(x: real) := Math.Log(x);
+
+function Log(x: real) := Math.Log(x); 
+
+function Log2(x: real) := LogN(2, x);
+
+function Log10(x: real) := Math.Log10(x);
+
+function LogN(base, x: real) := Math.Log(x) / Math.Log(base);
+
+function Sqrt(x: real) := Math.Sqrt(x);
+
+function Sqr(x: integer): int64 := x * x;
+
+function Sqr(x: shortint): integer := x * x;
+
+function Sqr(x: smallint): integer := x * x;
+
+function Sqr(x: BigInteger): BigInteger := x * x;
+
+function Sqr(x: byte): integer := x * x;
+
+function Sqr(x: word): uint64 := x * x;
+
+function Sqr(x: longword): uint64 := x * x;
+
+function Sqr(x: int64): int64 := x * x;
+
+function Sqr(x: uint64): uint64 := x * x;
+
+function Sqr(x: real): real := x * x;
+
+function Power(x, y: real): real := Math.Pow(x, y);
+
+//function Power(x, y: integer): real := Math.Pow(x, y);
+
+function Power(x: real; n: integer): real;
 begin
-  Result := Math.Sign(x);
+  case n of
+  0: Result := 1;
+  1: Result := x;
+  2: Result := x*x;
+  3: Result := x*x*x;
+  4: Result := x*x*x*x;
+  5: Result := x*x*x*x*x;
+  6: Result := x*x*x*x*x*x;
+  else
+  if n<0 then
+    Result := 1/Power(x,-n)
+  else  
+    begin
+      var z := x;
+      var r := 1.0;
+      while n > 0 do
+      begin
+        if n and 1 = 1 then
+          r := r * z;
+        z := z * z;
+        n := n shr 1;
+      end;
+      Result := r;
+    end;
+  end;
 end;
 
-function Sign(x: smallint): integer;
-begin
-  Result := Math.Sign(x);
-end;
+function Power(x: BigInteger; y: integer) := BigInteger.Pow(x, y);
 
-function Sign(x: integer): integer;
-begin
-  Result := Math.Sign(x);
-end;
+function Round(x: real) := Convert.ToInt32(x);
 
-function Sign(x: BigInteger): integer;
-begin
-  Result := x.Sign;
-end;
+function Round(x: real; digits: integer) := Math.Round(x,digits);
 
-function Sign(x: int64): integer;
-begin
-  Result := Math.Sign(x);
-end;
+function RoundBigInteger(x: real) := BigInteger.Create(Math.Round(x));
 
-function Sign(x: longword): integer;
-begin
-  Result := Math.Sign(int64(x));
-end;
+function Trunc(x: real) := Convert.ToInt32(Math.Truncate(x));
 
-function Sign(x: uint64): integer;
-begin
-  Result := Math.Sign(int64(x));
-end;
+function TruncBigInteger(x: real) := BigInteger.Create(Math.Truncate(x));
 
-function Sign(x: real): integer;
-begin
-  Result := Math.Sign(x);
-end;
+function Int(x: real) := x >= 0 ? Math.Floor(x) : Math.Ceiling(x);
 
-function Abs(x: shortint): shortint;
-begin
-  Result := Math.Abs(x);
-end;
+function Frac(x: real) := x - Int(x);
 
-function Abs(x: smallint): smallint;
-begin
-  Result := Math.Abs(x);
-end;
+function Floor(x: real) := Convert.ToInt32(Math.Floor(x));
 
-function Abs(x: integer): integer;
-begin
-  Result := Math.Abs(x);
-end;
+function Ceil(x: real) := Convert.ToInt32(Math.Ceiling(x));
 
-function Abs(x: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Abs(x)
-end;
+function RadToDeg(x: real) := x * 180 / Pi;
 
-function Abs(x: int64): int64;
-begin
-  Result := Math.Abs(x);
-end;
-
-function Abs(x: longword): longword;
-begin
-  Result := Math.Abs(int64(x));
-end;
-
-function Abs(x: uint64): uint64;
-begin
-  Result := Math.Abs(int64(x));
-end;
-
-function Abs(x: real): real;
-begin
-  Result := Math.Abs(x);
-end;
-
-function Sin(x: real): real;
-begin
-  Result := Math.Sin(x);
-end;
-
-function Sinh(x: real): real;
-begin
-  Result := Math.Sinh(x);
-end;
-
-function Cos(x: real): real;
-begin
-  Result := Math.Cos(x);
-end;
-
-function Cosh(x: real): real;
-begin
-  Result := Math.Cosh(x);
-end;
-
-function Tan(x: real): real;
-begin
-  Result := Math.Tan(x);
-end;
-
-function Tanh(x: real): real;
-begin
-  Result := Math.Tanh(x);
-end;
-
-function ArcSin(x: real): real;
-begin
-  Result := Math.Asin(x);
-end;
-
-function ArcCos(x: real): real;
-begin
-  Result := Math.Acos(x);
-end;
-
-function ArcTan(x: real): real;
-begin
-  Result := Math.Atan(x);
-end;
-
-function Exp(x: real): real;
-begin
-  Result := Math.Exp(x);
-end;
-
-function Ln(x: real): real;
-begin
-  Result := Math.Log(x);
-end;
-
-function Log2(x: real): real;
-begin
-  Result := LogN(2, x);
-end;
-
-function Log10(x: real): real;
-begin
-  Result := Math.Log10(x);
-end;
-
-function LogN(base, x: real): real;
-begin
-  Result := Math.Log(x) / Math.Log(base);
-end;
-
-function Sqrt(x: real): real;
-begin
-  Result := Math.Sqrt(x);
-end;
-
-function Sqr(x: integer): int64;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: shortint): integer;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: smallint): integer;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: BigInteger): BigInteger;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: longword): uint64;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: int64): int64;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: uint64): uint64;
-begin
-  Result := x * x;
-end;
-
-function Sqr(x: real): real;
-begin
-  Result := x * x;
-end;
-
-function Power(x, y: real): real;
-begin
-  Result := Math.Pow(x, y);
-end;
-
-function Power(x, y: integer): real;
-begin
-  Result := Math.Pow(x, y);
-end;
-
-function Power(x: BigInteger; y: integer): BigInteger;
-begin
-  Result := BigInteger.Pow(x, y)
-end;
-
-function Round(x: real): integer;
-begin
-  Result := Convert.ToInt32(Math.Round(x));
-end;
-
-function RoundBigInteger(x: real): BigInteger;
-begin
-  Result := BigInteger.Create(Math.Round(x));
-end;
-
-function Trunc(x: real): integer;
-begin
-  Result := Convert.ToInt32(Math.Truncate(x));
-end;
-
-function TruncBigInteger(x: real): BigInteger;
-begin
-  Result := BigInteger.Create(Math.Truncate(x));
-end;
-
-function Int(x: real): real;
-begin
-  //if x>=0 then
-  //  Result := Math.Floor(x)
-  //else Result := Math.Ceiling(x);
-  Result := x >= 0 ? Math.Floor(x) : Math.Ceiling(x);
-end;
-
-function Frac(x: real): real;
-begin
-  Result := x - Int(x);
-end;
-
-function Floor(x: real): integer;
-begin
-  Result := Convert.ToInt32(Math.Floor(x));
-end;
-
-function Ceil(x: real): integer;
-begin
-  Result := Convert.ToInt32(Math.Ceiling(x));
-end;
-
-function RadToDeg(x: real): real;
-begin
-  Result := x * 180 / Pi;
-end;
-
-function DegToRad(x: real): real;
-begin
-  Result := x * Pi / 180;
-end;
+function DegToRad(x: real) := x * Pi / 180;
 
 procedure Randomize;
 begin
@@ -6927,10 +7422,7 @@ begin
   rnd := new System.Random(seed);
 end;
 
-function Random(MaxValue: integer): integer;
-begin
-  Result := rnd.Next(MaxValue);
-end;
+function Random(MaxValue: integer) := rnd.Next(MaxValue);
 
 function Random(a, b: integer): integer;
 begin
@@ -6938,159 +7430,98 @@ begin
   Result := rnd.Next(a, b + 1);
 end;
 
-function Random: real;
+function Random(a, b: real): real;
 begin
-  Result := rnd.NextDouble;
+  if a > b then Swap(a, b);
+  Result := a + Random()*(b-a);
 end;
 
-function Max(a, b: byte): byte;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random := rnd.NextDouble;
 
-function Max(a, b: shortint): shortint;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random(MaxValue: real) := Random()*Abs(MaxValue);
 
-function Max(a, b: word): word;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random2(maxValue: integer) := (Random(maxValue), Random(maxValue));
 
-function Max(a, b: smallint): smallint;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random2(maxValue: real) := (Random(maxValue), Random(maxValue));
 
-function Max(a, b: integer): integer;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random2(a, b: integer) := (Random(a, b), Random(a, b));
 
-function Max(a, b: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Max(a,b);
-end;
+function Random2(a, b: real) := (Random(a, b), Random(a, b));
 
-function Max(a, b: longword): longword;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random2 := (Random, Random);
 
-function Max(a, b: int64): int64;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random3(maxValue: integer) := (Random(maxValue), Random(maxValue), Random(maxValue));
 
-function Max(a, b: uint64): uint64;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random3(maxValue: Real) := (Random(maxValue), Random(maxValue), Random(maxValue));
 
-function Max(a, b: real): real;
-begin
-  Result := Math.Max(a, b);
-end;
+function Random3(a, b: integer) := (Random(a, b), Random(a, b), Random(a, b));
 
-function Min(a, b: byte): byte;
-begin
-  Result := Math.Min(a, b);
-end;
+function Random3(a, b: real) := (Random(a, b), Random(a, b), Random(a, b));
 
-function Min(a, b: shortint): shortint;
-begin
-  Result := Math.Min(a, b);
-end;
+function Random3 := (Random, Random, Random);
 
-function Min(a, b: word): word;
-begin
-  Result := Math.Min(a, b);
-end;
 
-function Min(a, b: smallint): smallint;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: byte) := Math.Max(a, b);
 
-function Min(a, b: integer): integer;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: shortint) := Math.Max(a, b);
 
-function Min(a, b: BigInteger): BigInteger;
-begin
-  Result := BigInteger.Min(a,b);
-end;
+function Max(a, b: word) := Math.Max(a, b);
 
-function Min(a, b: longword): longword;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: smallint) := Math.Max(a, b);
 
-function Min(a, b: int64): int64;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: integer) := Math.Max(a, b);
 
-function Min(a, b: uint64): uint64;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: BigInteger) := BigInteger.Max(a, b);
 
-function Min(a, b: real): real;
-begin
-  Result := Math.Min(a, b);
-end;
+function Max(a, b: longword) := Math.Max(a, b);
 
-function Odd(i: byte): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Max(a, b: int64) := Math.Max(a, b);
 
-function Odd(i: shortint): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Max(a, b: uint64) := Math.Max(a, b);
 
-function Odd(i: word): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Max(a, b: real) := Math.Max(a, b);
 
-function Odd(i: smallint): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Min(a, b: byte) := Math.Min(a, b);
 
-function Odd(i: integer): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Min(a, b: shortint) := Math.Min(a, b);
 
-function Odd(i: BigInteger): boolean;
-begin
-  Result := not i.IsEven;
-end;
+function Min(a, b: word) := Math.Min(a, b);
 
-function Odd(i: longword): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Min(a, b: smallint) := Math.Min(a, b);
 
-function Odd(i: int64): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Min(a, b: integer) := Math.Min(a, b);
 
-function Odd(i: uint64): boolean;
-begin
-  result := (i mod 2) <> 0;
-end;
+function Min(a, b: BigInteger) := BigInteger.Min(a, b);
 
-function Cplx(re,im: real) := new Complex(re,im);
+function Min(a, b: longword) := Math.Min(a, b);
 
-function CplxFromPolar(magnitude,phase: real) := Complex.FromPolarCoordinates(magnitude,phase);
+function Min(a, b: int64) := Math.Min(a, b);
+
+function Min(a, b: uint64) := Math.Min(a, b);
+
+function Min(a, b: real) := Math.Min(a, b);
+
+function Odd(i: byte) := (i mod 2) <> 0;
+
+function Odd(i: shortint) := (i mod 2) <> 0;
+
+function Odd(i: word) := (i mod 2) <> 0;
+
+function Odd(i: smallint) := (i mod 2) <> 0;
+
+function Odd(i: integer) := (i mod 2) <> 0;
+
+function Odd(i: BigInteger) := not i.IsEven;
+
+function Odd(i: longword) := (i mod 2) <> 0;
+
+function Odd(i: int64) := (i mod 2) <> 0;
+
+function Odd(i: uint64) := (i mod 2) <> 0;
+
+function Cplx(re, im: real) := new Complex(re, im);
+
+function CplxFromPolar(magnitude, phase: real) := Complex.FromPolarCoordinates(magnitude, phase);
 
 function Sqrt(c: Complex) := Complex.Sqrt(c);
 
@@ -7104,9 +7535,11 @@ function Exp(c: Complex) := Complex.Exp(c);
 
 function Log(c: Complex) := Complex.Log(c);
 
+function Ln(c: Complex) := Complex.Log(c);
+
 function Log10(c: Complex) := Complex.Log10(c);
 
-function Power(c,power: Complex) := Complex.Pow(c,power);
+function Power(c, power: Complex) := Complex.Pow(c, power);
 
 function Sin(c: Complex) := Complex.Sin(c);
 
@@ -7153,12 +7586,12 @@ end;
 
 procedure Sort<T>(a: array of T; cmp: (T,T)->integer);
 begin
-  System.Array.Sort(a,cmp);
+  System.Array.Sort(a, cmp);
 end;
 
 procedure Sort<T>(a: array of T; less: (T,T)->boolean);
 begin
-  System.Array.Sort(a,(x,y)->less(x,y)?-1:(less(y,x)?1:0));
+  System.Array.Sort(a, (x, y)-> less(x, y) ? -1 : (less(y, x) ? 1 : 0));
 end;
 
 procedure Sort<T>(l: List<T>);
@@ -7173,7 +7606,19 @@ end;
 
 procedure Sort<T>(l: List<T>; less: (T,T)->boolean);
 begin
-  l.Sort((x,y)->less(x,y)?-1:(less(y,x)?1:0));
+  l.Sort((x, y)-> less(x, y) ? -1 : (less(y, x) ? 1 : 0));
+end;
+
+procedure SortDescending<T>(a: array of T);
+begin
+  Sort(a);
+  Reverse(a);
+end;
+
+procedure SortDescending<T>(l: List<T>);
+begin
+  Sort(l);
+  Reverse(l);
 end;
 
 procedure Reverse<T>(a: array of T);
@@ -7181,9 +7626,9 @@ begin
   System.Array.Reverse(a);
 end;
 
-procedure Reverse<T>(a: array of T; index,count: integer);
+procedure Reverse<T>(a: array of T; index, count: integer);
 begin
-  System.Array.Reverse(a,index,count);
+  System.Array.Reverse(a, index, count);
 end;
 
 procedure Reverse<T>(a: List<T>);
@@ -7191,24 +7636,37 @@ begin
   a.Reverse
 end;
 
-procedure Reverse<T>(a: List<T>; index,count: integer);
+procedure Reverse<T>(a: List<T>; index, count: integer);
 begin
-  a.Reverse(index,count)
+  a.Reverse(index, count)
 end;
 
+procedure Reverse(var s: string);
+begin
+  var cc := s.ToCharArray;
+  Reverse(cc);
+  s := new string(cc);
+end;
+
+procedure Reverse(var s: string; index, count: integer);
+begin
+  var cc := s.ToCharArray;
+  Reverse(cc,index-1,count);
+  s := new string(cc);
+end;
 
 procedure Shuffle<T>(a: array of T);
 begin
   var n := a.Length;
-	for var i:=0 to n-1 do
-	  Swap(a[i],a[Random(n)]);
+  for var i := 0 to n - 1 do
+    Swap(a[i], a[Random(n)]);
 end;
 
 procedure Shuffle<T>(l: List<T>);
 begin
   var n := l.Count;
-	for var i:=0 to n-1 do
-	begin
+  for var i := 0 to n - 1 do
+  begin
     var v := l[i];
     l[i] := l[Random(n)];
     l[Random(n)] := v;
@@ -7342,51 +7800,47 @@ end;
 
 function Pos(subs, s: string; from: integer): integer;
 begin
-  if (subs = nil) or (subs.Length = 0) then
+  if (subs = nil) or (subs.Length = 0) or (from > s.Length) then
     Result := 0
-  else Result := s.IndexOf(subs, from - 1,System.StringComparison.Ordinal) + 1;
+  else Result := s.IndexOf(subs, from - 1, System.StringComparison.Ordinal) + 1;
 end;
 
-function PosEx(subs, s: string; from: integer): integer;
-begin
-  if (subs = nil) or (subs.Length = 0) then
-    Result := 0
-  else Result := s.IndexOf(subs, from - 1,System.StringComparison.Ordinal) + 1;
-end;
+function PosEx(subs, s: string; from: integer) := Pos(subs,s,from);
 
 function LastPos(subs, s: string): integer;
 begin
   if (subs = nil) or (subs.Length = 0) then
     Result := 0
-  else Result := s.LastIndexOf(subs, s.Length - 1,System.StringComparison.Ordinal) + 1;
+  else Result := s.LastIndexOf(subs, s.Length - 1, System.StringComparison.Ordinal) + 1;
 end;
 
 function LastPos(subs, s: string; from: integer): integer;
 begin
-  if (subs = nil) or (subs.Length = 0) then
+  if (subs = nil) or (subs.Length = 0) or (from > s.Length) then
     Result := 0
-  else Result := s.LastIndexOf(subs, from - 1,System.StringComparison.Ordinal) + 1;
+  else Result := s.LastIndexOf(subs, from - 1, System.StringComparison.Ordinal) + 1;
 end;
 
-function Pos(c: char; s: string; from: integer): integer;
+{function Pos(c: char; s: string; from: integer): integer;
 begin
-  Result := s.IndexOf(c, from - 1,System.StringComparison.Ordinal) + 1;
+  if from > s.Length then
+    Result := 0;
+  Result := s.IndexOf(c, from - 1, System.StringComparison.Ordinal) + 1;
 end;
 
-function PosEx(c: char; s: string; from: integer): integer;
-begin
-  Result := s.IndexOf(c, from - 1,System.StringComparison.Ordinal) + 1;
-end;
+function PosEx(c: char; s: string; from: integer) := Pos(c,s,from);
 
 function LastPos(c: char; s: string): integer;
 begin
-  Result := s.LastIndexOf(c, s.Length - 1,System.StringComparison.Ordinal) + 1;
+  Result := s.LastIndexOf(c, s.Length - 1, System.StringComparison.Ordinal) + 1;
 end;
 
 function LastPos(c: char; s: string; from: integer): integer;
 begin
-  Result := s.LastIndexOf(c, from - 1,System.StringComparison.Ordinal) + 1;
-end;
+  if from > s.Length then
+    Result := 0;
+  Result := s.LastIndexOf(c, from - 1, System.StringComparison.Ordinal) + 1;
+end;}
 
 function Length(s: string): integer;
 begin
@@ -7417,7 +7871,7 @@ begin
     s := s.Substring(0, n)
   else if s.Length < n then
     if n <= sz then
-      s += new string(' ', n - s.Length )
+      s += new string(' ', n - s.Length)
     else 
       s += new String(' ', sz - s.Length)
 end;
@@ -7430,12 +7884,6 @@ begin
   if index > s.Length + 1 then
     index := s.Length + 1;
   s := s.Insert(index - 1, source);
-  {  try
-  s := s.Insert(index - 1, source);
-  except 
-  on e: System.Exception do
-  s := s.Insert(s.Length, source);
-  end;}
 end;
 
 procedure InsertInShortString(source: string; var s: string; index, n: integer);
@@ -7476,14 +7924,6 @@ begin
   if index + count - 1 > s.Length then
     count := s.Length - index + 1;
   Result := s.SubString(index - 1, count);
-  {  try
-  if index - 1 >= s.Length then 
-  Result := ''
-  else Result := s.SubString(index - 1, count);
-  except 
-  on e: System.Exception do
-  Result := s.Substring(index - 1, s.Length - index + 1);
-  end;}
 end;
 
 function Concat(s1, s2: string): string;
@@ -7521,6 +7961,13 @@ begin
   Result := new string(ca);
 end;
 
+function ReverseString(s: string; index,length: integer): string;
+begin
+  var ca := s.ToCharArray;
+  &Array.Reverse(ca,index,length);
+  Result := new string(ca);
+end;
+
 function CompareStr(s1, s2: string): Integer;
 begin
   Result := string.CompareOrdinal(s1, s2);
@@ -7542,7 +7989,7 @@ end;
 
 function Trim(s: string): string;
 begin
-  Result := s.Trim;
+  Result := s.Trim(' ');
 end;
 
 function TrimLeft(s: string): string;
@@ -7681,42 +8128,15 @@ begin
   value := Res;
 end;
 
-function StrToInt64(s: string): int64;
-begin
-  Result := Convert.ToInt64(s); 
-end;
+function StrToInt64(s: string) := Convert.ToInt64(s); 
+function StrToReal(s: string) := Convert.ToDouble(s, nfi);
+function StrToFloat(s: string) := StrToReal(s);
 
-function StrToFloat(s: string): real;
-begin
-  Result := Convert.ToDouble(s, nfi);
-end;
-
-function TryStrToInt64(s: string; var value: int64): boolean;
-begin
-  Result := int64.TryParse(s, value);
-end;
-
-function TryStrToFloat(s: string; var value: real): boolean;
-begin
-  try  
-    Result := True;
-    value := Convert.ToDouble(s, nfi);
-  except
-    value := 0;
-    Result := False;
-  end;
-end;
-
-function TryStrToFloat(s: string; var value: single): boolean;
-begin
-  try  
-    Result := True;
-    value := Convert.ToSingle(s, nfi);
-  except
-    value := 0;
-    Result := False;
-  end;
-end;
+function TryStrToInt64(s: string; var value: int64) := int64.TryParse(s, value);
+function TryStrToReal(s: string; var value: real) := real.TryParse(s,System.Globalization.NumberStyles.Float,new System.Globalization.NumberFormatInfo,value);
+function TryStrToSingle(s: string; var value: single) := single.TryParse(s,System.Globalization.NumberStyles.Float,new System.Globalization.NumberFormatInfo,value);
+function TryStrToFloat(s: string; var value: real) := TryStrToReal(s, value);
+function TryStrToFloat(s: string; var value: single) := TryStrToSingle(s, value);
 
 function ReadIntegerFromString(s: string; var from: integer): integer;
 begin
@@ -7813,7 +8233,7 @@ end;
 
 procedure Val(s: string; var value: single; var err: integer);
 begin
-  try  
+  try
     err := 0;
     value := Convert.ToSingle(s, nfi);
   except
@@ -7971,17 +8391,17 @@ end;
 
 //------------------------------------------------------------------------------
 //PRED-SUCC
-function succ(x:  boolean): boolean;
+function Succ(x: boolean): boolean;
 begin
   Result := not x;
 end;
 
-function succ(x: byte): byte;
+function Succ(x: byte): byte;
 begin
   Result := x + 1;
 end;
 
-function succ(x: shortint): shortint;
+function Succ(x: shortint): shortint;
 begin
   Result := x + 1;
 end;
@@ -7991,82 +8411,82 @@ begin
   Result := x + 1;
 end;
 
-function succ(x: word): word;
+function Succ(x: word): word;
 begin
   Result := x + 1;
 end;
 
-function succ(x: integer): integer;
+function Succ(x: integer): integer;
 begin
   Result := x + 1;
 end;
 
-function succ(x: longword): longword;
+function Succ(x: longword): longword;
 begin
   Result := x + 1;
 end;
 
-function succ(x: int64): int64;
+function Succ(x: int64): int64;
 begin
   Result := x + 1;
 end;
 
-function succ(x: uint64): uint64;
+function Succ(x: uint64): uint64;
 begin
   Result := x + 1;
 end;
 
-function succ(x: char): char;
+function Succ(x: char): char;
 begin
   Result := System.Convert.ToChar(System.Convert.ToUInt16(x) + 1);
 end;
 
-function pred(x: boolean): boolean;
+function Pred(x: boolean): boolean;
 begin
   Result := not x;
 end;
 
-function pred(x: byte): byte;
+function Pred(x: byte): byte;
 begin
   Result := x - 1;
 end;
 
-function pred(x: shortint): shortint;
+function Pred(x: shortint): shortint;
 begin
   Result := x - 1;
 end;
 
-function pred(x: smallint): smallint;
+function Pred(x: smallint): smallint;
 begin
   Result := x - 1;
 end;
 
-function pred(x: word): word;
+function Pred(x: word): word;
 begin
   Result := x - 1;
 end;
 
-function pred(x:  integer): integer;
+function Pred(x: integer): integer;
 begin
   Result := x - 1;
 end;
 
-function pred(x: longword): longword;
+function Pred(x: longword): longword;
 begin
   Result := x - 1;
 end;
 
-function pred(x: int64): int64;
+function Pred(x: int64): int64;
 begin
   Result := x - 1;
 end;
 
-function pred(x: uint64): uint64;
+function Pred(x: uint64): uint64;
 begin
   Result := x - 1;
 end;
 
-function pred(x: char): char;
+function Pred(x: char): char;
 begin
   Result := System.Convert.ToChar(System.Convert.ToUInt16(x) - 1);
 end;
@@ -8087,16 +8507,16 @@ end;
 
 // Возвращает бесконечную рекуррентную последовательность элементов, задаваемую начальным элементом и функцией next
 ///--
-function Iterate<T>(Self: T; next: T -> T): sequence of T; extensionmethod;
+function Iterate<T>(Self: T; next: T->T): sequence of T; extensionmethod;
 begin
-  Result := Iterate&<T>(Self,next);
+  Result := Iterate&<T>(Self, next);
 end;
 
 // Возвращает бесконечную рекуррентную последовательность элементов, задаваемую начальным элементом, следующим за ним элементом и функцией next
 ///--
-function Iterate<T>(Self,second: T; next: (T,T) -> T): sequence of T; extensionmethod;
+function Iterate<T>(Self, second: T; next: (T,T) ->T): sequence of T; extensionmethod;
 begin
-  Result := Iterate&<T>(Self,second,next);
+  Result := Iterate&<T>(Self, second, next);
 end;
 
 /// Возвращает бесконечную последовательность целых от текущего значения с шагом 1
@@ -8147,26 +8567,152 @@ begin
   end;
 end;
 
+// -----------------------------------------------------
+//>>     Фиктивная секция XXX - не удалять! # XXX
+// -----------------------------------------------------
+type
+  AdjGroupClass<T> = class
+  private 
+    cur: T;
+    enm: IEnumerator<T>;
+    fin: boolean;
+  public 
+    constructor Create(a: sequence of T);
+    begin
+      enm := a.GetEnumerator();
+      fin := enm.MoveNext;
+      if fin then
+        cur := enm.Current;
+    end;
+    
+    function TakeGroup: sequence of T;
+    begin
+      yield cur;
+      fin := enm.movenext;
+      while fin do
+      begin
+        if enm.current = cur then
+          yield enm.current
+        else
+        begin
+          cur := enm.Current;
+          break;
+        end;
+        fin := enm.movenext;
+      end;  
+    end;
+  end;
+
 //------------------------------------------------------------------------------
-//>>     Методы расширения для sequence of T # Extension methods for sequence of T
+//>>     Метод расширения Print для элементарных типов # Print for elementary types
+//------------------------------------------------------------------------------
+function Print(Self: integer): integer; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: int64): int64; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: real): real; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: char): char; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: boolean): boolean; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: BigInteger): BigInteger; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Print(Self: string): string; extensionmethod;
+begin
+  PABCSystem.Print(Self);
+  Result := Self;
+end;
+
+function Println(Self: integer): integer; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: int64): int64; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: real): real; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: char): char; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: boolean): boolean; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: BigInteger): BigInteger; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+function Println(Self: string): string; extensionmethod;
+begin
+  PABCSystem.Println(Self);
+  Result := Self;
+end;
+
+
+//------------------------------------------------------------------------------
+//>>     Методы расширения последовательностей # Extension methods for sequence of T
 //------------------------------------------------------------------------------
 /// Выводит последовательность на экран, используя delim в качестве разделителя
 function Print<T>(Self: sequence of T; delim: string): sequence of T; extensionmethod;
 begin
   var g := Self.GetEnumerator();
   if g.MoveNext() then
-    write(g.Current);
-  while g.MoveNext() do
-    if delim<>'' then
-      write(delim, g.Current)
-    else write(g.Current);
-  Result := Self;  
+  begin  
+    Write(g.Current);
+    while g.MoveNext() do
+      if delim <> '' then
+        Write(delim, g.Current)
+      else Write(g.Current);
+  end;  
+  Result := Self; 
 end;
 
 /// Выводит последовательность на экран, используя пробел в качестве разделителя
 function Print<T>(Self: sequence of T): sequence of T; extensionmethod;
 begin
-  if typeof(T)=typeof(char) then 
+  if typeof(T) = typeof(char) then 
     Result := Self.Print('')
   else  
     Result := Self.Print(PrintDelimDefault);  
@@ -8183,7 +8729,7 @@ end;
 /// Выводит последовательность на экран, используя пробел качестве разделителя, и переходит на новую строку
 function Println<T>(Self: sequence of T): sequence of T; extensionmethod;
 begin
-  if typeof(T)=typeof(char) then 
+  if typeof(T) = typeof(char) then 
     Result := Self.Println('')
   else  
     Result := Self.Println(PrintDelimDefault);  
@@ -8192,7 +8738,21 @@ end;
 /// Выводит последовательность строк в файл
 function WriteLines(Self: sequence of string; fname: string): sequence of string; extensionmethod;
 begin
-  WriteLines(fname,Self);
+  WriteLines(fname, Self);
+  Result := Self
+end;
+
+/// Выводит последовательность, каждый элемент выводится на новой строке
+function PrintLines<T>(Self: sequence of T): sequence of T; extensionmethod;
+begin
+  Self.Println(NewLine);
+  Result := Self
+end;
+
+/// Выводит последовательность, каждый элемент отображается с помощью функции map и выводится на новой строке
+function PrintLines<T,T1>(Self: sequence of T; map: T->T1): sequence of T; extensionmethod;
+begin
+  Self.Select(map).Println(NewLine);
   Result := Self
 end;
 
@@ -8202,9 +8762,11 @@ begin
   var g := Self.GetEnumerator();
   var sb := new System.Text.StringBuilder('');
   if g.MoveNext() then
+  begin
     sb.Append(g.Current.ToString());
-  while g.MoveNext() do 
-    sb.Append(delim + g.Current.ToString());
+    while g.MoveNext() do 
+      sb.Append(delim + g.Current.ToString());
+  end;  
   Result := sb.ToString;  
 end;
 
@@ -8229,9 +8791,25 @@ begin
   var i := 0;
   foreach x: T in Self do
   begin
-    action(x,i);
+    action(x, i);
     i += 1;
   end;
+end;
+
+/// Возвращает произведение элементов последовательности
+function Product(Self: sequence of real): real; extensionmethod;
+begin
+  Result := 1.0;
+  foreach var x in Self do
+    Result *= x;
+end;
+
+/// Возвращает произведение элементов последовательности
+function Product(Self: sequence of integer): integer; extensionmethod;
+begin
+  Result := 1;
+  foreach var x in Self do
+    Result *= x;
 end;
 
 /// Возвращает отсортированную по возрастанию последовательность
@@ -8242,6 +8820,18 @@ end;
 
 /// Возвращает отсортированную по убыванию последовательность
 function SortedDescending<T>(Self: sequence of T): sequence of T; extensionmethod;
+begin
+  Result := Self.OrderByDescending(x -> x);
+end;
+
+/// Возвращает отсортированную по возрастанию последовательность
+function Order<T>(Self: sequence of T): sequence of T; extensionmethod;
+begin
+  Result := Self.OrderBy(x -> x);
+end;
+
+/// Возвращает отсортированную по убыванию последовательность
+function OrderDescending<T>(Self: sequence of T): sequence of T; extensionmethod;
 begin
   Result := Self.OrderByDescending(x -> x);
 end;
@@ -8268,159 +8858,209 @@ end;
 //   Partition, ZipTuple, UnZipTuple, Interleave, Numerate, Tabulate, Pairwise, Batch 
 
 /// Возвращает первый элемент последовательности с минимальным значением ключа
-function MinBy<T, TKey>(Self: sequence of T; selector: T -> TKey): T; extensionmethod;
+function MinBy<T, TKey>(Self: sequence of T; selector: T->TKey): T; extensionmethod;
 begin
   if selector = nil then
     raise new ArgumentNullException('selector');
-  if not Self.Any() then
-    raise new InvalidOperationException('Empty sequence');
-
+  
   var comp := Comparer&<TKey>.Default;
-  Result := Self.Aggregate((min,x)-> comp.Compare(selector(x),selector(min))<0 ? x : min);
+  Result := Self.Aggregate((min, x)-> comp.Compare(selector(x), selector(min)) < 0 ? x : min);
 end;
 
 /// Возвращает первый элемент последовательности с максимальным значением ключа
-function MaxBy<T, TKey>(Self: sequence of T; selector: T -> TKey): T; extensionmethod;
+function MaxBy<T, TKey>(Self: sequence of T; selector: T->TKey): T; extensionmethod;
 begin
   if selector = nil then
     raise new ArgumentNullException('selector');
-  if not Self.Any() then
-    raise new InvalidOperationException('Empty sequence');
- 
+  
   var comp := Comparer&<TKey>.Default;
-  Result := Self.Aggregate((max,x)-> comp.Compare(selector(x),selector(max))>0 ? x : max);
+  Result := Self.Aggregate((max, x)-> comp.Compare(selector(x), selector(max)) > 0 ? x : max);
 end;
 
 /// Возвращает последний элемент последовательности с минимальным значением ключа
-function LastMinBy<T, TKey>(Self: sequence of T; selector: T -> TKey): T; extensionmethod;
+function LastMinBy<T, TKey>(Self: sequence of T; selector: T->TKey): T; extensionmethod;
 begin
   if selector = nil then
     raise new ArgumentNullException('selector');
-  if not Self.Any() then
-    raise new InvalidOperationException('Empty sequence');
-
+  
   var comp := Comparer&<TKey>.Default;
-  Result := Self.Aggregate((min,x)-> comp.Compare(selector(x),selector(min))<=0 ? x : min);
+  Result := Self.Aggregate((min, x)-> comp.Compare(selector(x), selector(min)) <= 0 ? x : min);
 end;
 
 /// Возвращает последний элемент последовательности с максимальным значением ключа
-function LastMaxBy<T, TKey>(Self: sequence of T; selector: T -> TKey): T; extensionmethod;
+function LastMaxBy<T, TKey>(Self: sequence of T; selector: T->TKey): T; extensionmethod;
 begin
   if selector = nil then
     raise new ArgumentNullException('selector');
-  if not Self.Any() then
-    raise new InvalidOperationException('Empty sequence');
- 
+  
   var comp := Comparer&<TKey>.Default;
-  Result := Self.Aggregate((max,x)-> comp.Compare(selector(x),selector(max))>=0 ? x : max);
+  Result := Self.Aggregate((max, x)-> comp.Compare(selector(x), selector(max)) >= 0 ? x : max);
 end;
 
 /// Возвращает последние count элементов последовательности
 function TakeLast<T>(Self: sequence of T; count: integer): sequence of T; extensionmethod;
 begin
-  Result := Self.Reverse.Take(count).Reverse;
+  if count < 0 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_EQUAL_0));
+  if Self is IList<T> then
+  begin
+    var lst := Self as IList<T>;
+    var ind := lst.Count - count;
+    if ind<0 then ind := 0;
+    for var i:=ind to lst.Count-1 do
+      yield lst[i];
+    exit;  
+  end;
+  
+  var buf := new List<T>;
+  var p := 0;
+  
+  foreach var x in Self do
+    if buf.Count<count then
+      buf.Add(x)
+    else
+    begin
+      buf[p] := x;
+      p := (p+1) mod count;      
+    end;
+  
+  for var i:=0 to buf.Count do
+  begin
+    yield buf[p];    
+    p := (p+1) mod count;      
+  end;  
 end;
+
+{function TakeLast<T>(Self: sequence of T; count: integer): sequence of T; extensionmethod;
+begin
+  Result := Self.Reverse.Take(count).Reverse;
+end;}
 
 /// Возвращает последовательность без последних count элементов 
-function SkipLast<T>(self: sequence of T; count: integer := 1): sequence of T; extensionmethod;
+function SkipLast<T>(Self: sequence of T; count: integer): sequence of T; extensionmethod;
+begin
+  if count < 0 then
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_EQUAL_0));
+  if Self is IList<T> then
+  begin
+    var lst := Self as IList<T>;
+    for var i:=0 to lst.Count - count - 1 do
+      yield lst[i];
+    exit;  
+  end;
+
+  var buf := new List<T>(count);
+  var p := 0;
+  
+  foreach var x in Self do
+    if buf.Count<count then
+      buf.Add(x)
+    else
+    begin
+      yield buf[p];    
+      buf[p] := x;
+      p := (p+1) mod count;      
+    end;
+end;
+
+function SkipLast<T>(Self: sequence of T): sequence of T; extensionmethod := 
+  Self.SkipLast(1);
+
+{function SkipLast<T>(self: sequence of T; count: integer := 1): sequence of T; extensionmethod;
 begin
   Result := Self.Reverse.Skip(count).Reverse;
-end;
+end;}
 
 /// Декартово произведение последовательностей
-function Cartesian<T,T1>(Self: sequence of T; b: sequence of T1): sequence of (T,T1); extensionmethod;
+function Cartesian<T, T1>(Self: sequence of T; b: sequence of T1): sequence of (T, T1); extensionmethod;
 begin
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-
-  foreach var x in Self do
-  foreach var y in b do
-    yield (x,y)
   
-  //Result := Self.Select(x->b.Select(y->(x,y))).SelectMany(x->x);
+  foreach var x in Self do
+    foreach var y in b do
+      yield (x, y)
 end;
 
 /// Декартово произведение последовательностей
-function Cartesian<T,T1,T2>(Self: sequence of T; b: sequence of T1; func: (T,T1)->T2): sequence of T2; extensionmethod;
+function Cartesian<T, T1, T2>(Self: sequence of T; b: sequence of T1; func: (T,T1)->T2): sequence of T2; extensionmethod;
 begin
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-
+  
   foreach var x in Self do
-  foreach var y in b do
-    yield func(x,y)
-
-//  Result := Self.Select(x->b.Select(y->(x,y))).SelectMany(x->x).Select(x->func(x[0],x[1]));
+    foreach var y in b do
+      yield func(x, y)
 end;
 
-/// Разбивает последовательности на две в позиции ind
-function SplitAt<T>(Self: sequence of T; ind: integer): (sequence of T,sequence of T); extensionmethod;
+/// Разбивает последовательность на две в позиции ind. Реализуется двухпроходным алгоритмом
+function SplitAt<T>(Self: sequence of T; ind: integer): (sequence of T, sequence of T); extensionmethod;
 begin
-  Result := (Self.Take(ind),Self.Skip(ind));
+  Result := (Self.Take(ind), Self.Skip(ind));
 end;
 
 // ToDo: то же для TakeWhile
 
 // ToDo: SequenceCompare
 
-/// Разделяет последовательности на две по заданному условию
-function Partition<T>(Self: sequence of T; cond: T->boolean): (sequence of T,sequence of T); extensionmethod;
+/// Разделяет последовательность на две по заданному условию. Реализуется двухпроходным алгоритмом
+function Partition<T>(Self: sequence of T; cond: T->boolean): (sequence of T, sequence of T); extensionmethod;
 begin
-  Result := (Self.Where(cond),Self.Where(x->not cond(x)));
+  Result := (Self.Where(cond), Self.Where(x -> not cond(x)));
 end;
 
-/// Разделяет последовательности на две по заданному условию, в котором участвует индекс
-function Partition<T>(Self: sequence of T; cond: (T,integer)->boolean): (sequence of T,sequence of T); extensionmethod;
+/// Разделяет последовательность на две по заданному условию, в котором участвует индекс. Реализуется двухпроходным алгоритмом
+function Partition<T>(Self: sequence of T; cond: (T,integer)->boolean): (sequence of T, sequence of T); extensionmethod;
 begin
-  Result := (Self.Where(cond),Self.Where((x,i)->not cond(x,i)));
+  Result := (Self.Where(cond), Self.Where((x, i) -> not cond(x, i)));
 end;
 
 /// Объединяет две последовательности в последовательность двухэлементных кортежей
-function ZipTuple<T,T1>(Self: sequence of T; a: sequence of T1): sequence of (T,T1); extensionmethod;
+function ZipTuple<T, T1>(Self: sequence of T; a: sequence of T1): sequence of (T, T1); extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  Result := Self.Zip(a,(x,y)->(x,y));
+  Result := Self.Zip(a, (x, y) -> (x, y));
 end;
 
 /// Объединяет три последовательности в последовательность трехэлементных кортежей
-function ZipTuple<T,T1,T2>(Self: sequence of T; a: sequence of T1; b: sequence of T2): sequence of (T,T1,T2); extensionmethod;
+function ZipTuple<T, T1, T2>(Self: sequence of T; a: sequence of T1; b: sequence of T2): sequence of (T, T1, T2); extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-  Result := Self.Zip(a,(x,y)->(x,y)).Zip(b,(p,z)->(p[0],p[1],z));
+  Result := Self.Zip(a, (x, y) -> (x, y)).Zip(b, (p, z) -> (p[0], p[1], z));
 end;
 
 /// Объединяет четыре последовательности в последовательность четырехэлементных кортежей
-function ZipTuple<T,T1,T2,T3>(Self: sequence of T; a: sequence of T1; b: sequence of T2; c: sequence of T3): sequence of (T,T1,T2,T3); extensionmethod;
+function ZipTuple<T, T1, T2, T3>(Self: sequence of T; a: sequence of T1; b: sequence of T2; c: sequence of T3): sequence of (T, T1, T2, T3); extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-  if c=nil then
+  if c = nil then
     raise new System.ArgumentNullException('c');
-  Result := Self.Zip(a,(x,y)->(x,y)).Zip(b,(p,z)->(p[0],p[1],z)).Zip(c,(p,z)->(p[0],p[1],p[2],z));
+  Result := Self.Zip(a, (x, y)-> (x, y)).Zip(b, (p, z)-> (p[0], p[1], z)).Zip(c, (p, z)-> (p[0], p[1], p[2], z));
 end;
 
-/// Разъединяет последовательность двухэлементных кортежей на две последовательности
-function UnZipTuple<T,T1>(Self: sequence of (T,T1)): (sequence of T,sequence of T1); extensionmethod;
+/// Разъединяет последовательность двухэлементных кортежей на две последовательности. Реализуется двухпроходным алгоритмом
+function UnZipTuple<T, T1>(Self: sequence of (T, T1)): (sequence of T, sequence of T1); extensionmethod;
 begin
-  Result := (Self.Select(x->x[0]),Self.Select(x->x[1]))
+  Result := (Self.Select(x -> x[0]), Self.Select(x -> x[1]))
 end;
 
-/// Разъединяет последовательность трехэлементных кортежей на три последовательности
-function UnZipTuple<T,T1,T2>(Self: sequence of (T,T1,T2)): (sequence of T,sequence of T1,sequence of T2); extensionmethod;
+/// Разъединяет последовательность трехэлементных кортежей на три последовательности. Реализуется многопроходным алгоритмом
+function UnZipTuple<T, T1, T2>(Self: sequence of (T, T1, T2)): (sequence of T, sequence of T1, sequence of T2); extensionmethod;
 begin
-  Result := (Self.Select(x->x[0]),Self.Select(x->x[1]),Self.Select(x->x[2]))
+  Result := (Self.Select(x -> x[0]), Self.Select(x -> x[1]), Self.Select(x -> x[2]))
 end;
 
-/// Разъединяет последовательность четырехэлементных кортежей на четыре последовательности
-function UnZipTuple<T,T1,T2,T3>(Self: sequence of (T,T1,T2,T3)): (sequence of T,sequence of T1,sequence of T2,sequence of T3); extensionmethod;
+/// Разъединяет последовательность четырехэлементных кортежей на четыре последовательности. Реализуется многопроходным алгоритмом
+function UnZipTuple<T, T1, T2, T3>(Self: sequence of (T, T1, T2, T3)): (sequence of T, sequence of T1, sequence of T2, sequence of T3); extensionmethod;
 begin
-  Result := (Self.Select(x->x[0]),Self.Select(x->x[1]),Self.Select(x->x[2]),Self.Select(x->x[3]))
+  Result := (Self.Select(x -> x[0]), Self.Select(x -> x[1]), Self.Select(x -> x[2]), Self.Select(x -> x[3]))
 end;
 
 // ToDo - сделать UnZipTuple с функцией-проекцией
@@ -8428,133 +9068,143 @@ end;
 /// Чередует элементы двух последовательностей
 function Interleave<T>(Self: sequence of T; a: sequence of T): sequence of T; extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  Result := Self.ZipTuple(a).SelectMany(x->Seq(x[0],x[1]))
+  Result := Self.ZipTuple(a).SelectMany(x -> Seq(x[0], x[1]))
 end;
 
 /// Чередует элементы трех последовательностей
-function Interleave<T>(Self: sequence of T; a,b: sequence of T): sequence of T; extensionmethod;
+function Interleave<T>(Self: sequence of T; a, b: sequence of T): sequence of T; extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-  Result := Self.ZipTuple(a,b).SelectMany(x->Seq(x[0],x[1],x[2]))
+  Result := Self.ZipTuple(a, b).SelectMany(x -> Seq(x[0], x[1], x[2]))
 end;
 
 /// Чередует элементы четырех последовательностей
-function Interleave<T>(Self: sequence of T; a,b,c: sequence of T): sequence of T; extensionmethod;
+function Interleave<T>(Self: sequence of T; a, b, c: sequence of T): sequence of T; extensionmethod;
 begin
-  if a=nil then
+  if a = nil then
     raise new System.ArgumentNullException('a');
-  if b=nil then
+  if b = nil then
     raise new System.ArgumentNullException('b');
-  if c=nil then
+  if c = nil then
     raise new System.ArgumentNullException('c');
-  Result := Self.ZipTuple(a,b,c).SelectMany(x->Seq(x[0],x[1],x[2],x[3]))
+  Result := Self.ZipTuple(a, b, c).SelectMany(x -> Seq(x[0], x[1], x[2], x[3]))
 end;
 
 /// Нумерует последовательность с единицы
-function Numerate<T>(Self: sequence of T): sequence of (integer,T); extensionmethod;
+function Numerate<T>(Self: sequence of T): sequence of (integer, T); extensionmethod;
 begin
-  Result := 1.Step.ZipTuple(Self);
+  var i := 1;
+  foreach var x in Self do
+  begin
+    yield (i,x);
+    i += 1;
+  end;  
 end;
 
 /// Нумерует последовательность с номера from
-function Numerate<T>(Self: sequence of T; from: integer): sequence of (integer,T); extensionmethod;
+function Numerate<T>(Self: sequence of T; from: integer): sequence of (integer, T); extensionmethod;
 begin
-  Result := from.Step.ZipTuple(Self);
+  var i := from;
+  foreach var x in Self do
+  begin
+    yield (i,x);
+    i += 1;
+  end;  
 end;
 
 /// Табулирует функцию последовательностью
-function Tabulate<T,T1>(Self: sequence of T; F: T->T1): sequence of (T,T1); extensionmethod;
+function Tabulate<T, T1>(Self: sequence of T; F: T->T1): sequence of (T, T1); extensionmethod;
 begin
-  Result := Self.Select(x->(x,f(x)));
+  Result := Self.Select(x -> (x, f(x)));
 end;
 
 /// Превращает последовательность в последовательность пар соседних элементов
-function Pairwise<T>(Self: sequence of T): sequence of (T,T); extensionmethod;
+function Pairwise<T>(Self: sequence of T): sequence of (T, T); extensionmethod;
 begin
   var previous: T;
   var it := Self.GetEnumerator();
   if (it.MoveNext()) then
-      previous := it.Current;
-
+    previous := it.Current;
+  
   while (it.MoveNext()) do
   begin
-    yield (previous,it.Current);
+    yield (previous, it.Current);
     previous := it.Current;
   end
 end;
 
 /// Превращает последовательность в последовательность пар соседних элементов, применяет func к каждой паре полученных элементов и получает новую последовательность 
-function Pairwise<T,Res>(Self: sequence of T; func:(T,T)->Res): sequence of Res; extensionmethod;
+function Pairwise<T, Res>(Self: sequence of T; func: (T,T)->Res): sequence of Res; extensionmethod;
 begin
   var previous: T;
   var it := Self.GetEnumerator();
   if (it.MoveNext()) then
-      previous := it.Current;
-
+    previous := it.Current;
+  
   while (it.MoveNext()) do
   begin
-    yield func(previous,it.Current);
+    yield func(previous, it.Current);
     previous := it.Current;
   end
-//  Result := Self.ZipTuple(Self.Skip(1)).Select(x->func(x[0],x[1]));
+  //  Result := Self.ZipTuple(Self.Skip(1)).Select(x->func(x[0],x[1]));
 end;
 
 /// Разбивает последовательность на серии длины size
 function Batch<T>(Self: sequence of T; size: integer): sequence of sequence of T; extensionmethod;
 begin
-  Result := SeqWhile(Self,v->v.Skip(size),v->v.Count>0).Select(v->v.Take(size))
+  Result := SeqWhile(Self, v -> v.Skip(size), v -> v.Count > 0).Select(v -> v.Take(size))
 end;
 
 /// Разбивает последовательность на серии длины size и применяет проекцию к каждой серии
-function Batch<T,Res>(Self: sequence of T; size: integer; proj: Func<IEnumerable<T>,Res>): sequence of Res; extensionmethod;
+function Batch<T, Res>(Self: sequence of T; size: integer; proj: Func<IEnumerable<T>, Res>): sequence of Res; extensionmethod;
 begin
-  Result := SeqWhile(Self,v->v.Skip(size),v->v.Count>0).Select(v->v.Take(size)).Select(ss->proj(ss));
+  Result := SeqWhile(Self, v -> v.Skip(size), v -> v.Count > 0).Select(v -> v.Take(size)).Select(ss -> proj(ss));
 end;
 
 ///--
-function SliceSeqImpl<T>(Self: sequence of T; from,step,count: integer): sequence of T;
+function SliceSeqImpl<T>(Self: sequence of T; from, step, count: integer): sequence of T;
 begin
   if step <= 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_GREATER_0));
-
+  
   if from < 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
-  Result := Self.Skip(from).Where((x,i)->i mod step = 0)
+  
+  Result := Self.Skip(from).Where((x, i)-> i mod step = 0)
 end;
 
 /// Возвращает срез последовательности от номера from с шагом step > 0
-function Slice<T>(Self: sequence of T; from,step: integer): sequence of T; extensionmethod;
+function Slice<T>(Self: sequence of T; from, step: integer): sequence of T; extensionmethod;
 begin
   if step <= 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_GREATER_0));
-
+  
   if from < 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
-  Result := Self.Skip(from).Where((x,i)->i mod step = 0)
+  
+  Result := Self.Skip(from).Where((x, i)-> i mod step = 0)
 end;
 
 /// Возвращает срез последовательности от номера from с шагом step > 0 длины не более count
-function Slice<T>(Self: sequence of T; from,step,count: integer): sequence of T; extensionmethod;
+function Slice<T>(Self: sequence of T; from, step, count: integer): sequence of T; extensionmethod;
 begin
   if step <= 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_GREATER_0));
-
+  
   if from < 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
-  Result := Self.Skip(from).Where((x,i)->i mod step = 0).Take(count)
+  
+  Result := Self.Skip(from).Where((x, i)-> i mod step = 0).Take(count)
 end;
 
 // Дополнения июль 2016: Incremental
 ///--
-{function IncrementalSeq(Self: sequence of integer): sequence of integer; 
+function IncrementalSeq(Self: sequence of integer): sequence of integer; 
 begin
   var iter := Self.GetEnumerator();
   if iter.MoveNext() then
@@ -8631,10 +9281,10 @@ end;
 function Incremental(Self: LinkedList<real>): sequence of real; extensionmethod;
 begin
   Result := IncrementalSeq(Self);
-end;}
+end;
 
 /// Возвращает последовательность разностей соседних элементов исходной последовательности. В качестве функции разности используется func
-function Incremental<T,T1>(Self: sequence of T; func: (T,T)->T1): sequence of T1; extensionmethod;
+function Incremental<T, T1>(Self: sequence of T; func: (T,T)->T1): sequence of T1; extensionmethod;
 begin
   var iter := Self.GetEnumerator();
   if iter.MoveNext() then
@@ -8643,14 +9293,14 @@ begin
     while iter.MoveNext() do
     begin
       var nextItem := iter.Current;
-      yield func(prevItem,nextItem);
+      yield func(prevItem, nextItem);
       prevItem := nextItem;
     end
   end
 end;
 
 /// Возвращает последовательность разностей соседних элементов исходной последовательности. В качестве функции разности используется func
-function Incremental<T,T1>(Self: sequence of T; func: (T,T,integer)->T1): sequence of T1; extensionmethod;
+function Incremental<T, T1>(Self: sequence of T; func: (T,T,integer)->T1): sequence of T1; extensionmethod;
 begin
   var iter := Self.GetEnumerator();
   if iter.MoveNext() then
@@ -8661,37 +9311,228 @@ begin
     begin
       var nextItem := iter.Current;
       ind += 1;
-      yield func(prevItem,nextItem,ind);
+      yield func(prevItem, nextItem, ind);
       prevItem := nextItem;
     end
   end
 end;
 
+/// Группирует одинаковые подряд идущие элементы, получая последовательность массивов 
+function AdjacentGroup<T>(Self: sequence of T): sequence of array of T; extensionmethod;
+begin
+  var c := new AdjGroupClass<T>(Self);
+  while c.fin do
+    yield c.TakeGroup().ToArray;
+end;
+
+// ToDo Сделать AdjacentGroup с функцией сравнения
+
 // -----------------------------------------------------
-//>>     Методы расширения типа List<T> # Extension methods for List T
+//>>     Методы расширения списков # Extension methods for List T
 // -----------------------------------------------------
 
 /// Перемешивает элементы списка случайным образом
 function Shuffle<T>(Self: List<T>): List<T>; extensionmethod;
 begin
   var n := Self.Count;
-	for var i:=0 to n-1 do
-	begin
-	  var r := PABCSystem.Random(n);
+  for var i := 0 to n - 1 do
+  begin
+    var r := PABCSystem.Random(n);
     var v := Self[i];
     Self[i] := Self[r];
     Self[r] := v;
   end;
-	Result := Self;  
+  Result := Self;  
+end;
+
+/// Находит первую пару подряд идущих одинаковых элементов и возвращает индекс первого элемента пары. Если не найден, возвращается -1
+function AdjacentFind<T>(Self: IList<T>; start: integer := 0): integer; extensionmethod;
+begin
+  Result := -1;
+  for var i := start to Self.Count - 2 do
+    if Self[i] = Self[i + 1] then 
+    begin
+      Result := i;
+      exit;
+    end;
+end;
+
+/// Находит первую пару подряд идущих одинаковых элементов, используя функцию сравнения eq, и возвращает индекс первого элемента пары. Если не найден, возвращается -1
+function AdjacentFind<T>(Self: IList<T>; eq: (T,T)->boolean; start: integer := 0): integer; extensionmethod;
+begin
+  Result := -1;
+  for var i := start to Self.Count - 2 do
+    if eq(Self[i], Self[i + 1]) then 
+    begin
+      Result := i;
+      exit;
+    end;
+end;
+
+/// Возвращает индекс первого минимального элемента начиная с позиции index
+function IndexMin<T>(Self: List<T>; index: integer := 0): integer; extensionmethod; where T: IComparable<T>;
+begin
+  var min := Self[index];
+  Result := index;
+  for var i := index + 1 to Self.Count - 1 do
+    if Self[i].CompareTo(min) < 0 then 
+    begin
+      Result := i;
+      min := Self[i];
+    end;
+end;
+
+/// Возвращает индекс первого максимального элемента начиная с позиции index
+function IndexMax<T>(Self: List<T>; index: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var max := Self[index];
+  Result := index;
+  for var i := index + 1 to Self.Count - 1 do
+    if Self[i].CompareTo(max) > 0 then 
+    begin
+      Result := i;
+      max := Self[i];
+    end;
+end;
+
+/// Возвращает индекс первого минимального элемента начиная с позиции index
+function IndexMin<T>(Self: array of T; index: integer := 0): integer; extensionmethod; where T: IComparable<T>;
+begin
+  var min := Self[index];
+  Result := index;
+  for var i := index + 1 to Self.Count - 1 do
+    if Self[i].CompareTo(min) < 0 then 
+    begin
+      Result := i;
+      min := Self[i];
+    end;
+end;
+
+/// Возвращает индекс первого максимального элемента начиная с позиции index
+function IndexMax<T>(Self: array of T; index: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var max := Self[index];
+  Result := index;
+  for var i := index + 1 to Self.Count - 1 do
+    if Self[i].CompareTo(max) > 0 then 
+    begin
+      Result := i;
+      max := Self[i];
+    end;
+end;
+
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index-1] 
+function LastIndexMin<T>(Self: List<T>; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var min := Self[index];
+  Result := index;
+  for var i := index - 1 downto 0 do
+    if Self[i].CompareTo(min) < 0 then 
+    begin
+      Result := i;
+      min := Self[i];
+    end;
+end;
+
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index-1] 
+function LastIndexMin<T>(Self: array of T; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var min := Self[index];
+  Result := index;
+  for var i := index - 1 downto 0 do
+    if Self[i].CompareTo(min) < 0 then 
+    begin
+      Result := i;
+      min := Self[i];
+    end;
+end;
+
+/// Возвращает индекс последнего минимального элемента
+function LastIndexMin<T>(Self: List<T>): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  Result := Self.LastIndexMin(Self.Count - 1);
+end;  
+
+/// Возвращает индекс последнего минимального элемента
+function LastIndexMin<T>(Self: array of T): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  Result := Self.LastIndexMin(Self.Length - 1);
+end;  
+
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index-1]
+function LastIndexMax<T>(Self: List<T>; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var max := Self[index];
+  Result := index;
+  for var i := index - 1 downto 0 do
+    if Self[i].CompareTo(max) > 0 then 
+    begin
+      Result := i;
+      max := Self[i];
+    end;
+end;
+
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index-1]
+function LastIndexMax<T>(Self: array of T; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  var max := Self[index];
+  Result := index;
+  for var i := index - 1 downto 0 do
+    if Self[i].CompareTo(max) > 0 then 
+    begin
+      Result := i;
+      max := Self[i];
+    end;
+end;
+
+/// Возвращает индекс последнего максимального элемента
+function LastIndexMax<T>(Self: List<T>): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  Result := Self.LastIndexMax(Self.Count - 1);
+end;  
+
+/// Возвращает индекс последнего максимального элемента
+function LastIndexMax<T>(Self: array of T): integer; extensionmethod; where T: System.IComparable<T>;
+begin
+  Result := Self.LastIndexMax(Self.Count - 1);
+end;  
+
+/// Заменяет в массиве или списке все вхождения одного значения на другое
+procedure Replace<T>(Self: IList<T>; oldValue, newValue: T); extensionmethod;
+begin
+  for var i := 0 to Self.Count - 1 do
+    if Self[i] = oldValue then
+      Self[i] := newValue;
+end;
+
+/// Преобразует элементы массива или списка по заданному правилу
+procedure Transform<T>(Self: IList<T>; f: T->T); extensionmethod;
+begin
+  for var i := 0 to Self.Count - 1 do
+    Self[i] := f(Self[i]);
+end;
+
+/// Преобразует элементы массива или списка по заданному правилу
+procedure Transform<T>(Self: IList<T>; f: (T,integer)->T); extensionmethod;
+begin
+  for var i := 0 to Self.Count - 1 do
+    Self[i] := f(Self[i],i);
+end;
+
+/// Заполняет элементы массива или списка значениями, вычисляемыми по некоторому правилу
+procedure Fill<T>(Self: IList<T>; f: integer->T); extensionmethod;
+begin
+  for var i := 0 to Self.Count - 1 do
+    Self[i] := f(i);
 end;
 
 ///-- 
-function CreateSliceFromListInternal<T>(Self: List<T>; from,step,count: integer): List<T>;
+function CreateSliceFromListInternal<T>(Self: List<T>; from, step, count: integer): List<T>;
 begin
   Result := new List<T>(count);
   
   var f := from;
-  for var i:=0 to count-1 do
+  loop count do
   begin
     Result.Add(Self[f]);
     f += step;
@@ -8699,40 +9540,40 @@ begin
 end;
 
 ///-- 
-procedure CorrectCountForSlice(Len,from,step: integer; var count: integer);
+procedure CorrectCountForSlice(Len, from, step: integer; var count: integer);
 begin
   if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
+  
   if count < 0 then
-    raise new ArgumentException(GetTranslation(PARAMETER_COUNT_MUST_BE_GREATER_0));
-
+    raise new System.ArgumentOutOfRangeException('count', count, GetTranslation(PARAMETER_MUST_BE_GREATER_EQUAL_0));
+  
   if (from < 0) or (from > Len - 1) then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
+  
   var cnt := step > 0 ? Len - from : from + 1; 
-  var cntstep := (cnt-1) div abs(step) + 1;
+  var cntstep := (cnt - 1) div abs(step) + 1;
   if count > cntstep then 
     count := cntstep;
 end;
 
 ///-- 
-function SliceListImpl<T>(Self: List<T>; from,step,count: integer): List<T>;
+function SliceListImpl<T>(Self: List<T>; from, step, count: integer): List<T>;
 begin
-  CorrectCountForSlice(Self.Count,from,step,count);
-  Result := CreateSliceFromListInternal(Self,from,step,count);
+  CorrectCountForSlice(Self.Count, from, step, count);
+  Result := CreateSliceFromListInternal(Self, from, step, count);
 end;
 
 /// Возвращает срез списка от индекса from с шагом step
-function Slice<T>(Self: List<T>; from,step: integer): List<T>; extensionmethod;
+function Slice<T>(Self: List<T>; from, step: integer): List<T>; extensionmethod;
 begin
-  Result := SliceListImpl(Self,from,step,integer.MaxValue);
+  Result := SliceListImpl(Self, from, step, integer.MaxValue);
 end;
 
 /// Возвращает срез списка от индекса from с шагом step длины не более count
-function Slice<T>(Self: List<T>; from,step,count: integer): List<T>; extensionmethod;
+function Slice<T>(Self: List<T>; from, step, count: integer): List<T>; extensionmethod;
 begin
-  Result := SliceListImpl(Self,from,step,count);
+  Result := SliceListImpl(Self, from, step, count);
 end;
 
 /// Удаляет последний элемент. Если элементов нет, генерирует исключение
@@ -8742,56 +9583,50 @@ begin
   Result := Self;
 end;
 
-procedure CorrectFromTo(situation: integer; Len: integer; var from,&to: integer; step: integer);
+procedure CorrectFromTo(situation: integer; Len: integer; var from, &to: integer; step: integer);
 begin
-  if step>0 then
+  if step > 0 then
   begin
     case situation of
-  1: from := 0;
-  2: &to := Len;
-  3: begin
-       from := 0;
-       &to := Len;
-     end;
+      1: from := 0;
+      2: &to := Len;
+      3: (from, &to) := (0, Len)
     end;  
   end
   else
   begin
     case situation of
-  1: from := Len - 1;
-  2: &to := -1;
-  3: begin
-       from := Len - 1;
-       &to := -1;
-     end;
+      1: from := Len - 1;
+      2: &to := -1;
+      3: (from, &to) := (Len - 1, -1);
     end;
   end;
 end;
 
 ///--
-function CorrectFromToAndCalcCountForSystemSliceQuestion(situation: integer; Len: integer; var from,&to: integer; step: integer): integer;
+function CorrectFromToAndCalcCountForSystemSliceQuestion(situation: integer; Len: integer; var from, &to: integer; step: integer): integer;
 begin
   if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
-  CorrectFromTo(situation,Len,from,&to,step);
-
-  if step>0 then
+  
+  CorrectFromTo(situation, Len, from, &to, step);
+  
+  if step > 0 then
   begin
-    if from<0 then
+    if from < 0 then
       from += (step - from - 1) div step * step;
     // from может оказаться > Len - 1
-    var m := min(Len,&to);
+    var m := Min(Len,&to);
     if from >= m then 
       Result := 0
-    else Result := (m - from - 1) div step + 1  
+    else Result := (m - from - 1) div step + 1
   end
   else
   begin
     if from > Len - 1 then
       from -= (from - Len - step) div step * step;
     // from может оказаться < 0   
-    var m := max(&to,-1);
+    var m := Max(&to,-1);
     if from <= m then
       Result := 0
     else Result := (from - m - 1) div (-step) + 1
@@ -8799,108 +9634,108 @@ begin
 end;
 
 ///--
-function CheckAndCorrectFromToAndCalcCountForSystemSlice(situation: integer; Len: integer; var from,&to: integer; step: integer): integer;
+function CheckAndCorrectFromToAndCalcCountForSystemSlice(situation: integer; Len: integer; var from, &to: integer; step: integer): integer;
 begin
-// situation = 0 - все параметры присутствуют
-// situation = 1 - from отсутствует
-// situation = 2 - to отсутствует
-// situation = 3 - from и to отсутствуют
+  // situation = 0 - все параметры присутствуют
+  // situation = 1 - from отсутствует
+  // situation = 2 - to отсутствует
+  // situation = 3 - from и to отсутствуют
   if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
-  if (situation=0) or (situation=2) then
+  
+  if (situation = 0) or (situation = 2) then
     if (from < 0) or (from > Len - 1) then
       raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
-  if (situation=0) or (situation=1) then
+  
+  if (situation = 0) or (situation = 1) then
     if (&to < -1) or (&to > Len) then
       raise new ArgumentException(GetTranslation(PARAMETER_TO_OUT_OF_RANGE));
-
-  CorrectFromTo(situation,Len,from,&to,step);
-
+  
+  CorrectFromTo(situation, Len, from, &to, step);
+  
   var count: integer;
   
-  if step>0 then
+  if step > 0 then
   begin
     var cnt := &to - from;
-    if cnt<=0 then 
+    if cnt <= 0 then 
       count := 0
-    else count := (cnt-1) div step + 1;
+    else count := (cnt - 1) div step + 1;
   end
   else
   begin
     var cnt := from - &to;
-    if cnt<=0 then 
+    if cnt <= 0 then 
       count := 0
-    else count := (cnt-1) div (-step) + 1;
+    else count := (cnt - 1) div (-step) + 1;
   end;
-
+  
   Result := count;
 end;
 
 ///--
-procedure CheckStepAndCorrectFromTo(situation: integer; Len: integer; var from,&to: integer; step: integer);
+procedure CheckStepAndCorrectFromTo(situation: integer; Len: integer; var from, &to: integer; step: integer);
 begin
-// situation = 0 - все параметры присутствуют
-// situation = 1 - from отсутствует
-// situation = 2 - to отсутствует
-// situation = 3 - from и to отсутствуют
+  // situation = 0 - все параметры присутствуют
+  // situation = 1 - from отсутствует
+  // situation = 2 - to отсутствует
+  // situation = 3 - from и to отсутствуют
   if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
+  
   {if (situation=0) or (situation=2) then
     if (from < 0) or (from > Len - 1) then
       raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
+  
   if (situation=0) or (situation=1) then
     if (&to < -1) or (&to > Len) then
       raise new ArgumentException(GetTranslation(PARAMETER_TO_OUT_OF_RANGE));}
-
-  CorrectFromTo(situation,Len,from,&to,step);
-end;
-
-///-- 
-function SystemSliceListImpl<T>(Self: List<T>; situation: integer; from,&to: integer; step: integer := 1): List<T>;
-begin
-  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation,Self.Count,from,&to,step);
-
-  Result := CreateSliceFromListInternal(Self,from,step,count);
-end;
-
-///--
-function SystemSlice<T>(Self: List<T>; situation: integer; from,&to: integer): List<T>; extensionmethod;
-begin
-  Result := SystemSliceListImpl(Self,situation,from,&to,1);
-end;
-
-///--
-function SystemSlice<T>(Self: List<T>; situation: integer; from,&to,step: integer): List<T>; extensionmethod;
-begin
-  Result := SystemSliceListImpl(Self,situation,from,&to,step);
-end;
-
-///-- 
-function SystemSliceListImplQuestion<T>(Self: List<T>; situation: integer; from,&to: integer; step: integer := 1): List<T>;
-begin
-  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation,Self.Count,from,&to,step);
   
-  Result := CreateSliceFromListInternal(Self,from,step,count);
+  CorrectFromTo(situation, Len, from, &to, step);
+end;
+
+///-- 
+function SystemSliceListImpl<T>(Self: List<T>; situation: integer; from, &to: integer; step: integer := 1): List<T>;
+begin
+  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation, Self.Count, from, &to, step);
+  
+  Result := CreateSliceFromListInternal(Self, from, step, count);
 end;
 
 ///--
-function SystemSliceQuestion<T>(Self: List<T>; situation: integer; from,&to: integer): List<T>; extensionmethod;
+function SystemSlice<T>(Self: List<T>; situation: integer; from, &to: integer): List<T>; extensionmethod;
 begin
-  Result := SystemSliceListImplQuestion(Self,situation,from,&to,1);
+  Result := SystemSliceListImpl(Self, situation, from, &to, 1);
 end;
 
 ///--
-function SystemSliceQuestion<T>(Self: List<T>; situation: integer; from,&to,step: integer): List<T>; extensionmethod;
+function SystemSlice<T>(Self: List<T>; situation: integer; from, &to, step: integer): List<T>; extensionmethod;
 begin
-  Result := SystemSliceListImplQuestion(Self,situation,from,&to,step);
+  Result := SystemSliceListImpl(Self, situation, from, &to, step);
+end;
+
+///-- 
+function SystemSliceListImplQuestion<T>(Self: List<T>; situation: integer; from, &to: integer; step: integer := 1): List<T>;
+begin
+  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation, Self.Count, from, &to, step);
+  
+  Result := CreateSliceFromListInternal(Self, from, step, count);
+end;
+
+///--
+function SystemSliceQuestion<T>(Self: List<T>; situation: integer; from, &to: integer): List<T>; extensionmethod;
+begin
+  Result := SystemSliceListImplQuestion(Self, situation, from, &to, 1);
+end;
+
+///--
+function SystemSliceQuestion<T>(Self: List<T>; situation: integer; from, &to, step: integer): List<T>; extensionmethod;
+begin
+  Result := SystemSliceListImplQuestion(Self, situation, from, &to, step);
 end;
 
 // -----------------------------------------------------
-//>>     Методы расширения типа array [,] of T # Extension methods for array [,] of T
+//>>     Методы расширения двумерных динамических массивов # Extension methods for array [,] of T
 // -----------------------------------------------------
 /// Количество строк в двумерном массиве
 function RowCount<T>(Self: array [,] of T): integer; extensionmethod;
@@ -8917,43 +9752,47 @@ end;
 /// Вывод двумерного массива, w - ширина поля вывода
 function Print<T>(Self: array [,] of T; w: integer := 4): array [,] of T; extensionmethod;
 begin
-	for var i:=0 to Self.RowCount-1 do
-	begin
-    for var j:=0 to Self.ColCount-1 do
+  for var i := 0 to Self.RowCount - 1 do
+  begin
+    for var j := 0 to Self.ColCount - 1 do
     begin
-      var elem := Self[i,j];
-      var s := StructuredObjectToString(elem);
-      Write(s.PadLeft(w));
+      if PrintMatrixWithFormat then
+        Write(StructuredObjectToString(Self[i, j]).PadLeft(w))
+      else Print(Self[i, j]);
     end;
     Writeln;  
   end;
-	Result := Self;  
+  Result := Self;  
 end;
 
 /// Вывод двумерного вещественного массива по формату :w:f
 function Print(Self: array [,] of real; w: integer := 7; f: integer := 2): array [,] of real; extensionmethod;
 begin
-	for var i:=0 to Self.RowCount-1 do
-	begin
-    for var j:=0 to Self.ColCount-1 do
-      Write(FormatValue(Self[i,j],w,f));
+  for var i := 0 to Self.RowCount - 1 do
+  begin
+    for var j := 0 to Self.ColCount - 1 do
+    begin
+      if PrintMatrixWithFormat then
+        Write(FormatValue(Self[i, j], w, f))
+      else Print(Self[i, j]);
+    end;  
     Writeln;  
   end;
-	Result := Self;  
+  Result := Self;  
 end;
 
 /// Вывод двумерного массива и переход на следующую строку, w - ширина поля вывода
 function Println<T>(Self: array [,] of T; w: integer := 4): array [,] of T; extensionmethod;
 begin
   Self.Print(w);
-	Result := Self;  
+  Result := Self;  
 end;
 
 /// Вывод двумерного вещественного массива по формату :w:f и переход на следующую строку 
 function Println(Self: array [,] of real; w: integer := 7; f: integer := 2): array [,] of real; extensionmethod;
 begin
-  Self.Print(w,f);
-	Result := Self;  
+  Self.Print(w, f);
+  Result := Self;  
 end;
 
 /// k-тая строка двумерного массива
@@ -8961,8 +9800,8 @@ function Row<T>(Self: array [,] of T; k: integer): array of T; extensionmethod;
 begin
   var n := Self.ColCount;
   var res := new T[n];
-  for var j:=0 to n-1 do
-    res[j] := Self[k,j];
+  for var j := 0 to n - 1 do
+    res[j] := Self[k, j];
   Result := res;
 end;
 
@@ -8971,229 +9810,311 @@ function Col<T>(Self: array [,] of T; k: integer): array of T; extensionmethod;
 begin
   var m := Self.RowCount;
   var res := new T[m];
-  for var i:=0 to m-1 do
-    res[i] := Self[i,k];
+  for var i := 0 to m - 1 do
+    res[i] := Self[i, k];
   Result := res;
 end;
 
 /// k-тая строка двумерного массива как последовательность
 function RowSeq<T>(Self: array [,] of T; k: integer): sequence of T; extensionmethod;
 begin
-  for var j:=0 to Self.ColCount-1 do
-    yield Self[k,j];
+  for var j := 0 to Self.ColCount - 1 do
+    yield Self[k, j];
 end;
 
 /// k-тый столбец двумерного массива как последовательность
 function ColSeq<T>(Self: array [,] of T; k: integer): sequence of T; extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-    yield Self[i,k];
+  for var i := 0 to Self.RowCount - 1 do
+    yield Self[i, k];
 end;
 
 /// Возвращает последовательность строк двумерного массива 
 function Rows<T>(Self: array [,] of T): sequence of sequence of T; extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
+  for var i := 0 to Self.RowCount - 1 do
     yield Self.RowSeq(i);
 end;
 
 /// Возвращает последовательность столбцов двумерного массива 
 function Cols<T>(Self: array [,] of T): sequence of sequence of T; extensionmethod;
 begin
-  for var j:=0 to Self.ColCount-1 do
+  for var j := 0 to Self.ColCount - 1 do
     yield Self.ColSeq(j);
 end;
 
 /// Меняет местами две строки двумерного массива с номерами k1 и k2
-procedure SwapRows<T>(Self: array [,] of T; k1,k2: integer); extensionmethod;
+procedure SwapRows<T>(Self: array [,] of T; k1, k2: integer); extensionmethod;
 begin
-  for var j:=0 to Self.ColCount-1 do
-    Swap(Self[k1,j],Self[k2,j])
+  for var j := 0 to Self.ColCount - 1 do
+    Swap(Self[k1, j], Self[k2, j])
 end;
 
 /// Меняет местами два столбца двумерного массива с номерами k1 и k2
-procedure SwapCols<T>(Self: array [,] of T; k1,k2: integer); extensionmethod;
+procedure SwapCols<T>(Self: array [,] of T; k1, k2: integer); extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-    Swap(Self[i,k1],Self[i,k2])
+  for var i := 0 to Self.RowCount - 1 do
+    Swap(Self[i, k1], Self[i, k2])
 end;
 
 /// Меняет строку k двумерного массива на другую строку
 procedure SetRow<T>(Self: array [,] of T; k: integer; a: array of T); extensionmethod;
 begin
-  if a.Length<>Self.ColCount then
+  if a.Length <> Self.ColCount then
     raise new System.ArgumentException(GetTranslation(ARR_LENGTH_MUST_BE_MATCH_TO_MATR_SIZE));
-  for var j:=0 to Self.ColCount-1 do
-    Self[k,j] := a[j]
+  for var j := 0 to Self.ColCount - 1 do
+    Self[k, j] := a[j]
 end;
+
+/// Меняет строку k двумерного массива на другую строку
+procedure SetRow<T>(Self: array [,] of T; k: integer; a: sequence of T); extensionmethod := Self.SetRow(k,a.ToArray);
 
 /// Меняет столбец k двумерного массива на другой столбец
 procedure SetCol<T>(Self: array [,] of T; k: integer; a: array of T); extensionmethod;
 begin
-  if a.Length<>Self.RowCount then
+  if a.Length <> Self.RowCount then
     raise new System.ArgumentException(GetTranslation(ARR_LENGTH_MUST_BE_MATCH_TO_MATR_SIZE));
-  for var i:=0 to Self.RowCount-1 do
-    Self[i,k] := a[i]
+  for var i := 0 to Self.RowCount - 1 do
+    Self[i, k] := a[i]
 end;
 
-/// Возвращает по заданному двумерному массиву последовательность (i,j,a[i,j])
-function ElementsWithIndexes<T>(Self: array [,] of T): sequence of (integer,integer,T); extensionmethod;
+/// Меняет столбец k двумерного массива на другой столбец
+procedure SetCol<T>(Self: array [,] of T; k: integer; a: sequence of T); extensionmethod := Self.SetCol(k,a.ToArray);
+
+/// Возвращает по заданному двумерному массиву последовательность (a[i,j],i,j)
+function ElementsWithIndices<T>(Self: array [,] of T): sequence of (T, integer, integer); extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-  for var j:=0 to Self.ColCount-1 do
-    yield (i,j,Self[i,j])
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      yield (Self[i, j], i, j)
+end;
+
+/// Возвращает по заданному двумерному массиву последовательность индексов элементов, удовлетворяющих заданному условию 
+function Indices<T>(Self: array [,] of T; cond: T -> boolean): sequence of (integer, integer); extensionmethod;
+begin
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      if cond(Self[i,j]) then 
+        yield (i, j)
 end;
 
 /// Возвращает по заданному двумерному массиву последовательность его элементов по строкам
 function ElementsByRow<T>(Self: array [,] of T): sequence of T; extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-  for var j:=0 to Self.ColCount-1 do
-    yield Self[i,j]
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      yield Self[i, j]
 end;
 
 /// Возвращает по заданному двумерному массиву последовательность его элементов по столбцам
 function ElementsByCol<T>(Self: array [,] of T): sequence of T; extensionmethod;
 begin
-  for var j:=0 to Self.ColCount-1 do
-  for var i:=0 to Self.RowCount-1 do
-    yield Self[i,j]
+  for var j := 0 to Self.ColCount - 1 do
+    for var i := 0 to Self.RowCount - 1 do
+      yield Self[i, j]
 end;
 
 /// Преобразует элементы двумерного массива и возвращает преобразованный массив
-function ConvertAll<T,T1>(Self: array [,] of T; converter: T -> T1): array [,] of T1; extensionmethod;
+function ConvertAll<T, T1>(Self: array [,] of T; converter: T->T1): array [,] of T1; extensionmethod;
 begin
-  Result := new T1[Self.RowCount,Self.ColCount];
-  for var i:=0 to Self.RowCount-1 do
-  for var j:=0 to Self.ColCount-1 do
-    Result[i,j] := converter(Self[i,j]);  
+  Result := new T1[Self.RowCount, Self.ColCount];
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      Result[i, j] := converter(Self[i, j]);  
+end;
+
+/// Преобразует элементы двумерного массива и возвращает преобразованный массив
+function ConvertAll<T, T1>(Self: array [,] of T; converter: (T,integer,integer)->T1): array [,] of T1; extensionmethod;
+begin
+  Result := new T1[Self.RowCount, Self.ColCount];
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      Result[i, j] := converter(Self[i, j],i,j);  
 end;
 
 /// Преобразует элементы двумерного массива по заданному правилу
-procedure Transform<T>(Self: array [,] of T; f: T -> T); extensionmethod;
+procedure Transform<T>(Self: array [,] of T; f: T->T); extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-  for var j:=0 to Self.ColCount-1 do
-    Self[i,j] := f(Self[i,j]);
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      Self[i, j] := f(Self[i, j]);
+end;
+
+/// Преобразует элементы двумерного массива по заданному правилу
+procedure Transform<T>(Self: array [,] of T; f: (T,integer,integer)->T); extensionmethod;
+begin
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      Self[i, j] := f(Self[i, j],i,j);
 end;
 
 /// Заполняет элементы двумерного массива значениями, вычисляемыми по некоторому правилу
-procedure Fill<T>(Self: array [,] of T; f: (integer,integer) -> T); extensionmethod;
+procedure Fill<T>(Self: array [,] of T; f: (integer,integer) ->T); extensionmethod;
 begin
-  for var i:=0 to Self.RowCount-1 do
-  for var j:=0 to Self.ColCount-1 do
-    Self[i,j] := f(i,j);
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      Self[i, j] := f(i, j);
+end;
+
+/// Применяет действие к каждому элементу двумерного массива
+procedure &ForEach<T>(Self: array [,] of T; act: T -> ()); extensionmethod;
+begin
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      act(Self[i, j]);
+end;
+
+/// Применяет действие к каждому элементу двумерного массива
+procedure &ForEach<T>(Self: array [,] of T; act: (T,integer,integer) -> ()); extensionmethod;
+begin
+  for var i := 0 to Self.RowCount - 1 do
+    for var j := 0 to Self.ColCount - 1 do
+      act(Self[i, j],i,j);
+end;
+
+function InR(Self: integer; a,b: integer): boolean;
+begin
+  Result := (a <= Self) and (Self <= b);
+end;
+
+
+/// Возвращает срез двумерного массива. RowIndex и ColIndex задают срезаемые строки и столбцы
+function MatrSlice<T>(Self: array[,] of T; RowIndex: array of integer; ColIndex: array of integer): array[,] of T; extensionmethod;
+begin
+  if RowIndex = nil then
+    raise new System.ArgumentNullException('RowIndex');
+  if ColIndex = nil then
+    raise new System.ArgumentNullException('ColIndex');
+  if RowIndex.Any(i->not InR(i,0,Self.RowCount-1)) then  
+    raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_ROW_INDEX),new Exception);
+  if ColIndex.Any(i->not InR(i,0,Self.ColCount-1)) then  
+    raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_COL_INDEX),new Exception);
+  Result := new T[RowIndex.Length, ColIndex.Length];
+  var r := 0;
+  foreach var ir in RowIndex do
+  begin
+    var c := 0;
+    foreach var jc in ColIndex do
+    begin
+      Result[r, c] := Self[ir, jc];
+      c += 1;
+    end;
+    r += 1;
+  end
+end;
+
+/// Возвращает срез двумерного массива между строками FromRow, ToRow и столбцами FromCol, ToCol
+function MatrSlice<T>(Self: array[,] of T; FromRow, ToRow, FromCol, ToCol: integer): array[,] of T; extensionmethod;
+begin
+  if not InR(FromRow,0,Self.RowCount-1) then  
+    raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_ROW_INDEX_FROM),new Exception);
+  if not InR(ToRow,0,Self.RowCount-1) then      raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_ROW_INDEX_TO),new Exception);
+  if not InR(FromCol,0,Self.ColCount-1) then  
+    raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_COL_INDEX_FROM),new Exception);
+  if not InR(ToCol,0,Self.ColCount-1) then  
+    raise new System.ArgumentOutOfRangeException(GetTranslation(BAD_COL_INDEX_TO),new Exception);
+  Result := new T[ToRow-FromRow+1, ToCol-FromCol+1];
+  var r := 0;
+  for var ir:=FromRow to ToRow do
+  begin
+    var c := 0;
+    for var jc:=FromCol to ToCol do
+    begin
+      Result[r, c] := Self[ir, jc];
+      c += 1;
+    end;
+    r += 1;
+  end
 end;
 
 // -----------------------------------------------------
 //>>     Фиктивная секция YYY - не удалять! # YYY
 // -----------------------------------------------------
 
+function Matr<T>(m,n: integer; params data: array of T): array [,] of T;
+begin
+  if data.Length<>m*n then
+    raise new System.ArgumentException(GetTranslation(INITELEM_COUNT_MUST_BE_EQUAL_TO_MATRIX_ELEMS_COUNT));
+  
+  Result := new T[m, n];
+  var k := 0;
+  for var i:=0 to Result.RowCount-1 do
+  for var j:=0 to Result.ColCount-1 do
+  begin
+    Result[i,j] := data[k];
+    k += 1;
+  end;
+end;
+
 // Реализация операций с матрицами - только после введения RowCount и ColCount
-function MatrRandom(m: integer; n: integer; a,b: integer): array [,] of integer;
+function MatrRandom(m: integer; n: integer; a, b: integer): array [,] of integer;
 begin
-  Result := new integer[m,n];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := Random(a,b);
+  Result := new integer[m, n];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := Random(a, b);
 end;
 
-function MatrRandomInteger(m: integer; n: integer; a,b: integer): array [,] of integer;
+function MatrRandomInteger(m: integer; n: integer; a, b: integer): array [,] of integer;
 begin
-  Result := new integer[m,n];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := Random(a,b);
+  Result := new integer[m, n];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := Random(a, b);
 end;
 
-function MatrRandomReal(m: integer; n: integer; a,b: real): array [,] of real;
+function MatrRandomReal(m: integer; n: integer; a, b: real): array [,] of real;
 begin
-  Result := new real[m,n];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := Random()*(b-a) + a;
+  Result := new real[m, n];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := Random() * (b - a) + a;
 end;
 
-function MatrFill<T>(m,n: integer; x: T): array [,] of T;
+function MatrFill<T>(m, n: integer; x: T): array [,] of T;
 begin
-  Result := new T[m,n];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := x;
+  Result := new T[m, n];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := x;
 end;
 
-function MatrGen<T>(m,n: integer; gen: (integer,integer)->T): array [,] of T;
+function MatrGen<T>(m, n: integer; gen: (integer,integer)->T): array [,] of T;
 begin
-  Result := new T[m,n];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := gen(i,j);
+  Result := new T[m, n];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := gen(i, j);
 end;
 
 function Transpose<T>(a: array [,] of T): array [,] of T;
 begin
   var m := a.RowCount;
   var n := a.ColCount;
-  Result := new T[n,m];
-  for var i:=0 to Result.RowCount-1 do
-  for var j:=0 to Result.ColCount-1 do
-    Result[i,j] := a[j,i]
+  Result := new T[n, m];
+  for var i := 0 to Result.RowCount - 1 do
+    for var j := 0 to Result.ColCount - 1 do
+      Result[i, j] := a[j, i]
 end;
 
-function ReadMatrInteger(m,n: integer): array [,] of integer;
+function ReadMatrInteger(m, n: integer): array [,] of integer;
 begin
-  Result := new integer[m,n];
-  for var i:=0 to m-1 do
-  for var j:=0 to n-1 do
-    Result[i,j] := ReadInteger;
+  Result := new integer[m, n];
+  for var i := 0 to m - 1 do
+    for var j := 0 to n - 1 do
+      Result[i, j] := ReadInteger;
 end;
 
-function ReadMatrReal(m,n: integer): array [,] of real;
+function ReadMatrReal(m, n: integer): array [,] of real;
 begin
-  Result := new real[m,n];
-  for var i:=0 to m-1 do
-  for var j:=0 to n-1 do
-    Result[i,j] := ReadReal;
+  Result := new real[m, n];
+  for var i := 0 to m - 1 do
+    for var j := 0 to n - 1 do
+      Result[i, j] := ReadReal;
 end;
 
 // -----------------------------------------------------
-//>>     Фиктивная секция XXX - не удалять! # XXX
-// -----------------------------------------------------
-type
-  AdjGroupClass<T> = class
-  private
-    cur: T;
-    enm: IEnumerator<T>;
-    fin: boolean;
-  public
-    constructor Create(a: sequence of T);
-    begin
-      enm := a.GetEnumerator();
-      fin := enm.MoveNext;
-      if fin then
-        cur := enm.Current;
-    end;
-    
-    function TakeGroup: sequence of T;
-    begin
-      yield cur;
-      fin := enm.movenext;
-      while fin do
-      begin
-        if enm.current = cur then
-          yield enm.current
-        else
-        begin
-          cur := enm.Current;
-          break;
-        end;
-        fin := enm.movenext;
-      end;  
-    end;
-  end;
-
-// -----------------------------------------------------
-//>>     Методы расширения типа array of T # Extension methods for array of T
+//>>     Методы расширения одномерных динамических массивов # Extension methods for array of T
 // -----------------------------------------------------
 
 // Дополнения февраль 2016: Shuffle, AdjacentFind, IndexMin, IndexMax, Replace, Transform
@@ -9204,12 +10125,12 @@ type
 function Shuffle<T>(Self: array of T): array of T; extensionmethod;
 begin
   var n := Self.Length;
-	for var i:=0 to n-1 do
-	  Swap(Self[i],Self[Random(n)]);
-	Result := Self;  
+  for var i := 0 to n - 1 do
+    Swap(Self[i], Self[Random(n)]);
+  Result := Self;  
 end;
 
-/// Находит первую пару подряд идущих одинаковых элементов и возвращает индекс первого элемента пары. Если не найден, возвращается -1
+{/// Находит первую пару подряд идущих одинаковых элементов и возвращает индекс первого элемента пары. Если не найден, возвращается -1
 function AdjacentFind<T>(Self: array of T; start: integer := 0): integer; extensionmethod;
 begin
   Result := -1;
@@ -9231,78 +10152,68 @@ begin
       Result := i;
       exit;
     end;
-end;
-
-/// Группирует одинаковые подряд идущие элементы, получая последовательность последовательностей 
-function AdjacentGroup<T>(Self: sequence of T): sequence of sequence of T; extensionmethod;
-begin
-  var c := new AdjGroupClass<T>(Self);
-  while c.fin do
-    yield c.TakeGroup();
-end;
-
-// ToDo Сделать AdjacentGroup с функцией сравнения
+end;}
 
 /// Возвращает минимальный элемент 
 function Min<T>(Self: array of T): T; extensionmethod; where T: System.IComparable<T>;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
-    if Self[i].CompareTo(Result)<0 then 
+  for var i := 1 to Self.Length - 1 do
+    if Self[i].CompareTo(Result) < 0 then 
       Result := Self[i];
 end;
 
-/// Возвращает максинимальный элемент 
+/// Возвращает максимальный элемент 
 function Max<T>(Self: array of T): T; extensionmethod; where T: System.IComparable<T>;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
-    if Self[i].CompareTo(Result)>0 then 
+  for var i := 1 to Self.Length - 1 do
+    if Self[i].CompareTo(Result) > 0 then 
       Result := Self[i];
 end;
 
 /// Возвращает минимальный элемент 
-function Min(Self: array of integer): integer; extensionmethod; 
+function Min(Self: array of integer): integer; extensionmethod;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
+  for var i := 1 to Self.Length - 1 do
     if Self[i] < Result then 
       Result := Self[i];
 end;
 
 /// Возвращает минимальный элемент 
-function Min(Self: array of real): real; extensionmethod; 
+function Min(Self: array of real): real; extensionmethod;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
+  for var i := 1 to Self.Length - 1 do
     if Self[i] < Result then 
       Result := Self[i];
 end;
 
 /// Возвращает максимальный элемент 
-function Max(Self: array of integer): integer; extensionmethod; 
+function Max(Self: array of integer): integer; extensionmethod;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
+  for var i := 1 to Self.Length - 1 do
     if Self[i] > Result then 
       Result := Self[i];
 end;
 
 /// Возвращает максимальный элемент 
-function Max(Self: array of real): real; extensionmethod; 
+function Max(Self: array of real): real; extensionmethod;
 begin
   Result := Self[0];
-  for var i:=1 to Self.Length-1 do
+  for var i := 1 to Self.Length - 1 do
     if Self[i] > Result then 
       Result := Self[i];
 end;
 
-/// Возвращает индекс первого минимального элемента начиная с позиции start
-function IndexMin<T>(Self: array of T; start: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
+{/// Возвращает индекс первого минимального элемента начиная с позиции index
+function IndexMin<T>(Self: array of T; index: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
 begin
-  var min := Self[start];
-  Result := start;
-  for var i:=start+1 to Self.Length-1 do
+  var min := Self[index];
+  Result := index;
+  for var i:=index+1 to Self.Length-1 do
     if Self[i].CompareTo(min)<0 then 
     begin
       Result := i;
@@ -9310,12 +10221,12 @@ begin
     end;
 end;
 
-/// Возвращает индекс первого максимального элемента начиная с позиции start
-function IndexMax<T>(self: array of T; start: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
+/// Возвращает индекс первого максимального элемента начиная с позиции index
+function IndexMax<T>(self: array of T; index: integer := 0): integer; extensionmethod; where T: System.IComparable<T>;
 begin
-  var max := Self[start];
-  Result := start;
-  for var i:=start+1 to Self.Length-1 do
+  var max := Self[index];
+  Result := index;
+  for var i:=index+1 to Self.Length-1 do
     if Self[i].CompareTo(max)>0 then 
     begin
       Result := i;
@@ -9336,12 +10247,12 @@ begin
     end;
 end;
 
-/// Возвращает индекс последнего минимального элемента начиная с позиции start
-function LastIndexMin<T>(Self: array of T; start: integer): integer; extensionmethod; where T: System.IComparable<T>;
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index] 
+function LastIndexMin<T>(Self: array of T; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
 begin
-  var min := Self[start];
-  Result := start;
-  for var i:=start-1 downto 0 do
+  var min := Self[index];
+  Result := index;
+  for var i:=index-1 downto 0 do
     if Self[i].CompareTo(min)<0 then 
     begin
       Result := i;
@@ -9362,12 +10273,12 @@ begin
     end;
 end;
 
-/// Возвращает индекс последнего минимального элемента начиная с позиции start
-function LastIndexMax<T>(Self: array of T; start: integer): integer; extensionmethod; where T: System.IComparable<T>;
+/// Возвращает индекс последнего минимального элемента в диапазоне [0,index]
+function LastIndexMax<T>(Self: array of T; index: integer): integer; extensionmethod; where T: System.IComparable<T>;
 begin
-  var max := Self[start];
-  Result := start;
-  for var i:=start-1 downto 0 do
+  var max := Self[index];
+  Result := index;
+  for var i:=index-1 downto 0 do
     if Self[i].CompareTo(max)>0 then 
     begin
       Result := i;
@@ -9386,8 +10297,8 @@ end;
 /// Преобразует элементы массива по заданному правилу
 procedure Transform<T>(self: array of T; f: T -> T); extensionmethod;
 begin
-  for var i:=0 to self.Length-1 do
-    self[i] := f(self[i]);
+  for var i:=0 to Self.Length-1 do
+    Self[i] := f(Self[i]);
 end;
 
 /// Заполняет элементы массива значениями, вычисляемыми по некоторому правилу
@@ -9395,111 +10306,138 @@ procedure Fill<T>(Self: array of T; f: integer -> T); extensionmethod;
 begin
   for var i:=0 to Self.Length-1 do
     Self[i] := f(i);
-end;
+end;}
 
 /// Выполняет бинарный поиск в отсортированном массиве
-function BinarySearch<T>(self: array of T; x: T): integer; extensionmethod;
+function BinarySearch<T>(Self: array of T; x: T): integer; extensionmethod;
 begin
-  Result := System.Array.BinarySearch(self,x);  
+  Result := System.Array.BinarySearch(self, x);  
 end;
 
 /// Преобразует элементы массива и возвращает преобразованный массив
-function ConvertAll<T,T1>(self: array of T; converter: T -> T1): array of T1; extensionmethod;
+function ConvertAll<T, T1>(Self: array of T; converter: T->T1): array of T1; extensionmethod;
 begin
-  Result := System.Array.ConvertAll(self,t->converter(t));  
+  Result := System.Array.ConvertAll(self, t -> converter(t));  
+end;
+
+/// Преобразует элементы массива и возвращает преобразованный массив
+function ConvertAll<T, T1>(Self: array of T; converter: (T,integer)->T1): array of T1; extensionmethod;
+begin
+  Result := new T1[Self.Length];
+  for var i := 0 to Self.Length - 1 do
+    Result[i] := converter(Self[i],i);
 end;
 
 /// Выполняет поиск первого элемента в массиве, удовлетворяющего предикату. Если не найден, возвращается нулевое значение соответствующего типа
-function Find<T>(self: array of T; p: T->boolean): T; extensionmethod;
+function Find<T>(Self: array of T; p: T->boolean): T; extensionmethod;
 begin
-  Result := System.Array.Find(self,p);  
+  Result := System.Array.Find(self, p);  
 end;
 
 /// Выполняет поиск индекса первого элемента в массиве, удовлетворяющего предикату. Если не найден, возвращается -1
-function FindIndex<T>(self: array of T; p: T->boolean): integer; extensionmethod;
+function FindIndex<T>(Self: array of T; p: T->boolean): integer; extensionmethod;
 begin
-  Result := System.Array.FindIndex(self,p);  
+  Result := System.Array.FindIndex(self, p);  
 end;
 
 /// Выполняет поиск индекса первого элемента в массиве, удовлетворяющего предикату, начиная с индекса start. Если не найден, возвращается -1
-function FindIndex<T>(self: array of T; start: integer; p: T->boolean): integer; extensionmethod;
+function FindIndex<T>(Self: array of T; start: integer; p: T->boolean): integer; extensionmethod;
 begin
-  Result := System.Array.FindIndex(self,start,p);  
+  Result := System.Array.FindIndex(self, start, p);  
 end;
 
 /// Возвращает в виде массива все элементы, удовлетворяющие предикату
-function FindAll<T>(self: array of T; p: T->boolean): array of T; extensionmethod;
+function FindAll<T>(Self: array of T; p: T->boolean): array of T; extensionmethod;
 begin
-  Result := System.Array.FindAll(self,p);  
+  Result := System.Array.FindAll(self, p);  
 end;
 
 /// Выполняет поиск последнего элемента в массиве, удовлетворяющего предикату. Если не найден, возвращается нулевое значение соответствующего типа
-function FindLast<T>(self: array of T; p: T->boolean): T; extensionmethod;
+function FindLast<T>(Self: array of T; p: T->boolean): T; extensionmethod;
 begin
-  Result := System.Array.FindLast(self,p);  
+  Result := System.Array.FindLast(self, p);  
 end;
 
-/// Выполняет поиск индекса последнего элемента в массиве, удовлетворяющего предикату. Если не найден, возвращается нулевое значение соответствующего типа
-function FindLastIndex<T>(self: array of T; p: T->boolean): integer; extensionmethod;
+/// Выполняет поиск индекса последнего элемента в массиве, удовлетворяющего предикату. Если не найден, возвращается -1
+function FindLastIndex<T>(Self: array of T; p: T->boolean): integer; extensionmethod;
 begin
-  Result := System.Array.FindLastIndex(self,p);  
+  Result := System.Array.FindLastIndex(self, p);  
 end;
 
-/// Выполняет поиск индекса последнего элемента в массиве, удовлетворяющего предикату, начиная с индекса start. Если не найден, возвращается нулевое значение соответствующего типа
+/// Выполняет поиск индекса последнего элемента в массиве, удовлетворяющего предикату, в диапазоне индексов от 0 до start. Если не найден, возвращается -1
 function FindLastIndex<T>(self: array of T; start: integer; p: T->boolean): integer; extensionmethod;
 begin
-  Result := System.Array.FindLastIndex(self,start,p);  
+  Result := System.Array.FindLastIndex(Self, start, p);  
 end;
 
 /// Возвращает индекс первого вхождения элемента или -1 если элемент не найден
-function IndexOf<T>(self: array of T; x: T): integer; extensionmethod;
+function IndexOf<T>(Self: array of T; x: T): integer; extensionmethod;
 begin
-  Result := System.Array.IndexOf(self,x);  
+  Result := System.Array.IndexOf(Self, x);  
 end;
 
 /// Возвращает индекс первого вхождения элемента начиная с индекса start или -1 если элемент не найден
-function IndexOf<T>(self: array of T; x: T; start: integer): integer; extensionmethod;
+function IndexOf<T>(Self: array of T; x: T; start: integer): integer; extensionmethod;
 begin
-  Result := System.Array.IndexOf(self,x,start);  
+  Result := System.Array.IndexOf(Self, x, start);  
 end;
 
 /// Возвращает индекс последнего вхождения элемента или -1 если элемент не найден
-function LastIndexOf<T>(self: array of T; x: T): integer; extensionmethod;
+function LastIndexOf<T>(Self: array of T; x: T): integer; extensionmethod;
 begin
-  Result := System.Array.LastIndexOf(self,x);  
+  Result := System.Array.LastIndexOf(Self, x);  
 end;
 
 /// Возвращает индекс последнего вхождения элемента начиная с индекса start или -1 если элемент не найден
-function LastIndexOf<T>(self: array of T; x: T; start: integer): integer; extensionmethod;
+function LastIndexOf<T>(Self: array of T; x: T; start: integer): integer; extensionmethod;
 begin
-  Result := System.Array.LastIndexOf(self,x,start);  
+  Result := System.Array.LastIndexOf(Self, x, start);  
 end;
 
 /// Сортирует массив по возрастанию
-procedure Sort<T>(self: array of T); extensionmethod;
+procedure Sort<T>(Self: array of T); extensionmethod;
 begin
-  System.Array.Sort(self);  
+  System.Array.Sort(Self);  
 end;
 
 /// Сортирует массив по возрастанию, используя cmp в качестве функции сравнения элементов
-procedure Sort<T>(self: array of T; cmp: (T,T) -> integer); extensionmethod;
+procedure Sort<T>(Self: array of T; cmp: (T,T) ->integer); extensionmethod;
 begin
-  System.Array.Sort(self,cmp);  
+  System.Array.Sort(Self, cmp);  
 end;
 
 /// Возвращает индекс последнего элемента массива
-function High(self: System.Array); extensionmethod := High(Self);
+function High(Self: System.Array); extensionmethod := High(Self);
 
 /// Возвращает индекс первого элемента массива
-function Low(self: System.Array); extensionmethod := Low(Self);
+function Low(Self: System.Array); extensionmethod := Low(Self);
+
+/// Возвращает последовательность индексов одномерного массива
+function Indices<T>(Self: array of T): sequence of integer; extensionmethod := Range(0, Self.Length - 1);
+
+/// Возвращает последовательность индексов элементов одномерного массива, удовлетворяющих условию
+function Indices<T>(Self: array of T; cond: T->boolean): sequence of integer; extensionmethod;
+begin
+  for var i := 0 to Self.High do
+    if cond(Self[i]) then
+      yield i;
+end;
+
+/// Возвращает последовательность индексов элементов одномерного массива, удовлетворяющих условию
+function Indices<T>(Self: array of T; cond: (T,integer) ->boolean): sequence of integer; extensionmethod;
+begin
+  for var i := 0 to Self.High do
+    if cond(Self[i], i) then
+      yield i;
+end;
 
 ///-- 
-function CreateSliceFromArrayInternal<T>(Self: array of T; from,step,count: integer): array of T;
+function CreateSliceFromArrayInternal<T>(Self: array of T; from, step, count: integer): array of T;
 begin
   Result := new T[count];
   
   var f := from;
-  for var i:=0 to count-1 do
+  for var i := 0 to count - 1 do
   begin
     Result[i] := Self[f];
     f += step;
@@ -9507,74 +10445,74 @@ begin
 end;
 
 ///-- 
-function SliceArrayImpl<T>(Self: array of T; from,step,count: integer): array of T;
+function SliceArrayImpl<T>(Self: array of T; from, step, count: integer): array of T;
 begin
   {if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
+  
   if (from < 0) or (from > Self.Length - 1) then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
+  
   var cnt := step > 0 ? Self.Length - from : from + 1; 
   var cntstep := (cnt-1) div abs(step) + 1;
   if count > cntstep then 
     count := cntstep;}
-    
-  CorrectCountForSlice(Self.Length,from,step,count);  
-    
-  Result := CreateSliceFromArrayInternal(Self,from,step,count)
+  
+  CorrectCountForSlice(Self.Length, from, step, count);  
+  
+  Result := CreateSliceFromArrayInternal(Self, from, step, count)
 end;
 
 /// Возвращает срез массива от индекса from с шагом step
-function Slice<T>(Self: array of T; from,step: integer): array of T; extensionmethod;
+function Slice<T>(Self: array of T; from, step: integer): array of T; extensionmethod;
 begin
-  Result := SliceArrayImpl(Self,from,step,integer.MaxValue);
+  Result := SliceArrayImpl(Self, from, step, integer.MaxValue);
 end;
 
 /// Возвращает срез массива от индекса from с шагом step длины не более count
-function Slice<T>(Self: array of T; from,step,count: integer): array of T; extensionmethod;
+function Slice<T>(Self: array of T; from, step, count: integer): array of T; extensionmethod;
 begin
-  Result := SliceArrayImpl(Self,from,step,count);
+  Result := SliceArrayImpl(Self, from, step, count);
 end;
 
 ///-- 
-function SystemSliceArrayImpl<T>(Self: array of T; situation: integer; from,&to: integer; step: integer := 1): array of T;
+function SystemSliceArrayImpl<T>(Self: array of T; situation: integer; from, &to: integer; step: integer := 1): array of T;
 begin
-  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation,Self.Length,from,&to,step);
-
-  Result := CreateSliceFromArrayInternal(Self,from,step,count)
-end;
-
-///--
-function SystemSlice<T>(Self: array of T; situation: integer; from,&to: integer): array of T; extensionmethod;
-begin
-  Result := SystemSliceArrayImpl(Self,situation,from,&to,1);
-end;
-
-///--
-function SystemSlice<T>(Self: array of T; situation: integer; from,&to,step: integer): array of T; extensionmethod;
-begin
-  Result := SystemSliceArrayImpl(Self,situation,from,&to,step);
-end;
-
-///-- 
-function SystemSliceArrayImplQuestion<T>(Self: array of T; situation: integer; from,&to: integer; step: integer := 1): array of T;
-begin
-  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation,Self.Length,from,&to,step);
+  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation, Self.Length, from, &to, step);
   
-  Result := CreateSliceFromArrayInternal(Self,from,step,count);
+  Result := CreateSliceFromArrayInternal(Self, from, step, count)
 end;
 
 ///--
-function SystemSliceQuestion<T>(Self: array of T; situation: integer; from,&to: integer): array of T; extensionmethod;
+function SystemSlice<T>(Self: array of T; situation: integer; from, &to: integer): array of T; extensionmethod;
 begin
-  Result := SystemSliceArrayImplQuestion(Self,situation,from,&to,1);
+  Result := SystemSliceArrayImpl(Self, situation, from, &to, 1);
 end;
 
 ///--
-function SystemSliceQuestion<T>(Self: array of T; situation: integer; from,&to,step: integer): array of T; extensionmethod;
+function SystemSlice<T>(Self: array of T; situation: integer; from, &to, step: integer): array of T; extensionmethod;
 begin
-  Result := SystemSliceArrayImplQuestion(Self,situation,from,&to,step);
+  Result := SystemSliceArrayImpl(Self, situation, from, &to, step);
+end;
+
+///-- 
+function SystemSliceArrayImplQuestion<T>(Self: array of T; situation: integer; from, &to: integer; step: integer := 1): array of T;
+begin
+  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation, Self.Length, from, &to, step);
+  
+  Result := CreateSliceFromArrayInternal(Self, from, step, count);
+end;
+
+///--
+function SystemSliceQuestion<T>(Self: array of T; situation: integer; from, &to: integer): array of T; extensionmethod;
+begin
+  Result := SystemSliceArrayImplQuestion(Self, situation, from, &to, 1);
+end;
+
+///--
+function SystemSliceQuestion<T>(Self: array of T; situation: integer; from, &to, step: integer): array of T; extensionmethod;
+begin
+  Result := SystemSliceArrayImplQuestion(Self, situation, from, &to, step);
 end;
 
 // -----------------------------------------------------
@@ -9592,24 +10530,37 @@ begin
   Result := Sqr(Self);
 end;
 
+/// Возвращает True если значение находится между двумя другими
+function Between(Self: integer; a, b: integer): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
+/// Возвращает True если значение находится между двумя другими
+function InRange(Self: integer; a,b: integer): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
+
 // Дополнения февраль 2016: IsEven, IsOdd
 
 /// Возвращает, является ли целое четным
 function IsEven(Self: integer): boolean; extensionmethod;
 begin
-	Result := Self mod 2 = 0;
+  Result := Self mod 2 = 0;
 end;
 
 /// Возвращает, является ли целое нечетным
 function IsOdd(Self: integer): boolean; extensionmethod;
 begin
-	Result := Self mod 2 <> 0;
+  Result := Self mod 2 <> 0;
 end;
 
 /// Возвращает последовательность чисел от 1 до данного
 function Range(Self: integer): sequence of integer; extensionmethod;
 begin
-  Result := Range(1,Self);  
+  Result := Range(1, Self);  
 end;
 
 // Дополнения февраль 2016: &To, &Downto, Times
@@ -9629,7 +10580,33 @@ end;
 /// Возвращает последовательность целых 0,1,...n-1
 function Times(Self: integer): sequence of integer; extensionmethod;
 begin
-  Result := Range(0,Self-1);
+  Result := Range(0, Self - 1);
+end;
+
+/// Возвращает число, ограниченное диапазоном от bottom до top включительно
+function Clamp(Self: integer; bottom,top: integer): integer; extensionmethod;
+begin
+  if Self < bottom then 
+    Result := bottom
+  else if Self > top then 
+    Result := top
+  else Result := Self;  
+end;
+
+/// Возвращает число, ограниченное величиной top сверху
+function ClampTop(Self: integer; top: integer): integer; extensionmethod;
+begin
+  if Self > top then 
+    Result := top
+  else Result := Self;  
+end;
+
+/// Возвращает число, ограниченное величиной bottom снизу
+function ClampBottom(Self: integer; bottom: integer): integer; extensionmethod;
+begin
+  if Self < bottom then 
+    Result := bottom
+  else Result := Self;  
 end;
 
 // -----------------------------------------------------
@@ -9644,6 +10621,18 @@ end;
 // -----------------------------------------------------
 //>>     Методы расширения типа real # Extension methods for real
 // -----------------------------------------------------
+/// Возвращает True если значение находится между двумя другими
+function Between(Self: real; a, b: real): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
+/// Возвращает True если значение находится между двумя другими
+function InRange(Self: real; a,b: real): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
 /// Возвращает квадратный корень числа
 function Sqrt(Self: real): real; extensionmethod;
 begin
@@ -9660,6 +10649,12 @@ end;
 function Round(Self: real): integer; extensionmethod;
 begin
   Result := Round(Self);
+end;
+
+/// Возвращает x, округленное до ближайшего вещественного с digits знаками после десятичной точки
+function Round(Self: real; digits: integer): real; extensionmethod;
+begin
+  Result := Round(Self,digits);
 end;
 
 /// Возвращает число, округленное до ближайшего длинного целого
@@ -9683,40 +10678,66 @@ end;
 /// Возвращает вещественное, отформатированное к строке с frac цифрами после десятичной точки
 function ToString(Self: real; frac: integer): string; extensionmethod;
 begin
-  if frac<0 then
-    raise new System.ArgumentOutOfRangeException('frac','frac<0');
-  if frac>=100 then
-    raise new System.ArgumentOutOfRangeException('frac','frac>=100');
-  Result := Format('{0:f'+frac+'}',Self)
+  if frac < 0 then
+    raise new System.ArgumentOutOfRangeException('frac', 'frac<0');
+  if frac >= 100 then
+    raise new System.ArgumentOutOfRangeException('frac', 'frac>=100');
+  Result := Format('{0:f' + frac + '}', Self)
+end;
+
+/// Возвращает число, ограниченное диапазоном от bottom до top включительно
+function Clamp(Self: real; bottom,top: real): real; extensionmethod;
+begin
+  if Self < bottom then 
+    Result := bottom
+  else if Self > top then 
+    Result := top
+  else Result := Self;  
+end;
+
+/// Возвращает число, ограниченное величиной top сверху
+function ClampTop(Self: real; top: real): real; extensionmethod;
+begin
+  if Self > top then 
+    Result := top
+  else Result := Self;  
+end;
+
+/// Возвращает число, ограниченное величиной bottom снизу
+function ClampBottom(Self: real; bottom: real): real; extensionmethod;
+begin
+  if Self < bottom then 
+    Result := bottom
+  else Result := Self;  
 end;
 
 
 //------------------------------------------------------------------------------
 //>>     Методы расширения типа char # Extension methods for char
 //------------------------------------------------------------------------------
-/// Предыдущий символ
-function Pred(Self: char): char; extensionmethod;
+/// Возвращает True если значение находится между двумя другими
+function Between(Self: char; a, b: char): boolean; extensionmethod;
 begin
-  Result := PABCSystem.Pred(Self);
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
 end;
+
+/// Возвращает True если значение находится между двумя другими
+function InRange(Self: char; a,b: char): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
+/// Предыдущий символ
+function Pred(Self: char); extensionmethod := PABCSystem.Pred(Self);
 
 /// Следующий символ
-function Succ(Self: char): char; extensionmethod;
-begin
-  Result := PABCSystem.Succ(Self);
-end;
+function Succ(Self: char); extensionmethod := PABCSystem.Succ(Self);
 
 /// Код символа в кодировке Unicode
-function Code(Self: char): integer; extensionmethod;
-begin
-  Result := word(Self);
-end;
+function Code(Self: char): integer; extensionmethod := word(Self);
 
 /// Является ли символ цифрой
-function IsDigit(Self: char): boolean; extensionmethod;
-begin
-  Result := char.IsDigit(Self);
-end;
+function IsDigit(Self: char); extensionmethod := char.IsDigit(Self);
 
 /// Является ли символ буквой
 function IsLetter(Self: char): boolean; extensionmethod;
@@ -9740,7 +10761,7 @@ end;
 function ToDigit(Self: char): integer; extensionmethod;
 begin
   Result := OrdUnicode(Self) - OrdUnicode('0');
-  if (Result<0) or (Result>=10) then
+  if (Result < 0) or (Result >= 10) then
     raise new System.FormatException('not a Digit');
 end;
 
@@ -9759,6 +10780,18 @@ end;
 //------------------------------------------------------------------------------
 //>>     Методы расширения типа string # Extension methods for string
 //------------------------------------------------------------------------------
+/// Возвращает True если значение находится между двумя другими
+function Between(Self: string; a, b: string): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
+/// Возвращает True если значение находится между двумя другими
+function InRange(Self: string; a,b: string): boolean; extensionmethod;
+begin
+  Result := (a <= Self) and (Self <= b) or (b <= Self) and (Self <= a);
+end;
+
 /// Считывает целое из строки начиная с позиции from и устанавливает from за считанным значением
 function ReadInteger(Self: string; var from: integer): integer; extensionmethod;
 begin
@@ -9778,21 +10811,38 @@ begin
 end;
 
 /// Преобразует строку в целое
-function ToInteger(Self: string): integer; extensionmethod;
-begin
-  Result := integer.Parse(Self);
-end;
+function ToInteger(Self: string): integer; extensionmethod := integer.Parse(Self);
 
 /// Преобразует строку в BigInteger
-function ToBigInteger(Self: string): BigInteger; extensionmethod;
+function ToBigInteger(Self: string): BigInteger; extensionmethod := BigInteger.Parse(Self);
+
+/// Преобразует строку в вещественное
+function ToReal(Self: string): real; extensionmethod := real.Parse(Self, nfi);
+
+/// Преобразует строку в целое и записывает его в value. 
+///При невозможности преобразования возвращается False
+function TryToInteger(Self: string; var value: integer): boolean; extensionmethod := TryStrToInt(Self,value);
+
+/// Преобразует строку в вещественное и записывает его в value. 
+///При невозможности преобразования возвращается False
+function TryToReal(Self: string; var value: real): boolean; extensionmethod := TryStrToReal(Self,value);
+
+/// Преобразует строку в целое
+///При невозможности преобразования возвращается defaultvalue
+function ToInteger(Self: string; defaultvalue: integer): integer; extensionmethod;
 begin
-  Result := BigInteger.Parse(Self);
+  var b := TryStrToInt(Self,Result);
+  if not b then
+    Result := defaultvalue
 end;
 
 /// Преобразует строку в вещественное
-function ToReal(Self: string): real; extensionmethod;
+///При невозможности преобразования возвращается defaultvalue
+function ToReal(Self: string; defaultvalue: real): real; extensionmethod;
 begin
-  Result := real.Parse(Self, nfi);
+  var b := TryStrToReal(Self,Result);
+  if not b then
+    Result := defaultvalue
 end;
 
 /// Преобразует строку в массив слов
@@ -9804,20 +10854,20 @@ end;
 /// Преобразует строку в массив целых
 function ToIntegers(Self: string): array of integer; extensionmethod;
 begin
-  Result := Self.ToWords().Select(s -> StrToInt(s)).ToArray();
+  Result := Self.ToWords().ConvertAll(s -> StrToInt(s));
 end;
 
 /// Преобразует строку в массив вещественных
 function ToReals(Self: string): array of real; extensionmethod;
 begin
-  Result := Self.ToWords().Select(s -> StrToFloat(s)).ToArray();
+  Result := Self.ToWords().ConvertAll(s -> StrToFloat(s));
 end;
 
 /// Возвращает инверсию строки
 function Inverse(Self: string): string; extensionmethod;
 begin
   var sb := new System.Text.StringBuilder(Self.Length);
-  for var i:= Self.Length downto 1 do
+  for var i := Self.Length downto 1 do
     sb.Append(Self[i]);
   Result := sb.ToString;
 end;
@@ -9825,33 +10875,33 @@ end;
 // Дополнения февраль 2016: Matches, MatchValue, MatchValues, IsMatch, RegexReplace, Remove, Right, Left
 
 /// Заменяет в указанной строке все вхождения регулярного выражения указанной строкой замены и возвращает преобразованную строку
-function RegexReplace(Self: string; reg,repl: string; options: RegexOptions := RegexOptions.None): string; extensionmethod;
+function RegexReplace(Self: string; reg, repl: string; options: RegexOptions := RegexOptions.None): string; extensionmethod;
 begin
-	Result := Regex.Replace(Self,reg,repl,options)
+  Result := Regex.Replace(Self, reg, repl, options)
 end;
 
 /// Заменяет в указанной строке все вхождения регулярного выражения указанным преобразованием замены и возвращает преобразованную строку
-function RegexReplace(Self: string; reg: string; repl: Match -> string; options: RegexOptions := RegexOptions.None): string; extensionmethod;
+function RegexReplace(Self: string; reg: string; repl: &Match->string; options: RegexOptions := RegexOptions.None): string; extensionmethod;
 begin
-	Result := Regex.Replace(Self,reg,repl,options)
+  Result := Regex.Replace(Self, reg, repl, options)
 end;
 
 /// Ищет в указанной строке все вхождения регулярного выражения и возвращает их в виде последовательности элементов типа Match
-function Matches(Self: string; reg: string; options: RegexOptions := RegexOptions.None): sequence of Match; extensionmethod;
+function Matches(Self: string; reg: string; options: RegexOptions := RegexOptions.None): sequence of &Match; extensionmethod;
 begin
-	Result := (new Regex(reg, options)).Matches(Self).Cast&<Match>();
+  Result := (new Regex(reg, options)).Matches(Self).Cast&<&Match>();
 end;
 
 /// Ищет в указанной строке первое вхождение регулярного выражения и возвращает его в виде строки
 function MatchValue(Self: string; reg: string; options: RegexOptions := RegexOptions.None): string; extensionmethod;
 begin
-	Result := (new Regex(reg, options)).Match(Self).Value;
+  Result := (new Regex(reg, options)).&Match(Self).Value;
 end;
 
 /// Ищет в указанной строке все вхождения регулярного выражения и возвращает их в виде последовательности строк
 function MatchValues(Self: string; reg: string; options: RegexOptions := RegexOptions.None): sequence of string; extensionmethod;
 begin
-	Result := Self.Matches(reg,options).Select(m->m.Value);
+  Result := Self.Matches(reg, options).Select(m -> m.Value);
 end;
 
 /// Удовлетворяет ли строка регулярному выражению
@@ -9860,21 +10910,21 @@ function IsMatch(Self: string; reg: string; options: RegexOptions := RegexOption
 /// Удаляет в строке все вхождения указанных строк
 function Remove(Self: string; params targets: array of string): string; extensionmethod;
 begin
-	var builder := new StringBuilder (Self);
-
-	for var i := 0 to targets.Length-1 do
-		builder.Replace (targets[i], String.Empty);
-
-	Result := builder.ToString();
+  var builder := new StringBuilder(Self);
+  
+  for var i := 0 to targets.Length - 1 do
+    builder.Replace(targets[i], String.Empty);
+  
+  Result := builder.ToString();
 end;
 
 /// Возвращает подстроку, полученную вырезанием из строки length самых правых символов
 function Right(Self: string; length: integer): string; extensionmethod;
 begin
   length := Max(length, 0);
-
+  
   if Self.Length > length then
-      Result := Self.Substring(Self.Length - length, length)
+    Result := Self.Substring(Self.Length - length, length)
   else Result := Self;
 end;
 
@@ -9882,18 +10932,18 @@ end;
 function Left(Self: string; length: integer): string; extensionmethod;
 begin
   length := Max(length, 0);
-
+  
   if Self.Length > length then
-      Result := Self.Substring(0, length)
+    Result := Self.Substring(0, length)
   else Result := Self;
 end;
 
 ///-- 
-function CreateSliceFromStringInternal(Self: string; from,step,count: integer): string;
+function CreateSliceFromStringInternal(Self: string; from, step, count: integer): string;
 begin
   var res := new StringBuilder(count);
   
-  for var i:=0 to count-1 do
+  loop count do
   begin
     res.Append(Self[from]);
     from += step;
@@ -9902,87 +10952,87 @@ begin
 end;
 
 ///-- 
-function SliceStringImpl(Self: string; from,step,count: integer): string;
+function SliceStringImpl(Self: string; from, step, count: integer): string;
 begin
   {if step = 0 then
     raise new ArgumentException(GetTranslation(PARAMETER_STEP_MUST_BE_NOT_EQUAL_0));
-
+  
   if (from < 0) or (from > Self.Length - 1) then
     raise new ArgumentException(GetTranslation(PARAMETER_FROM_OUT_OF_RANGE));
-
+  
   var cnt := step > 0 ? Self.Length - from : from + 1; 
   var cntstep := (cnt-1) div abs(step) + 1;
   if count > cntstep then 
     count := cntstep;}
-    
-  CorrectCountForSlice(Self.Length,from,step,count);
   
-  Result := CreateSliceFromStringInternal(Self,from+1,step,count);
+  CorrectCountForSlice(Self.Length, from, step, count);
+  
+  Result := CreateSliceFromStringInternal(Self, from + 1, step, count);
 end;
 
 /// Возвращает срез строки от индекса from с шагом step
-function Slice(Self: string; from,step: integer): string; extensionmethod;
+function Slice(Self: string; from, step: integer): string; extensionmethod;
 begin
-  Result := SliceStringImpl(Self,from,step,integer.MaxValue);
+  Result := SliceStringImpl(Self, from, step, integer.MaxValue);
 end;
 
 /// Возвращает срез строки от индекса from с шагом step длины не более count
-function Slice(Self: string; from,step,count: integer): string; extensionmethod;
+function Slice(Self: string; from, step, count: integer): string; extensionmethod;
 begin
-  Result := SliceStringImpl(Self,from,step,count);
+  Result := SliceStringImpl(Self, from, step, count);
 end;
 
 ///-- 
-function SystemSliceStringImpl(Self: string; situation: integer; from,&to: integer; step: integer := 1): string;
+function SystemSliceStringImpl(Self: string; situation: integer; from, &to: integer; step: integer := 1): string;
 begin
-  var fromv := from-1;
-  var tov := &to-1;
-  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation,Self.Length,fromv,tov,step);
-
-  Result := CreateSliceFromStringInternal(Self,fromv+1,step,count)
+  var fromv := from - 1;
+  var tov := &to - 1;
+  var count := CheckAndCorrectFromToAndCalcCountForSystemSlice(situation, Self.Length, fromv, tov, step);
+  
+  Result := CreateSliceFromStringInternal(Self, fromv + 1, step, count)
 end;
 
 ///--
-function SystemSlice(Self: string; situation: integer; from,&to: integer): string; extensionmethod;
+function SystemSlice(Self: string; situation: integer; from, &to: integer): string; extensionmethod;
 begin
-  Result := SystemSliceStringImpl(Self,situation,from,&to,1);
+  Result := SystemSliceStringImpl(Self, situation, from, &to, 1);
 end;
 
 ///--
-function SystemSlice(Self: string; situation: integer; from,&to,step: integer): string; extensionmethod;
+function SystemSlice(Self: string; situation: integer; from, &to, step: integer): string; extensionmethod;
 begin
-  Result := SystemSliceStringImpl(Self,situation,from,&to,step);
+  Result := SystemSliceStringImpl(Self, situation, from, &to, step);
 end;
 
 ///-- 
-function SystemSliceStringImplQuestion(Self: string; situation: integer; from,&to: integer; step: integer := 1): string;
+function SystemSliceStringImplQuestion(Self: string; situation: integer; from, &to: integer; step: integer := 1): string;
 begin
-  var fromv := from-1;
-  var tov := &to-1;
+  var fromv := from - 1;
+  var tov := &to - 1;
   
-  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation,Self.Length,fromv,tov,step);
+  var count := CorrectFromToAndCalcCountForSystemSliceQuestion(situation, Self.Length, fromv, tov, step);
   
-  Result := CreateSliceFromStringInternal(Self,fromv+1,step,count);
+  Result := CreateSliceFromStringInternal(Self, fromv + 1, step, count);
 end;
 
 ///--
-function SystemSliceQuestion(Self: string; situation: integer; from,&to: integer): string; extensionmethod;
+function SystemSliceQuestion(Self: string; situation: integer; from, &to: integer): string; extensionmethod;
 begin
-  Result := SystemSliceStringImplQuestion(Self,situation,from,&to,1);
+  Result := SystemSliceStringImplQuestion(Self, situation, from, &to, 1);
 end;
 
 ///--
-function SystemSliceQuestion(Self: string; situation: integer; from,&to,step: integer): string; extensionmethod;
+function SystemSliceQuestion(Self: string; situation: integer; from, &to, step: integer): string; extensionmethod;
 begin
-  Result := SystemSliceStringImplQuestion(Self,situation,from,&to,step);
+  Result := SystemSliceStringImplQuestion(Self, situation, from, &to, step);
 end;
 //--------------------------------------------
 //>>     Методы расширения типа Func # Extension methods for Func
 //--------------------------------------------
 /// Суперпозиция функций
-function Compose<T1, T2, TResult> (Self: T2 -> TResult; composer: T1 -> T2): T1 -> TResult; extensionmethod;
+function Compose<T1, T2, TResult>(Self: T2->TResult; composer: T1->T2): T1->TResult; extensionmethod;
 begin
-  if composer=nil then
+  if composer = nil then
     raise new System.ArgumentNullException('composer');
   var Slf := Self;
   Result := x -> Slf(composer(x));
@@ -9998,12 +11048,12 @@ begin
 end;
 
 // -----------------------------------------------------------------------------
-//>>     Методы расширения IDictionary # Extension methods for IDictionary
+//>>     Методы расширения словарей # Extension methods for IDictionary
 // -----------------------------------------------------------------------------
 /// Возвращает в словаре значение, связанное с указанным ключом, а если такого ключа нет, то значение по умолчанию
-function Get<Key,Value>(Self: IDictionary<Key,Value>; K: Key): Value; extensionmethod;
+function Get<Key, Value>(Self: IDictionary<Key, Value>; K: Key): Value; extensionmethod;
 begin
-  var b := Self.TryGetValue(K,Result);
+  var b := Self.TryGetValue(K, Result);
   if not b then 
     Result := default(Value);
 end;
@@ -10015,9 +11065,9 @@ end;
 //          Операции для Func
 //------------------------------------------------------------------------------
 ///--
-function operator*<T1, T2, TResult> (Self: T2 -> TResult; composer: T1 -> T2): T1 -> TResult; extensionmethod;
+function operator*<T1, T2, TResult>(Self: T2->TResult; composer: T1->T2): T1->TResult; extensionmethod;
 begin
-  if composer=nil then
+  if composer = nil then
     raise new System.ArgumentNullException('composer');
   Result := Self.Compose(composer);
 end;
@@ -10026,115 +11076,251 @@ end;
 //          Операции для Tuple
 //------------------------------------------------------------------------------
 ///--
-function operator+<T1, T2, T3> (Self: (T1,T2); v: T3): (T1,T2,T3); extensionmethod;
+function operator+<T1, T2, T3>(Self: (T1, T2); v: T3): (T1, T2, T3); extensionmethod;
 begin
-  Result := (Self[0],Self[1],v);
+  Result := (Self[0], Self[1], v);
 end;
 
 ///--
-function operator+<T1, T2, T3, T4> (Self: (T1,T2,T3); v: T4): (T1,T2,T3,T4); extensionmethod;
+function operator+<T1, T2, T3, T4>(Self: (T1, T2, T3); v: T4): (T1, T2, T3, T4); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],v);
+  Result := (Self[0], Self[1], Self[2], v);
 end;
 
 ///--
-function operator+<T1, T2, T3, T4, T5> (Self: (T1,T2,T3,T4); v: T5): (T1,T2,T3,T4,T5); extensionmethod;
+function operator+<T1, T2, T3, T4, T5>(Self: (T1, T2, T3, T4); v: T5): (T1, T2, T3, T4, T5); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], v);
 end;
 
 ///--
-function operator+<T1, T2, T3, T4, T5, T6> (Self: (T1,T2,T3,T4,T5); v: T6): (T1,T2,T3,T4,T5,T6); extensionmethod;
+function operator+<T1, T2, T3, T4, T5, T6>(Self: (T1, T2, T3, T4, T5); v: T6): (T1, T2, T3, T4, T5, T6); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],Self[4],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], Self[4], v);
 end;
 
 ///--
-function operator+<T1, T2, T3, T4, T5, T6, T7> (Self: (T1,T2,T3,T4,T5,T6); v: T7): (T1,T2,T3,T4,T5,T6,T7); extensionmethod;
+function operator+<T1, T2, T3, T4, T5, T6, T7>(Self: (T1, T2, T3, T4, T5, T6); v: T7): (T1, T2, T3, T4, T5, T6, T7); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],Self[4],Self[5],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], Self[4], Self[5], v);
 end;
 
 ///--
-function operator=<T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := Self.Equals( v ) ;
-///--
-function operator<><T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := not Self.Equals( v );
-///--
-function CompareToTup2<T1,T2>(v1: (T1,T2); v2: (T1,T2)) := (v1 as System.IComparable).CompareTo(v2);
-///--
-function operator<<T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := CompareToTup2(Self,v) < 0;
-///--
-function operator<=<T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := CompareToTup2(Self,v) <= 0;
-///--
-function operator><T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := CompareToTup2(Self,v) > 0;
-///--
-function operator>=<T1, T2> (Self: (T1,T2); v: (T1,T2)); extensionmethod := CompareToTup2(Self,v) >= 0;
+function InternalEqual<T1, T2> (x: (T1,T2); y: (T1,T2)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
 
 ///--
-function operator=<T1, T2, T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := Self.Equals( v ) ;
+function operator=<T1, T2> (x: (T1,T2); y: (T1,T2)): boolean; extensionmethod := InternalEqual(x,y);
 ///--
-function operator<><T1, T2, T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := not Self.Equals( v );
+function operator<><T1, T2> (x: (T1,T2); y: (T1,T2)): boolean; extensionmethod := not InternalEqual(x,y);
 ///--
-function CompareToTup3<T1,T2,T3>(v1: (T1,T2,T3); v2: (T1,T2,T3)) := (v1 as System.IComparable).CompareTo(v2);
+function CompareToTup2<T1, T2>(v1: (T1, T2); v2: (T1, T2)) := (v1 as System.IComparable).CompareTo(v2);
 ///--
-function operator<<T1,T2,T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := CompareToTup3(Self,v) < 0;
+function operator<<T1, T2>(Self: (T1, T2); v: (T1, T2)); extensionmethod := CompareToTup2(Self, v) < 0;
 ///--
-function operator<=<T1,T2,T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := CompareToTup3(Self,v) <= 0;
+function operator<=<T1, T2>(Self: (T1, T2); v: (T1, T2)); extensionmethod := CompareToTup2(Self, v) <= 0;
 ///--
-function operator><T1,T2,T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := CompareToTup3(Self,v) > 0;
+function operator><T1, T2>(Self: (T1, T2); v: (T1, T2)); extensionmethod := CompareToTup2(Self, v) > 0;
 ///--
-function operator>=<T1,T2,T3> (Self: (T1,T2,T3); v: (T1,T2,T3)); extensionmethod := CompareToTup3(Self,v) >= 0;
+function operator>=<T1, T2>(Self: (T1, T2); v: (T1, T2)); extensionmethod := CompareToTup2(Self, v) >= 0;
 
 ///--
-function operator=<T1, T2, T3, T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := Self.Equals( v ) ;
+function InternalEqual<T1, T2, T3> (x: (T1,T2,T3); y: (T1,T2,T3)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
 ///--
-function operator<><T1, T2, T3, T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := not Self.Equals( v );
+function operator=<T1, T2, T3> (x: (T1,T2,T3); y: (T1,T2,T3)); extensionmethod := InternalEqual(x,y);
 ///--
-function CompareToTup4<T1,T2,T3,T4>(v1: (T1,T2,T3,T4); v2: (T1,T2,T3,T4)) := (v1 as System.IComparable).CompareTo(v2);
+function operator<><T1, T2, T3> (x: (T1,T2,T3); y: (T1,T2,T3)); extensionmethod := not InternalEqual(x,y);
 ///--
-function operator<<T1,T2,T3,T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := CompareToTup4(Self,v) < 0;
+function CompareToTup3<T1, T2, T3>(v1: (T1, T2, T3); v2: (T1, T2, T3)) := (v1 as System.IComparable).CompareTo(v2);
 ///--
-function operator<=<T1,T2,T3,T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := CompareToTup4(Self,v) <= 0;
+function operator<<T1,T2,T3>(Self: (T1, T2, T3); v: (T1, T2, T3)); extensionmethod := CompareToTup3(Self, v) < 0;
 ///--
-function operator><T1,T2,T3,T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := CompareToTup4(Self,v) > 0;
+function operator<=<T1,T2,T3>(Self: (T1, T2, T3); v: (T1, T2, T3)); extensionmethod := CompareToTup3(Self, v) <= 0;
 ///--
-function operator>=<T1,T2,T3,T4> (Self: (T1,T2,T3,T4); v: (T1,T2,T3,T4)); extensionmethod := CompareToTup4(Self,v) >= 0;
+function operator><T1,T2,T3>(Self: (T1, T2, T3); v: (T1, T2, T3)); extensionmethod := CompareToTup3(Self, v) > 0;
+///--
+function operator>=<T1,T2,T3>(Self: (T1, T2, T3); v: (T1, T2, T3)); extensionmethod := CompareToTup3(Self, v) >= 0;
 
+///--
+function InternalEqual<T1, T2, T3, T4> (x: (T1,T2,T3,T4); y: (T1,T2,T3,T4)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
+///--
+function operator=<T1, T2, T3, T4> (x: (T1,T2,T3,T4); y: (T1,T2,T3,T4)); extensionmethod := InternalEqual(x,y);
+///--
+function operator<><T1, T2, T3, T4> (x: (T1,T2,T3,T4); y: (T1,T2,T3,T4)); extensionmethod := not InternalEqual(x,y);
+///--
+function CompareToTup4<T1, T2, T3, T4>(v1: (T1, T2, T3, T4); v2: (T1, T2, T3, T4)) := (v1 as System.IComparable).CompareTo(v2);
+///--
+function operator<<T1,T2,T3,T4>(Self: (T1, T2, T3, T4); v: (T1, T2, T3, T4)); extensionmethod := CompareToTup4(Self, v) < 0;
+///--
+function operator<=<T1,T2,T3,T4>(Self: (T1, T2, T3, T4); v: (T1, T2, T3, T4)); extensionmethod := CompareToTup4(Self, v) <= 0;
+///--
+function operator><T1,T2,T3,T4>(Self: (T1, T2, T3, T4); v: (T1, T2, T3, T4)); extensionmethod := CompareToTup4(Self, v) > 0;
+///--
+function operator>=<T1,T2,T3,T4>(Self: (T1, T2, T3, T4); v: (T1, T2, T3, T4)); extensionmethod := CompareToTup4(Self, v) >= 0;
 
+///--
+function InternalEqual<T1, T2, T3, T4, T5> (x: (T1,T2,T3,T4,T5); y: (T1,T2,T3,T4,T5)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
+///--
+function operator=<T1, T2, T3, T4,T5> (x: (T1,T2,T3,T4,T5); y: (T1,T2,T3,T4,T5)); extensionmethod := InternalEqual(x,y);
+///--
+function operator<><T1, T2, T3, T4,T5> (x: (T1,T2,T3,T4,T5); y: (T1,T2,T3,T4,T5)); extensionmethod := not InternalEqual(x,y);
+///--
+function CompareToTup5<T1, T2, T3, T4,T5>(v1: (T1, T2, T3, T4,T5); v2: (T1, T2, T3, T4,T5)) := (v1 as System.IComparable).CompareTo(v2);
+///--
+function operator<<T1,T2,T3,T4,T5>(Self: (T1, T2, T3, T4,T5); v: (T1, T2, T3, T4,T5)); extensionmethod := CompareToTup5(Self, v) < 0;
+///--
+function operator<=<T1,T2,T3,T4,T5>(Self: (T1, T2, T3, T4,T5); v: (T1, T2, T3, T4,T5)); extensionmethod := CompareToTup5(Self, v) <= 0;
+///--
+function operator><T1,T2,T3,T4,T5>(Self: (T1, T2, T3, T4,T5); v: (T1, T2, T3, T4,T5)); extensionmethod := CompareToTup5(Self, v) > 0;
+///--
+function operator>=<T1,T2,T3,T4,T5>(Self: (T1, T2, T3, T4,T5); v: (T1, T2, T3, T4,T5)); extensionmethod := CompareToTup5(Self, v) >= 0;
+
+///--
+function InternalEqual<T1, T2, T3, T4, T5, T6> (x: (T1,T2,T3,T4,T5,T6); y: (T1,T2,T3,T4,T5,T6)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
+///--
+function operator=<T1, T2, T3, T4,T5,T6> (x: (T1,T2,T3,T4,T5,T6); y: (T1,T2,T3,T4,T5,T6)); extensionmethod := InternalEqual(x,y);
+///--
+function operator<><T1, T2, T3, T4,T5,T6> (x: (T1,T2,T3,T4,T5,T6); y: (T1,T2,T3,T4,T5,T6)); extensionmethod := not InternalEqual(x,y);
+///--
+function CompareToTup5<T1, T2, T3, T4,T5,T6>(v1: (T1, T2, T3, T4,T5,T6); v2: (T1, T2, T3, T4,T5,T6)) := (v1 as System.IComparable).CompareTo(v2);
+///--
+function operator<<T1,T2,T3,T4,T5,T6>(Self: (T1, T2, T3, T4,T5,T6); v: (T1, T2, T3, T4,T5,T6)); extensionmethod := CompareToTup5(Self, v) < 0;
+///--
+function operator<=<T1,T2,T3,T4,T5,T6>(Self: (T1, T2, T3, T4,T5,T6); v: (T1, T2, T3, T4,T5,T6)); extensionmethod := CompareToTup5(Self, v) <= 0;
+///--
+function operator><T1,T2,T3,T4,T5,T6>(Self: (T1, T2, T3, T4,T5,T6); v: (T1, T2, T3, T4,T5,T6)); extensionmethod := CompareToTup5(Self, v) > 0;
+///--
+function operator>=<T1,T2,T3,T4,T5,T6>(Self: (T1, T2, T3, T4,T5,T6); v: (T1, T2, T3, T4,T5,T6)); extensionmethod := CompareToTup5(Self, v) >= 0;
+
+///--
+function InternalEqual<T1, T2, T3, T4, T5, T6, T7> (x: (T1,T2,T3,T4,T5,T6,T7); y: (T1,T2,T3,T4,T5,T6,T7)): boolean; 
+begin
+  var xn := Object.ReferenceEquals(x,nil);
+  var yn := Object.ReferenceEquals(y,nil);
+  if xn then
+    Result := yn
+  else if yn then 
+    Result := xn
+  else Result := x.Equals(y);
+end;
+///--
+function operator=<T1, T2, T3, T4,T5,T6,T7> (x: (T1,T2,T3,T4,T5,T6,T7); y: (T1,T2,T3,T4,T5,T6,T7)); extensionmethod := InternalEqual(x,y);
+///--
+function operator<><T1, T2, T3, T4,T5,T6,T7> (x: (T1,T2,T3,T4,T5,T6,T7); y: (T1,T2,T3,T4,T5,T6,T7)); extensionmethod := not InternalEqual(x,y);
+///--
+function CompareToTup5<T1, T2, T3, T4,T5,T6,T7>(v1: (T1, T2, T3, T4,T5,T6,T7); v2: (T1, T2, T3, T4,T5,T6,T7)) := (v1 as System.IComparable).CompareTo(v2);
+///--
+function operator<<T1,T2,T3,T4,T5,T6,T7>(Self: (T1, T2, T3, T4,T5,T6,T7); v: (T1, T2, T3, T4,T5,T6,T7)); extensionmethod := CompareToTup5(Self, v) < 0;
+///--
+function operator<=<T1,T2,T3,T4,T5,T6,T7>(Self: (T1, T2, T3, T4,T5,T6,T7); v: (T1, T2, T3, T4,T5,T6,T7)); extensionmethod := CompareToTup5(Self, v) <= 0;
+///--
+function operator><T1,T2,T3,T4,T5,T6,T7>(Self: (T1, T2, T3, T4,T5,T6,T7); v: (T1, T2, T3, T4,T5,T6,T7)); extensionmethod := CompareToTup5(Self, v) > 0;
+///--
+function operator>=<T1,T2,T3,T4,T5,T6,T7>(Self: (T1, T2, T3, T4,T5,T6,T7); v: (T1, T2, T3, T4,T5,T6,T7)); extensionmethod := CompareToTup5(Self, v) >= 0;
 // --------------------------------------------
 //      Методы расширения типа Tuple # Extension methods for Tuple
 // -------------------------------------------
 // Дополнения февраль 2016
 
 // Добавляет поле к кортежу
-function Add<T1, T2, T3> (Self: (T1,T2); v: T3): (T1,T2,T3); extensionmethod;
+function Add<T1, T2, T3>(Self: (T1, T2); v: T3): (T1, T2, T3); extensionmethod;
 begin
-  Result := (Self[0],Self[1],v);
+  Result := (Self[0], Self[1], v);
 end;
 
 // Добавляет поле к кортежу
-function Add<T1, T2, T3, T4> (Self: (T1,T2,T3); v: T4): (T1,T2,T3,T4); extensionmethod;
+function Add<T1, T2, T3, T4>(Self: (T1, T2, T3); v: T4): (T1, T2, T3, T4); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],v);
+  Result := (Self[0], Self[1], Self[2], v);
 end;
 
 // Добавляет поле к кортежу
-function Add<T1, T2, T3, T4, T5> (Self: (T1,T2,T3,T4); v: T5): (T1,T2,T3,T4,T5); extensionmethod;
+function Add<T1, T2, T3, T4, T5>(Self: (T1, T2, T3, T4); v: T5): (T1, T2, T3, T4, T5); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], v);
 end;
 
 // Добавляет поле к кортежу
-function Add<T1, T2, T3, T4, T5, T6> (Self: (T1,T2,T3,T4,T5); v: T6): (T1,T2,T3,T4,T5,T6); extensionmethod;
+function Add<T1, T2, T3, T4, T5, T6>(Self: (T1, T2, T3, T4, T5); v: T6): (T1, T2, T3, T4, T5, T6); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],Self[4],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], Self[4], v);
 end;
 
 // Добавляет поле к кортежу
-function Add<T1, T2, T3, T4, T5, T6, T7> (Self: (T1,T2,T3,T4,T5,T6); v: T7): (T1,T2,T3,T4,T5,T6,T7); extensionmethod;
+function Add<T1, T2, T3, T4, T5, T6, T7>(Self: (T1, T2, T3, T4, T5, T6); v: T7): (T1, T2, T3, T4, T5, T6, T7); extensionmethod;
 begin
-  Result := (Self[0],Self[1],Self[2],Self[3],Self[4],Self[5],v);
+  Result := (Self[0], Self[1], Self[2], Self[3], Self[4], Self[5], v);
 end;
+
+// Выводит кортеж
+procedure Print<T1, T2>(Self: (T1, T2)); extensionmethod := Print(Self);
+// Выводит кортеж
+procedure Print<T1, T2, T3>(Self: (T1, T2, T3)); extensionmethod := Print(Self);
+// Выводит кортеж
+procedure Print<T1, T2, T3, T4>(Self: (T1, T2, T3, T4)); extensionmethod := Print(Self);
+// Выводит кортеж
+procedure Print<T1, T2, T3, T4, T5>(Self: (T1, T2, T3, T4, T5)); extensionmethod := Print(Self);
+// Выводит кортеж
+procedure Print<T1, T2, T3, T4, T5, T6>(Self: (T1, T2, T3, T4, T5, T6)); extensionmethod := Print(Self);
+// Выводит кортеж
+procedure Print<T1, T2, T3, T4, T5, T6, T7>(Self: (T1, T2, T3, T4, T5, T6, T7)); extensionmethod := Print(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2>(Self: (T1, T2)); extensionmethod := Println(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2, T3>(Self: (T1, T2, T3)); extensionmethod := Println(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2, T3, T4>(Self: (T1, T2, T3, T4)); extensionmethod := Println(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2, T3, T4, T5>(Self: (T1, T2, T3, T4, T5)); extensionmethod := Println(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2, T3, T4, T5, T6>(Self: (T1, T2, T3, T4, T5, T6)); extensionmethod := Println(Self);
+// Выводит кортеж и переходит на новую строку
+procedure Println<T1, T2, T3, T4, T5, T6, T7>(Self: (T1, T2, T3, T4, T5, T6, T7)); extensionmethod := Println(Self);
+
 
 {// Определяет, есть ли указанный элемент в массиве
  function Contains<T>(self: array of T; x: T): boolean; extensionmethod;
@@ -10210,29 +11396,29 @@ begin
     //begin
     case System.Type.GetTypeCode(t) of
       TypeCode.Boolean: Result := sizeof(Boolean);
-      TypeCode.Byte:    Result := sizeof(Byte);
-      TypeCode.Char:    Result := 1;//sizeof(Char);
+      TypeCode.Byte: Result := sizeof(Byte);
+      TypeCode.Char: Result := 1;//sizeof(Char);
       TypeCode.Decimal: Result := sizeof(Decimal);
-      TypeCode.Double:  Result := sizeof(Double);
-      TypeCode.Int16:   Result := sizeof(Int16);
-      TypeCode.Int32:   Result := sizeof(Int32);
-      TypeCode.Int64:   Result := sizeof(Int64);
-      TypeCode.UInt16:  Result := sizeof(UInt16);
-      TypeCode.UInt32:  Result := sizeof(UInt32);
-      TypeCode.UInt64:  Result := sizeof(UInt64);
-      TypeCode.SByte:   Result := sizeof(SByte);
-      TypeCode.Single:  Result := sizeof(Single);
-    else if t.IsEnum then result := sizeof(integer);
+      TypeCode.Double: Result := sizeof(Double);
+      TypeCode.Int16: Result := sizeof(Int16);
+      TypeCode.Int32: Result := sizeof(Int32);
+      TypeCode.Int64: Result := sizeof(Int64);
+      TypeCode.UInt16: Result := sizeof(UInt16);
+      TypeCode.UInt32: Result := sizeof(UInt32);
+      TypeCode.UInt64: Result := sizeof(UInt64);
+      TypeCode.SByte: Result := sizeof(SByte);
+      TypeCode.Single: Result := sizeof(Single);
+    else if t.IsEnum then Result := sizeof(integer);
     end//;
   //end 
   else
   if t.IsValueType then // it is a record
   begin
     //elem := Activator.CreateInstance(t); //ssyy commented
-    fa := t.GetFields;
+    fa := t.GetFields(System.Reflection.BindingFlags.GetField or System.Reflection.BindingFlags.Instance or System.Reflection.BindingFlags.Public or System.Reflection.BindingFlags.NonPublic);
     Result := 0;
     for var i := 0 to fa.Length - 1 do
-      if not fa[i].IsStatic then 
+      if {not fa[i].IsStatic and} not fa[i].IsLiteral then 
         Result := Result + RunTimeSizeOf(fa[i].FieldType)
   end
   else if t = typeof(string) then
@@ -10306,7 +11492,7 @@ end;
 
 function GetResourceStream(ResourceFileName: string): Stream;
 begin
-  result := System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(ResourceFileName);
+  Result := System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream(ResourceFileName);
 end;
 
 function FormatValue(value: object; NumOfChars: integer): string;
@@ -10345,9 +11531,6 @@ end;
 
 procedure StringDefaultPropertySet(var s: string; index: integer; c: char);
 begin
-  //s := string.Concat( s.Copy(0,index-1), c, s.Copy(index, s.Length - index));
-  //s := string.Concat(s.Substring(0, index), c, s.Substring(index + 1));
-  //ChangeChar(s[index + 1], c);
   var chars := s.ToCharArray;
   chars[index] := c;
   s := new String(chars);
@@ -10359,8 +11542,6 @@ begin
 end;
 
 procedure CheckCanUsePointerOnType(T: System.Type);
-var
-  fields: array of System.Reflection.FieldInfo;
 begin
   if T.IsPointer then
   begin
@@ -10369,7 +11550,7 @@ begin
   end;
   if T.IsValueType then
   begin
-    fields := T.GetFields();
+    var fields := T.GetFields();
     foreach var fi in fields do
       if not fi.IsStatic then
         CheckCanUsePointerOnType(fi.FieldType);
@@ -10464,7 +11645,8 @@ begin
 end;
 
 function GetRuntimeSize<T>: integer;
-var val: T;
+var
+  val: T;
 begin
   result := System.Runtime.InteropServices.Marshal.SizeOf(val);
 end;
@@ -10524,10 +11706,8 @@ begin
     var src_ind := 0;
     var dest_ind := 0;
     internal_copy(source, dest, source_sizes, dest_sizes, 0, src_ind, dest_ind, 0);
-    Result := dest;
-  end
-  else
-    Result := dest;
+  end;
+  Result := dest;
 end;
 
 {function TypedSetComparer.Equals(x: System.Object; y: System.Object): boolean;
@@ -10668,13 +11848,31 @@ var
 
 function ExecuteAssemlyIsDll: boolean;
 begin
-  Result := not __from_dll and (IO.Path.GetExtension(System.Reflection.Assembly.GetExecutingAssembly.ManifestModule.FullyQualifiedName).ToLower = '.dll');
+  Result := not __from_dll and (System.IO.Path.GetExtension(System.Reflection.Assembly.GetExecutingAssembly.ManifestModule.FullyQualifiedName).ToLower = '.dll');
 end;
 
 function IsUnix: boolean;
 begin
   Result := (Environment.OSVersion.Platform = PlatformID.Unix) or (Environment.OSVersion.Platform = PlatformID.MacOSX);
 end;
+
+function __StandardFilesDirectory: string;
+begin
+  // Грубо. Исправить, сделав поиск
+  Result := 'C:\Program Files (x86)\PascalABC.NET\Files\';
+end;
+
+function __FindFile(filename: string): string;
+begin
+  Result := __StandardFilesDirectory+filename;
+  if not FileExists(Result) then 
+    Result := '';
+  if Result = '' then
+    Result := filename;
+  if not FileExists(Result) then 
+    Result := '';
+end;
+
 //------------------------------------------------------------------------------
 //OMP
 
@@ -10716,14 +11914,28 @@ begin
   System.Threading.Thread.CurrentThread.CurrentUICulture := System.Globalization.CultureInfo.GetCultureInfo(locale_str);
   nfi := new System.Globalization.NumberFormatInfo();
   nfi.NumberGroupSeparator := '.';
-  //  System.Threading.Thread.CurrentThread.CurrentCulture := new System.Globalization.CultureInfo('en-US');
-  rnd := new System.Random;
+   
+  {var ci := System.Globalization.CultureInfo.GetCultureInfo(locale_str);
+  ci.NumberFormat.NumberDecimalSeparator := '.';
+  System.Threading.Thread.CurrentThread.CurrentCulture := ci;
+  System.Threading.Thread.CurrentThread.CurrentUICulture := ci;}
+   
+  // SSM 1.08.18 только в текущем потоке будет точка в вещественных
+  // В Net 4.6 System.Globalization.CultureInfo.DefaultThreadCurrentCulture := ci
+  // Но как сделать чтобы работало и в младших NET - не знаю
+  //var ci := (System.Globalization.CultureInfo.CurrentCulture.Clone as System.Globalization.CultureInfo);
+  //ci.NumberFormat := nfi;
+  //System.Globalization.CultureInfo.CurrentCulture := ci;
+  
+  // SSM 10/11/18 восстановил эту строку чтобы в главном потоке в вещественных была точка
+  System.Threading.Thread.CurrentThread.CurrentCulture := new System.Globalization.CultureInfo('en-US');
+  //rnd := new System.Random;
   StartTime := DateTime.Now;
   output := new TextFile();
   input := new TextFile();
   //var tmp := __CONFIG__;
   if (Environment.OSVersion.Platform = PlatformID.Unix) or (Environment.OSVersion.Platform = PlatformID.MacOSX) then
-    foreach listener: System.Diagnostics.TraceListener in System.Diagnostics.Trace.Listeners do
+    foreach var listener in System.Diagnostics.Trace.Listeners do
       if listener is System.Diagnostics.DefaultTraceListener then
         (listener as System.Diagnostics.DefaultTraceListener).AssertUiEnabled := true; 
 end;
@@ -10749,6 +11961,15 @@ begin
     output.sw.Close;
   if (input.sr <> nil) and (input.sr.BaseStream <> nil) then
     input.sr.Close;
+end;
+
+// -----------------------------------------------------
+//   DQNToNullable for dot_question_node: implementation
+// -----------------------------------------------------
+
+function DQNToNullable<T>(v: T): System.Nullable<T>; where T: record;
+begin
+  Result := new System.Nullable<T>(v);
 end;
 
 initialization

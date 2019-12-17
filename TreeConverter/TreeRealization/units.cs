@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace PascalABCCompiler.TreeRealization
     [Serializable]
     public abstract class unit_node : definition_node
     {
-        public abstract PascalABCCompiler.TreeConverter.SymbolInfo find_only_in_namespace(string name);
+        public abstract List<TreeConverter.SymbolInfo> find_only_in_namespace(string name);
 
         public override general_node_type general_node_type
         {
@@ -24,13 +24,27 @@ namespace PascalABCCompiler.TreeRealization
     public class namespace_unit_node : unit_node
     {
         public using_namespace namespace_name;
+        public SymbolTable.Scope scope;
+        public location loc;
         public namespace_unit_node(using_namespace namespace_name)
         {
             this.namespace_name = namespace_name;
         }
-        public override PascalABCCompiler.TreeConverter.SymbolInfo find_only_in_namespace(string name)
+        public namespace_unit_node(using_namespace namespace_name, location loc)
+        {
+            this.namespace_name = namespace_name;
+            this.loc = loc;
+        }
+        public override List<TreeConverter.SymbolInfo> find_only_in_namespace(string name)
         {
             throw new NotSupportedException();
+        }
+        public override location location
+        {
+            get
+            {
+                return loc;
+            }
         }
         public override semantic_node_type semantic_node_type
         {
@@ -68,7 +82,7 @@ namespace PascalABCCompiler.TreeRealization
             }
         }
 
-        public override PascalABCCompiler.TreeConverter.SymbolInfo find_only_in_namespace(string name)
+        public override List<TreeConverter.SymbolInfo> find_only_in_namespace(string name)
         {
             return _dotNetScope.Find(name);
         }
@@ -95,7 +109,7 @@ namespace PascalABCCompiler.TreeRealization
         {
             get
             {
-                TreeConverter.SymbolInfo si = namespaces[0].findOnlyInNamespace(TreeConverter.compiler_string_consts.system_unit_marker);
+                TreeConverter.SymbolInfo si = namespaces[0].findFirstOnlyInNamespace(TreeConverter.compiler_string_consts.system_unit_marker);
                 if (si == null)
                     return false;
                 if (si.sym_info is constant_definition_node)
@@ -234,7 +248,7 @@ namespace PascalABCCompiler.TreeRealization
 			}
 		}
 
-        public override PascalABCCompiler.TreeConverter.SymbolInfo find_only_in_namespace(string name)
+        public override List<TreeConverter.SymbolInfo> find_only_in_namespace(string name)
 		{
 			return _scope.FindOnlyInScope(name);
 		}

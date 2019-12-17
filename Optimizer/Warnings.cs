@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -98,6 +98,20 @@ namespace PascalABCCompiler
         {
             //return ("Possible two type convertions\n"+_en.location.ToString());
             return (WarningStringResources.Get("UNREACHABLE_CODE_DETECTED"));
+        }
+    }
+
+    public class InfiniteRecursion : CompilerWarningWithLocation
+    {
+        public InfiniteRecursion(location loc)
+        {
+            this.loc = loc;
+        }
+
+        public override string ToString()
+        {
+            //return ("Possible two type convertions\n"+_en.location.ToString());
+            return (WarningStringResources.Get("INFINITE_RECURSION"));
         }
     }
 

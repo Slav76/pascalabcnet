@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -763,6 +763,7 @@ namespace VisualPascalABC
             [HandleProcessCorruptedStateExceptionsAttribute]
             get
             {
+                return false;
             	try
             	{
             		if (!failed)
@@ -1141,17 +1142,16 @@ namespace VisualPascalABC
             List<IListItem> list = new List<IListItem>();
             if (val != null)
             {
-            	NamedValueCollection nvc = val.Dereference.GetMembers(type, flags);
+            	NamedValueCollection nvc = val.GetMembers(type, flags);
             	foreach (NamedValue v in nvc)
             	{
                 	try
                 	{
-                    //bool b = v.IsObject;
-                    //if (v != null)
-                    	list.Add(new ValueItem(v,this.DebugType));
-                    //list.Add(new FixedItem(v.Name,"","",v));
+                        if (v is MemberValue && (v as MemberValue).MemberInfo is PropertyInfo && ((v as MemberValue).MemberInfo as PropertyInfo).GetGetMethod().ParameterCount > 0)
+                            continue;
+                        list.Add(new ValueItem(v,this.DebugType));
                 	}
-                	catch (System.Exception e)
+                	catch (System.Exception)
                 	{
                 	}
             	}
@@ -1331,24 +1331,10 @@ namespace VisualPascalABC
                 }
                 List<IListItem> publicStatic = GetMembers(BindingFlags.Public | BindingFlags.Static);
                 List<IListItem> privateStatic = GetMembers(BindingFlags.NonPublic | BindingFlags.Static);
-                //List<ListItem> publicStatic = new List<ListItem>();
-                //List<ListItem> privateInstance = new List<ListItem>();
-                //List<ListItem> privateStatic = new List<ListItem>();
-
 
                 if (type.BaseType != null && type.BaseType.FullName != "System.Object" && type.BaseType.FullName != "System.ValueType")
                 {
                     list.Add(new BaseTypeItem(val, type.BaseType));
-                    //            	BaseTypeItem bti = new BaseTypeItem(val, type.BaseType);
-                    //            	try
-                    //            	{
-                    //            		if (bti.GetSubItems(true).Count > 0)
-                    //            		list.Add(new BaseTypeItem(val, type.BaseType));
-                    //            	}
-                    //            	catch
-                    //            	{
-                    //            		
-                    //            	}
                 }
                 if (val != null)
                 {

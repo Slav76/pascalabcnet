@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -43,6 +43,17 @@ namespace VisualPascalABC.OptionsContent
                 tvContentList.SelectedNode = tvContentList.Nodes[0];
                 lastSelectedNode = tvContentList.SelectedNode;
             }
+        }
+
+        public void UpdateOptionsForm()
+        {
+            int i = 0;
+            foreach (IOptionsContent content in contentEngine.ContentList)
+            {
+                tvContentList.Nodes[i].Text = content.ContentName;
+                i++;
+            }
+            PascalABCCompiler.StringResources.SetTextForAllObjects(this, strprefix);
         }
 
         private void tvContentList_AfterSelect(object sender, TreeViewEventArgs e)

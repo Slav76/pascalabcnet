@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -49,6 +49,16 @@ namespace VisualPascalABC
         	stand_types["object"] = typeof(object);
         }
         
+        public static bool Is32BitAssembly()
+        {
+            if (!Environment.Is64BitProcess)
+                return false;
+            System.Reflection.PortableExecutableKinds peKind;
+            System.Reflection.ImageFileMachine machine;
+            a.ManifestModule.GetPEKind(out peKind, out machine);
+            return peKind == System.Reflection.PortableExecutableKinds.Required32Bit;
+        }
+
         public static void LoadAssembly(string file_name)
         {
         	//ad = AppDomain.CreateDomain("DebugDomain",null,Path.GetDirectoryName(file_name),Path.GetDirectoryName(file_name),false);
@@ -59,7 +69,7 @@ namespace VisualPascalABC
                 fs.Read(buf, 0, (int)fs.Length);
                 fs.Close();
                 a = System.Reflection.Assembly.Load(buf);
-
+                
                 Type[] tt = a.GetTypes();
                 foreach (Type t in tt)
                 {
@@ -108,7 +118,6 @@ namespace VisualPascalABC
         {
             if (f == null)
                 return false;
-
             try
             {
                 System.Reflection.MethodBase mb = a.ManifestModule.ResolveMethod((int)f.Token);
@@ -293,7 +302,7 @@ namespace VisualPascalABC
         private bool MustDebug = false;
         public bool IsRunning = false;
         public string ExeFileName;
-		public bool show_debug_tabs=true;
+		public bool ShowDebugTabs=true;
 		public PascalABCCompiler.Parsers.IParser parser = null;
 		EventHandler<EventArgs> debuggerStateEvent;
 		
@@ -353,6 +362,7 @@ namespace VisualPascalABC
             }
             if (!added)
                 br = dbg.AddBreakpoint(fileName, line);
+            
             return br;
         }
 		
@@ -426,6 +436,7 @@ namespace VisualPascalABC
         			ExeFileName = null;
         			WorkbenchServiceFactory.OperationsService.ClearTabStack();
         			WorkbenchServiceFactory.DebuggerOperationsService.ClearDebugTabs();
+                    WorkbenchServiceFactory.Workbench.DisassemblyWindow.ClearWindow();
         		}
         	}
         }
@@ -470,7 +481,46 @@ namespace VisualPascalABC
         	SelectProcess(debuggedProcess);
         	//debuggedProcess.Break();
         }
-        
+
+        Function currentFunction;
+        Dictionary<int, int> sourceMap;
+
+        public void UpdateBreakpoints()
+        {
+            try
+            {
+                Dictionary<string, List<int>> dict = new Dictionary<string, List<int>>();
+                List<Breakpoint> toRemove = new List<Breakpoint>();
+                foreach (CurrentBreakpointBookmark b in BreakPointFactory.breakpoints.Keys)
+                {
+                    try
+                    {
+                        if (dbg.GetBreakpoint(b.FileName, b.LineNumber + 1) == null)
+                            dbg.AddBreakpoint(b.FileName, b.LineNumber + 1);
+                        if (!dict.ContainsKey(b.FileName))
+                            dict.Add(b.FileName, new List<int>());
+                        if (!dict[b.FileName].Contains(b.LineNumber + 1))
+                            dict[b.FileName].Add(b.LineNumber + 1);
+                    }
+                    catch
+                    {
+                        if (!dict.ContainsKey(b.FileName))
+                            dict.Add(b.FileName, new List<int>());
+                    }
+                }
+
+                foreach (Breakpoint b in dbg.Breakpoints)
+                    if (dict.ContainsKey(b.SourcecodeSegment.SourceFullFilename) && !dict[b.SourcecodeSegment.SourceFullFilename].Contains(b.SourcecodeSegment.StartLine))
+                        toRemove.Add(b);
+                foreach (Breakpoint b in toRemove)
+                    dbg.RemoveBreakpoint(b);
+            }
+            catch
+            {
+
+            }
+        }
+
         void debuggedProcess_DebuggeeStateChanged(object sender, ProcessEventArgs e)
         {
             if (currentBreakpoint != null)
@@ -484,6 +534,16 @@ namespace VisualPascalABC
             //if (e.Process.IsPaused)
             WorkbenchServiceFactory.DebuggerOperationsService.RefreshPad(new FunctionItem(e.Process.SelectedFunction).SubItems);
             workbench.WidgetController.SetStartDebugEnabled();
+            if (currentFunction != e.Process.SelectedFunction)
+            {
+                if (WorkbenchServiceFactory.Workbench.DisassemblyWindow.IsVisible)
+                {
+                    var tp = GetNativeCodeOfSelectedFunction(e.Process.SelectedFunction);
+                    WorkbenchServiceFactory.DebuggerOperationsService.DisplayDisassembledCode(tp.Item1);
+                    sourceMap = tp.Item2;
+                    currentFunction = e.Process.SelectedFunction;
+                }
+            }
             if (debuggerStateEvent != null)
             	debuggerStateEvent(this, new ProcessEventArgsDelegator(new ProcessDelegator(this.debuggedProcess)));
         }
@@ -583,18 +643,19 @@ namespace VisualPascalABC
             if (Exited != null && ExeFileName != null)
                 Exited(ExeFileName);
             curPage = null;            
-            show_debug_tabs = true;
+            ShowDebugTabs = true;
             workbench.WidgetController.SetPlayButtonsVisible(false);
             workbench.WidgetController.SetAddExprMenuVisible(false);
+            workbench.WidgetController.SetDisassemblyMenuVisible(false);
             DebugWatchListWindowForm.WatchWindow.ClearAllSubTrees();
             IsRunning = false;
             workbench.WidgetController.SetDebugStopDisabled();
             workbench.WidgetController.ChangeContinueDebugNameOnStart();
-            //if (cur_brpt != null) dbg.RemoveBreakpoint(cur_brpt);
             CurrentLineBookmark.Remove();
             WorkbenchServiceFactory.DebuggerOperationsService.ClearLocalVarTree();
             WorkbenchServiceFactory.DebuggerOperationsService.ClearDebugTabs();
             WorkbenchServiceFactory.DebuggerOperationsService.ClearWatch();
+            WorkbenchServiceFactory.Workbench.DisassemblyWindow.ClearWindow();
             workbench.WidgetController.SetDebugTabsVisible(false);
             WorkbenchServiceFactory.OperationsService.ClearTabStack();
             workbench.WidgetController.EnableCodeCompletionToolTips(true);
@@ -635,12 +696,10 @@ namespace VisualPascalABC
             workbench.WidgetController.ChangeStartDebugNameOnContinue();
             workbench.WidgetController.EnableCodeCompletionToolTips(false);
             workbench.WidgetController.SetAddExprMenuVisible(true);
+            workbench.WidgetController.SetDisassemblyMenuVisible(true);
             TooltipServiceManager.hideToolTip();
             IsRunning = true;
             evaluator = new ExpressionEvaluator(e.Process,workbench.VisualEnvironmentCompiler, FileName);
-            //CodeFileDocumentControl page = frm.CurrentTabPage;
-            //(page.ag as CodeFileDocumentControl).TextEditor.ActiveTextAreaControl.TextArea.ToolTipRequest += TextAreaToolTipRequest;
-            //(page.ag as CodeFileDocumentControl).TextEditor.ActiveTextAreaControl.TextArea.MouseLeave += TextAreaMouseLeave;
         }
 		
         /// <summary>
@@ -787,9 +846,9 @@ namespace VisualPascalABC
                     string save_PrevFullFileName = PrevFullFileName;
                     //CodeFileDocumentControl page = null;
                     //DebuggerService.JumpToCurrentLine(nextStatement.SourceFullFilename, nextStatement.StartLine, nextStatement.StartColumn, nextStatement.EndLine, nextStatement.EndColumn);
-                    if (!show_debug_tabs)//esli eshe ne pokazany watch i lokal, pokazyvaem
+                    if (!ShowDebugTabs)//esli eshe ne pokazany watch i lokal, pokazyvaem
                     {
-                        show_debug_tabs = true;
+                        ShowDebugTabs = true;
                         workbench.WidgetController.SetDebugTabsVisible(true);
                         workbench.WidgetController.SetAddExprMenuVisible(true);
                     }
@@ -809,7 +868,7 @@ namespace VisualPascalABC
                         
                         return;
                     }
-                    else if (is_out == true)
+                    else if (is_out)
                     {
                         is_out = false;
                         if (stepin_stmt.SourceFullFilename == debuggedProcess.NextStatement.SourceFullFilename && stepin_stmt.StartLine != debuggedProcess.NextStatement.StartLine)
@@ -946,7 +1005,78 @@ namespace VisualPascalABC
         }
 
         private int curILOffset = 0;
-       
+
+        struct COR_DEBUG_IL_TO_NATIVE_MAP
+        {
+            public uint ilOffset;
+            public uint nativeStartOffset;
+            public uint nativeEndOffset;
+        }
+
+        public Tuple<string, Dictionary<int, int>> GetNativeCodeOfSelectedFunction(Function selectedFunction=null)
+        {
+            if (selectedFunction == null)
+                selectedFunction = debuggedProcess.SelectedFunction;
+            uint size = selectedFunction.CorFunction.NativeCode.Size;
+            byte[] buffer = new byte[size];
+            uint mapSize;
+            COR_DEBUG_IL_TO_NATIVE_MAP[] mapBuffer = new COR_DEBUG_IL_TO_NATIVE_MAP[selectedFunction.CorFunction.ILCode.Size];
+            unsafe
+            {
+                fixed (byte* ptr = &buffer[0])
+                {
+                    IntPtr iptr = new IntPtr((void*)ptr);
+                    selectedFunction.CorFunction.NativeCode.GetCode(0, size, size, iptr);
+                }
+                fixed (void* ptr = &mapBuffer[0])
+                {
+                    IntPtr iptr = new IntPtr(ptr);
+                    selectedFunction.CorFunction.NativeCode.GetILToNativeMapping((uint)mapBuffer.Length, out mapSize, iptr);
+                } 
+            }
+            Dictionary<uint, uint> il2asm = new Dictionary<uint, uint>();
+            for (int i = 0; i < mapSize; i++)
+            {
+                il2asm.Add(mapBuffer[i].nativeStartOffset, mapBuffer[i].ilOffset);
+            }
+            SharpDisasm.Disassembler disasm = new SharpDisasm.Disassembler(buffer, AssemblyHelper.Is32BitAssembly()?SharpDisasm.ArchitectureMode.x86_32: SharpDisasm.ArchitectureMode.x86_64);
+            IEnumerable<SharpDisasm.Instruction> instructions = disasm.Disassemble();
+            StringBuilder sb = new StringBuilder();
+            int linesNum = 0;
+            Dictionary<int, int> sourceMap = new Dictionary<int, int>();
+            Dictionary<int, int> linesDict = new Dictionary<int, int>();
+            bool firstLine = true;
+            foreach (var instruction in instructions)
+            {
+                linesNum++;
+
+                uint ilOffset;
+                if (il2asm.TryGetValue((uint)instruction.Offset, out ilOffset))
+                {
+                    var segment = selectedFunction.GetSegmentForOffet(ilOffset);
+                    
+                    if (segment != null && !linesDict.ContainsKey(segment.StartLine))
+                    {
+                        if (ilOffset > 2000000000)
+                        {
+                            if (firstLine)
+                                continue;
+                        }
+                        else
+                            firstLine = false;
+                        int line = segment.StartLine;
+                        string text = curPage.TextEditor.Document.GetText(curPage.TextEditor.Document.GetLineSegment(line - 1));
+                        sb.AppendLine((segment.StartLine+":").PadRight(10, ' ') + text.Trim());
+                        linesDict.Add(segment.StartLine, segment.StartLine);
+                    }
+                }
+                sb.Append("///"+selectedFunction.CorFunction.NativeCode.Address.ToString("X") + "+0x"+instruction.Offset.ToString("X") + ": " + instruction.ToString());
+                sb.AppendLine();
+
+            }
+            return new Tuple<string, Dictionary<int, int>>(sb.ToString(),sourceMap);
+        }
+
         public void DoInPausedState(MethodInvoker action)
         {
             Debugger.Process process = debuggedProcess;
@@ -994,10 +1124,6 @@ namespace VisualPascalABC
         public string GetVariable(TextArea textArea, out int num_line)
         {
             IDocument doc = textArea.Document;
-            /*LineSegment seg = doc.GetLineSegment(logicPos.Y);
-            num_line = seg.LineNumber;
-            if (logicPos.X > seg.Length - 1)
-                return null;*/
             string textContent = doc.TextContent;
             num_line = textArea.Caret.Line;
             int start_off = 0;
@@ -1021,18 +1147,18 @@ namespace VisualPascalABC
             string expressionResult = FindFullExpression(textContent, seg.Offset + logicPos.X,doc, out start_off, out end_off);
             return expressionResult;
         }
-		
+
         private string FindFullExpression(string text, int offset, IDocument doc, out int start_off, out int end_off)
         {
             int i = offset;
-            int beg_line=1;
-            int off=0;
+            int beg_line = 1;
+            int off = 0;
             start_off = 0;
             end_off = 0;
             if (debuggedProcess != null)
             {
-            	beg_line = (int)debuggedProcess.SelectedFunction.symMethod.SequencePoints[0].Line;
-            	off = doc.LineSegmentCollection[beg_line - 1].Offset;
+                beg_line = (int)debuggedProcess.SelectedFunction.symMethod.SequencePoints[0].Line;
+                off = doc.LineSegmentCollection[beg_line - 1].Offset;
             }
             //int lll = doc.GetLineNumberForOffset(offset) - 1;
             int cur_str_off = doc.LineSegmentCollection[doc.GetLineNumberForOffset(offset)].Offset;
@@ -1041,14 +1167,18 @@ namespace VisualPascalABC
             int cur_sk = 0;
             //while (i >= 0 && text[i] != '\n')
             //int len = text.Length;
+            bool format_str = false;
+            bool var_in_format_str = false;
             while (text[i] != '\n')
                 if (text[i] == '\'')
                 {
                     if (i == offset) return null;
+                    if (i > 0 && text[i - 1] == '$')
+                        format_str = true;
                     cur_sk = (cur_sk == 0) ? 1 : 0;
                     i++;
                 }
-                else if (i == offset && cur_sk == 1) return null;
+                //else if (i == offset && cur_sk == 1) return null;
                 else i++;
             i = offset;
             bool new_line = false;
@@ -1056,12 +1186,25 @@ namespace VisualPascalABC
                 if (text[i] == '\n') { new_line = true; i--; }
                 else
                     if (text[i] == '/' && i > 0 && text[i - 1] == '/') if (!new_line) return null; else i--;
-                    else if (text[i] == '}') break;
-                    else if (text[i] == '{') return null;
-                    else i--;
+                else if (text[i] == '}') break;
+                else if (text[i] == '{')
+                {
+                    if (!format_str)
+                        return null;
+                    else
+                    {
+                        var_in_format_str = true;
+                        i--;
+                    }
+                        
+                }
+                    
+                else i--;
             i = offset;
+            if (format_str && !var_in_format_str)
+                return null;
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			
+
             if (i >= 0 && !(Char.IsLetterOrDigit(text[i]) || text[i] == '_')) i--;
             while (i >= 0 && (Char.IsLetterOrDigit(text[i]) || text[i] == '_'))
                 i--;
@@ -1071,11 +1214,11 @@ namespace VisualPascalABC
                 if (text[i] == '.') is_dot = true;
                 int j = i + 1;
                 while (j < text.Length && (Char.IsLetterOrDigit(text[j]) || text[j] == '_'))
-                      sb.Append(text[j++]);
+                    sb.Append(text[j++]);
                 if (j < text.Length && text[j] == '(')
-                       return null;
-                 end_off = j-1;
-                 start_off = i+1;
+                    return null;
+                end_off = j - 1;
+                start_off = i + 1;
             }
             else
             {
@@ -1084,35 +1227,28 @@ namespace VisualPascalABC
                     sb.Append(text[j++]);
                 if (j < text.Length && text[j] == '(')
                     return null;
-                end_off = j-1;
-                start_off = i+1;
+                end_off = j - 1;
+                start_off = i + 1;
             }
-            
+
             if (is_dot)
             {
-            	/*StringBuilder new_sb = new StringBuilder();
-            	new_sb.Insert(0,text[i]);
-            	int j = i-1;
-            	while (j >= 0)
-            	{
-            		if (text[j])
-            	}*/
-            	sb.Insert(0,'.');
-            	PascalABCCompiler.Parsers.KeywordKind keyw=PascalABCCompiler.Parsers.KeywordKind.None;
-            	string s = CodeCompletion.CodeCompletionController.CurrentParser.LanguageInformation.
-            		FindExpression(i,text,0,0,out keyw);
-            	if (s != null)
-            	{
-            		sb.Insert(0,s);
-            		string tmp = s.TrimStart(' ','\n','\t','\r');
-            		start_off = i-tmp.Length;
-            	}
+                sb.Insert(0, '.');
+                PascalABCCompiler.Parsers.KeywordKind keyw = PascalABCCompiler.Parsers.KeywordKind.None;
+                string s = CodeCompletion.CodeCompletionController.CurrentParser.LanguageInformation.
+                    FindExpression(i, text, 0, 0, out keyw);
+                if (s != null)
+                {
+                    sb.Insert(0, s);
+                    string tmp = s.TrimStart(' ', '\n', '\t', '\r');
+                    start_off = i - tmp.Length;
+                }
             }
             else
             {
-            	string s = sb.ToString().Trim(' ','\n','\t','\r');
-            	if (string.Compare(s,"array",true)==0)
-            		return "";
+                string s = sb.ToString().Trim(' ', '\n', '\t', '\r');
+                if (string.Compare(s, "array", true) == 0)
+                    return "";
             }
             return sb.ToString();
         }
@@ -1133,7 +1269,20 @@ namespace VisualPascalABC
                     NamedValue disp_nv = null;
                     NamedValue ret_nv = null;
                     nvc = debuggedProcess.SelectedFunction.LocalVariables;
+                    List<NamedValue> val_list = new List<NamedValue>();
                     foreach (NamedValue nv in nvc)//smotrim sredi lokalnyh peremennyh
+                    {
+                        if (nv.Name.IndexOf("<>local_variables") == -1)
+                            val_list.Add(nv);
+                        else
+                        {
+                            foreach (NamedValue nv2 in nv.GetMembers())//smotrim sredi lokalnyh peremennyh
+                            {
+                                val_list.Add(nv2);
+                            }
+                        }
+                    }
+                    foreach (NamedValue nv in val_list)//smotrim sredi lokalnyh peremennyh
                     {
                         if (nv.Name.IndexOf(':') != -1)
                         {
@@ -1229,17 +1378,32 @@ namespace VisualPascalABC
                         IList<FieldInfo> fields = global_nv.Type.GetFields(BindingFlags.All);
                         foreach (FieldInfo fi in fields)
                             if (string.Compare(fi.Name, var, true) == 0) return new ValueItem(fi.GetValue(global_nv), fi.DeclaringType);
+                        Type global_type = AssemblyHelper.GetType(global_nv.Type.FullName);
+                        if (global_type != null)
+                        {
+                            System.Reflection.FieldInfo fi = global_type.GetField(var, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.IgnoreCase);
+                            if (fi != null && fi.IsLiteral)
+                                return new ValueItem(DebugUtils.MakeValue(fi.GetRawConstantValue()), var, global_nv.Type);
+                        }
                     }
 
-                    
-                        List<DebugType> types = AssemblyHelper.GetUsesTypes(debuggedProcess, debuggedProcess.SelectedFunction.DeclaringType);
-                        foreach (DebugType dt in types)
+
+                    List<DebugType> types = AssemblyHelper.GetUsesTypes(debuggedProcess, debuggedProcess.SelectedFunction.DeclaringType);
+                    foreach (DebugType dt in types)
+                    {
+                        IList<FieldInfo> fields = dt.GetFields(BindingFlags.All);
+                        foreach (FieldInfo fi in fields)
+                            if (fi.IsStatic && string.Compare(fi.Name, var, true) == 0)
+                                return new ValueItem(fi.GetValue(null), fi.DeclaringType);
+                        Type unit_type = AssemblyHelper.GetType(dt.FullName);
+                        if (unit_type != null)
                         {
-                            IList<FieldInfo> fields = dt.GetFields(BindingFlags.All);
-                            foreach (FieldInfo fi in fields)
-                                if (fi.IsStatic && string.Compare(fi.Name, var, true) == 0) return new ValueItem(fi.GetValue(null), fi.DeclaringType);
+                            System.Reflection.FieldInfo fi = unit_type.GetField(var, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.IgnoreCase);
+                            if (fi != null && fi.IsLiteral)
+                                return new ValueItem(DebugUtils.MakeValue(fi.GetRawConstantValue()), var, dt);
                         }
-                    
+                    }
+
                     /*foreach (NamedValue nv in unit_vars)
                     {
                         IList<FieldInfo> fields = nv.Type.GetFields(BindingFlags.All);
@@ -1505,7 +1669,18 @@ namespace VisualPascalABC
             try
             {
                 workbench.WidgetController.SetStartDebugDisabled();
-                dbg.Processes[0].StepOver();
+                if (debuggedProcess.SelectedFunction.Name == ".cctor")
+                {
+                    var sequencePoints = debuggedProcess.SelectedFunction.symMethod.SequencePoints;
+                    if (sequencePoints != null && debuggedProcess.NextStatement.StartLine == sequencePoints[sequencePoints.Length-1].Line)
+                    {
+                        debuggedProcess.StepOut();
+                    }
+                    else
+                        debuggedProcess.StepOver();
+                }
+                else
+                    debuggedProcess.StepOver();
                 CurrentLineBookmark.Remove();
             }
             catch (System.Exception e)
@@ -1521,11 +1696,6 @@ namespace VisualPascalABC
         {
             try
             {
-                /*if (dbg.Processes[0].SelectedThread.Suspended)
-                {
-                    dbg.Processes[0].Pause(false);
-                    dbg.Processes[0].SelectedThread.Suspended = false;
-                }*/
                 workbench.WidgetController.SetStartDebugDisabled();
                 dbg.Processes[0].Continue();
                 CurrentLineBookmark.Remove();

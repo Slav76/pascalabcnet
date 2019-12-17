@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -72,6 +72,10 @@ namespace SyntaxVisitors
             Print(""+st);
         }
 
+        public override void visit(assign ass)
+        {
+            DefaultVisit(ass);
+        }
         public virtual void Enter(syntax_tree_node st)
         {
             if (st is statement_list)
@@ -133,7 +137,7 @@ namespace SyntaxVisitors
                 var vds = st as var_def_statement;
                 Println (vds.ToString());
             }
-            else if (st is empty_statement || st is declarations || st is block || st is class_body || st is class_members 
+            else if (st is empty_statement || st is declarations || st is block || st is class_body_list || st is class_members 
                 || st is case_variants || st is program_module || st is no_type_foreach || st is template_param_list
                 || st is yield_unknown_foreach_type || st is yield_unknown_expression_type 
                 )

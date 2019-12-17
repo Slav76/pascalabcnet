@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -115,6 +115,54 @@ namespace PascalABCCompiler.SyntaxTree
                     throw_not_equal(left, right);
                 CompareInternal(left.to, right.to);
                 CompareInternal(left.from, right.from);
+            }
+        }
+
+        public void CompareInternal(addressed_value_list left, addressed_value_list right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                if (left.variables.Count != right.variables.Count)
+                    throw_not_equal(left, right);
+                for (int i = 0; i < left.variables.Count; i++)
+                {
+                    CompareInternal(left.variables[i], right.variables[i]);
+                }
+            }
+        }
+
+        public void CompareInternal(assign_tuple left, assign_tuple right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.vars, right.vars);
+                CompareInternal(left.expr, right.expr);
+            }
+        }
+        
+        public void CompareInternal(assign_var_tuple left, assign_var_tuple right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.idents, right.idents);
+                CompareInternal(left.expr, right.expr);
+            }
+        }
+        
+        public void CompareInternal(loop_stmt left, loop_stmt right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.count, right.count);
+                CompareInternal(left.stmt, right.stmt);
             }
         }
 
@@ -235,7 +283,7 @@ namespace PascalABCCompiler.SyntaxTree
             }
         }
 
-        public void CompareInternal(class_body left, class_body right)
+        public void CompareInternal(class_body_list left, class_body_list right)
         {
             if (left == null && right != null || left != null && right == null)
                 throw_not_equal(left, right);
@@ -656,9 +704,28 @@ namespace PascalABCCompiler.SyntaxTree
                     CompareInternal(left as function_lambda_call, right as function_lambda_call);
                 else if (left is function_lambda_definition)
                     CompareInternal(left as function_lambda_definition, right as function_lambda_definition);
+                else if (left is tuple_node)
+                    CompareInternal(left as tuple_node, right as tuple_node);
+                else if (left is slice_expr)
+                    CompareInternal(left as slice_expr, right as slice_expr);
+                else if (left is is_pattern_expr)
+                    CompareInternal(left as is_pattern_expr, right as is_pattern_expr);
                 else
                     throw new NotImplementedException(left.GetType().ToString());
 
+            }
+        }
+
+        public void CompareInternal(slice_expr left, slice_expr right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.v, right.v);
+                CompareInternal(left.from, right.from);
+                CompareInternal(left.step, right.step);
+                CompareInternal(left.to, right.to);
             }
         }
 
@@ -798,7 +865,7 @@ namespace PascalABCCompiler.SyntaxTree
                 CompareInternal(left.ident_list, right.ident_list);
                 CompareInternal(left.parameters, right.parameters);
                 CompareInternal(left.formal_parameters, right.formal_parameters);
-                CompareInternal(left.proc_definition, right.proc_definition);
+                CompareInternal(left.proc_definition as procedure_definition, right.proc_definition as procedure_definition);
                 CompareInternal(left.proc_body, right.proc_body);
                 CompareInternal(left.return_type, right.return_type);
             }
@@ -1630,6 +1697,14 @@ namespace PascalABCCompiler.SyntaxTree
                     CompareInternal(left as inherited_method_call, right as inherited_method_call);
                 else if (left is assign)
                     CompareInternal(left as assign, right as assign);
+                else if (left is yield_node)
+                    CompareInternal(left as yield_node, right as yield_node);
+                else if (left is loop_stmt)
+                    CompareInternal(left as loop_stmt, right as loop_stmt);
+                else if (left is assign_tuple)
+                    CompareInternal(left as assign_tuple, right as assign_tuple);
+                else if (left is assign_var_tuple)
+                    CompareInternal(left as assign_var_tuple, right as assign_var_tuple);
                 //else if (left is expression) // SSM 12/06/15
                 //    CompareInternal(left as expression, right as expression);
 
@@ -2175,6 +2250,102 @@ namespace PascalABCCompiler.SyntaxTree
             if (left != null && right != null)
             {
                 CompareInternal(left.el, right.el);
+            }
+        }
+
+        public void CompareInternal(yield_node left, yield_node right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.ex, right.ex);
+            }
+        }
+
+        public void CompareInternal(tuple_node left, tuple_node right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.el, right.el);
+            }
+        }
+
+        public void CompareInternal(is_pattern_expr left, is_pattern_expr right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.left, right.left);
+                CompareInternal(left.right, right.right);
+            }
+        }
+
+        public void CompareInternal(pattern_node left, pattern_node right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                if (left.GetType() != right.GetType())
+                    throw_not_equal(left, right);
+                if (left is deconstructor_pattern)
+                    CompareInternal(left as deconstructor_pattern, right as deconstructor_pattern);
+            }
+        }
+
+        public void CompareInternal(deconstructor_pattern left, deconstructor_pattern right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.type, right.type);
+                if (left.parameters.Count != right.parameters.Count)
+                    throw_not_equal(left, right);
+                for (int i = 0; i < left.Count; i++)
+                {
+                    CompareInternal(left.parameters[i], right.parameters[i]);
+                }
+            }
+        }
+
+        public void CompareInternal(pattern_parameter left, pattern_parameter right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                if (left.GetType() != right.GetType())
+                    throw_not_equal(left, right);
+                if (left is var_deconstructor_parameter)
+                    CompareInternal(left as var_deconstructor_parameter, right as var_deconstructor_parameter);
+                if (left is recursive_deconstructor_parameter)
+                    CompareInternal(left as recursive_deconstructor_parameter, right as recursive_deconstructor_parameter);
+            }
+        }
+
+        public void CompareInternal(var_deconstructor_parameter left, var_deconstructor_parameter right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.identifier, right.identifier);
+                CompareInternal(left.type, right.type);
+            }
+        }
+
+        public void CompareInternal(recursive_deconstructor_parameter left, recursive_deconstructor_parameter right)
+        {
+            if (left == null && right != null || left != null && right == null)
+                throw_not_equal(left, right);
+            if (left != null && right != null)
+            {
+                CompareInternal(left.pattern, right.pattern);
             }
         }
     }

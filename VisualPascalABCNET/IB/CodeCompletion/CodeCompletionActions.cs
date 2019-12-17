@@ -1,4 +1,4 @@
-﻿// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+﻿// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections;
@@ -79,7 +79,8 @@ namespace VisualPascalABC
                     return;
                 unitName = (cu as PascalABCCompiler.SyntaxTree.program_module).program_name.prog_name;
             }
-
+            if (unitName.source_context == null)
+                return;
             List<SymbolsViewerSymbol> refers = ccp.Rename(unitName.name, unitName.name, FileName, unitName.source_context.begin_position.line_num, unitName.source_context.begin_position.column_num);
             if (refers == null || new_val == null) return;
             int addit = 0;
@@ -125,8 +126,15 @@ namespace VisualPascalABC
             ccp = new CodeCompletionProvider();
             string full_expr;
             string expressionResult = FindFullExpression(textContent, textArea, out ccp.keyword, out full_expr);
+            if (expressionResult != null)
+                expressionResult = expressionResult.Trim();
+            if (expressionResult != full_expr && full_expr.StartsWith("("))
+                return new List<Position>();
+            
+            if (full_expr != null && full_expr.Contains("^"))
+            	full_expr = full_expr.Replace("^","");
             List<Position> poses = ccp.GetDefinition(full_expr, textArea.MotherTextEditorControl.FileName, textArea.Caret.Line, textArea.Caret.Column, only_check);
-            if (poses == null)
+            if (poses == null || poses.Count == 0)
                 poses = ccp.GetDefinition(expressionResult, textArea.MotherTextEditorControl.FileName, textArea.Caret.Line, textArea.Caret.Column, only_check);
             return poses;
         }
@@ -140,7 +148,7 @@ namespace VisualPascalABC
             string full_expr;
             string expressionResult = FindFullExpression(textContent, textArea, out ccp.keyword, out full_expr);
             List<Position> poses = ccp.GetRealization(full_expr, textArea.MotherTextEditorControl.FileName, textArea.Caret.Line, textArea.Caret.Column);
-            if (poses == null)
+            if (poses == null || poses.Count == 0)
                 poses = ccp.GetRealization(expressionResult, textArea.MotherTextEditorControl.FileName, textArea.Caret.Line, textArea.Caret.Column);
             return poses;
         }
@@ -158,7 +166,7 @@ namespace VisualPascalABC
         {
             if (CodeCompletion.CodeCompletionController.CurrentParser == null) return;
             position = GetRealizationPosition(textArea);
-            if (position == null) return;
+            if (position == null || position.Count == 0) return;
             if (position.Count == 1)
             {
                 Position pos = position[0];
@@ -339,7 +347,9 @@ namespace VisualPascalABC
                 }
         }
 
-        public static void GenerateTemplate(string pattern, TextArea textArea)
+        public static void GenerateTemplate(string pattern, TextArea textArea) => GenerateTemplate(pattern, textArea, templateManager);
+
+        public static void GenerateTemplate(string pattern, TextArea textArea, CodeTemplateManager templateManager, bool withPatternLength = true, Func<string,string> PostAction = null)
         {
             try
             {
@@ -351,7 +361,7 @@ namespace VisualPascalABC
                 string name = templateManager.GetTemplateHeader(pattern);
                 if (name == null) return;
                 string templ = templateManager.GetTemplate(name);
-                int ind = pattern.Length;
+                int ind = withPatternLength ? pattern.Length : 0;
                 int cline;
                 int ccol;
                 find_cursor_pos(templ, out cline, out ccol);
@@ -374,7 +384,12 @@ namespace VisualPascalABC
                 doc.Replace(offset, ind, "");
                 doc.CommitUpdate();
                 textArea.Caret.Column = col - ind;
-                textArea.InsertString(sb.ToString());
+                var sbs = sb.ToString();
+                if (PostAction != null)
+                {
+                    sbs = PostAction(sbs);
+                }
+                textArea.InsertString(sbs);
                 textArea.Caret.Line = line + cline;
                 textArea.Caret.Column = col - ind + ccol;
             }
@@ -566,6 +581,8 @@ namespace VisualPascalABC
     {
         public override void Execute(TextArea textArea)
         {
+            if (WorkbenchServiceFactory.DebuggerManager.IsRunning)
+                return;
             WorkbenchServiceFactory.Workbench.ErrorsListWindow.ClearErrorList();
             VisualPABCSingleton.MainForm.CurrentCodeFileDocument.DeselectAll();
             CodeFormatters.CodeFormatter cf = new CodeFormatters.CodeFormatter(VisualPABCSingleton.MainForm.UserOptions.TabIndent);
@@ -592,7 +609,7 @@ namespace VisualPascalABC
                                 new PascalABCCompiler.SourceLocation(VisualPABCSingleton.MainForm.CurrentCodeFileDocument.FileName, cf.Line, cf.Column, cf.Line, cf.Column), VisualPascalABCPlugins.SourceLocationAction.GotoBeg);
                 }
             }
-            else
+            else if (!(Errors[0] is PascalABCCompiler.Errors.ParserBadFileExtension))
             {
                 WorkbenchServiceFactory.Workbench.VisualEnvironmentCompiler.ExecuteAction(VisualPascalABCPlugins.VisualEnvironmentCompilerAction.AddMessageToErrorListWindow, new List<PascalABCCompiler.Errors.Error>(new PascalABCCompiler.Errors.Error[] { Errors[0] }));
             }

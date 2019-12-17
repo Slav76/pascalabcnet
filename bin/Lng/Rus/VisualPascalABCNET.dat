@@ -37,6 +37,7 @@ M_DELETE=Удалить
 
 MR_SERVICE=Сервис
 M_OPTIONS=Настройки...
+M_AUTOINSERT_CODE=Режим автозавершения кода
 
 MR_VIEW=Вид
 M_BOTTOMPANEL=Нижняя панель
@@ -131,6 +132,7 @@ M_COLLAPSE_REGIONS=Свернуть все регионы
 TP_WARNINGLIST=Предупреждения
 TP_VARLIST=Локальные переменные
 TP_WATCHLIST=Просмотр выражений
+TP_DISASSEMBLY=Окно дизассемблирования
 TP_FIND_SYMBOL_RESULTS=Результат поиска символов
 CLMN_VAR=Переменная
 CLMN_TYPE=Тип
@@ -331,14 +333,23 @@ PRJ_COMPANY=Компания
 PRJ_TRADEMARK=Торговая марка
 PRJ_COPYRIGHT=Copyright
 PRJ_GENERATE_XML_DOC=Генерировать XML документацию
-VERSION_IS_UP_DO_DATE=Вы используете актуальную версию PascalABC.NET
+PRJ_NUGET=NuGet
+PRJ_NAMESPACE=Пространство имен
+NUGET_PACKAGE=Идентификатор пакета
+NUGET_INSTALL=Установить пакет
+NUGET_LOG=Лог
+VERSION_IS_UP_TO_DATE=Вы используете актуальную версию PascalABC.NET
 UPDATE_AVAILABLE=Доступна новая версия PascalABC.NET. Перейти на страницу скачивания?
 UPDATE_AVAILABLE_CURRENT_VESION{0}=Установленная версия: {0}
 UPDATE_AVAILABLE_NEW_VESION{0}=Доступная версия: {0}
 UPDATE_CHECK_ERROR=Ошибка при проверке обновлений
-UPDATE_CHECK=Проверка обновлений
+UPDATE_CHECK=Проверка обновлений PascalABC.NET
 PABC_DOWNLOAD_PAGE=http://pascalabc.net/ssyilki-dlya-skachivaniya
 M_CHECKUPDATES=Проверить обновления
+FRAMEWORK_DOWNLOAD_PAGE=https://www.microsoft.com/ru-RU/download/details.aspx?id=56116
+DOTNET_UPDATE_CHECK=Проверка обновлений .NET Framework
+DOTNET_AVAILABLE=Доступна новая версия .NET Framework (.NET Framework 4.7.1). Перейти на страницу скачивания?
+
 //Options
 %PREFIX%=VP_OC_VIEWOPTIONS_
 NAME=Общие
@@ -353,6 +364,7 @@ EDITOR_OPTIONS=Редактор
 SHOW_DEBUG_PLAY_PAUSE_BUTTONS=Показывать дополнительные кнопки управления отладкой
 PASUSE_IN_RUNMODE_IF_CONSOLE=Делать паузу после завершения консольной программы
 SAVE_FILES_IF_COMPILATOIN_OK=Сохранять файлы если компиляция прошла успешно
+AUTO_INSERT_CODE_IS_ENABLED_ON_STARTUP=Режим автозавершения кода включён при запуске
 
 %PREFIX%=VP_OC_EDITOROPTIONS_
 NAME=Редактор
@@ -408,8 +420,8 @@ PROJECT_ADMIN=Руководитель проекта:
 PROJECT_ADMIN_FIO=Михалкович С.С.
 DEVELOPERS=Разработчики
 DEVELOPERS1=Ivan Bondarev (Германия)
-DEVELOPERS2=Малеванный Михаил
-DEVELOPERS3=Саушкин Роман
+DEVELOPERS2=
+DEVELOPERS3=
 MADEIN=Россия, ЮФУ, мехмат; Германия
 CORE=Ядро:
 VISUAL=Oболочка:

@@ -1,4 +1,4 @@
-// Copyright (c) Ivan Bondarev, Stanislav Mihalkovich (for details please see \doc\copyright.txt)
+// Copyright (c) Ivan Bondarev, Stanislav Mikhalkovich (for details please see \doc\copyright.txt)
 // This code is distributed under the GNU LGPL (for details please see \doc\license.txt)
 using System;
 using System.Collections.Generic;
@@ -483,7 +483,7 @@ namespace VisualPascalABC
             //int end_region_num;
             while (s_num < count)
             {
-                trimed = lines[s_num].TrimStart(' ');
+                trimed = lines[s_num].TrimStart(' ','\t');
                 if (trimed.StartsWith(string_consts.begin_designer_region, StringComparison.InvariantCultureIgnoreCase))
                 {
                     break;
@@ -498,7 +498,7 @@ namespace VisualPascalABC
             int e_num = s_num + 1;
             while (e_num < count)
             {
-                trimed = lines[e_num].TrimStart(' ');
+                trimed = lines[e_num].TrimStart(' ', '\t');
                 if (trimed.StartsWith(string_consts.end_designer_region, StringComparison.InvariantCultureIgnoreCase))
                 {
                     break;
